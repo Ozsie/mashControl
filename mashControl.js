@@ -22,10 +22,8 @@ var readTemp = function(callback) {
 
 var parseTemp = function(data) {
   var crc = data.match(/(crc=)[a-z0-9]*/g)[0];
+  crc = available.split("=")[1];
   var available = data.match(/([A-Z])\w+/g)[0];
-  console.log("a" + available);
-  available = available.split("=")[1];
-  console.log("a" + available);
   var temperature = 'n/a';
   if (available === 'YES') {
     temperature = data.match(/(t=)[0-9]{5}/g)[0];
