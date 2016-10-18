@@ -3,22 +3,54 @@ var express = require('express');
 var fs = require('fs');
 var exec = require('child_process').exec;
 
+var startSchedule = function(newSchedule) {
+  if (newSchedule) {
+    console.log(schedule);
+    var schedule = {
+      status = 'started';
+    }
+    return true;
+  } else {
+    return false;
+  }
+};
+
+var stopSchedule = function() {
+  if (schedule) {
+    console.log(schedule);
+    var schedule = {
+      status = 'stopped';
+    }
+    return true;
+  } else {
+    return false;
+  }
+};
+
+var getStatus = function(schedule) {
+  if (!schedule) {
+    return "unavailable";
+  } else {
+    return schedule.status;
+  }
+};
+
 var modprobe = function(error, stdout, stderr) {
  if (error) {
    console.log("MODPROB ERROR:  " + error);
    console.log("MODPROB STDERR: " + stderr);
  }
-}
+};
 
 var readTemp = function() {
   readTemp(function(err, data) {
     console.log("data:" + data);
   });
-}
+};
 
 var readTemp = function(callback) {
   fs.readFile("/sys/bus/w1/devices/28-800000263717/w1_slave", 'utf8', callback);
-}
+};
 
 var parseTemp = function(data) {
   var crc = data.match(/(crc=)[a-z0-9]*/g)[0];
@@ -28,6 +60,7 @@ var parseTemp = function(data) {
   if (available === 'YES') {
     temperature = data.match(/(t=)[0-9]{5}/g)[0];
     temperature = temperature.split("=")[1];
+    temperature = parseInt(temperature);
   }
   var temp = {
     crc: crc,
@@ -40,7 +73,7 @@ var parseTemp = function(data) {
   console.log("Temp status: " + temp);
 
   return temp;
-}
+};
 
 exec("modprobe w1-gpio", modprobe);
 exec("modprobe w1-therm", modprobe);
@@ -57,7 +90,23 @@ app.get('/temp/current', function(req, res) {
       res.status(200).send(parseTemp(data));
     }
   });
-}); 
+});
+
+app.post('/schedule/start', function(req, res) {
+  console.log('Start schedule requested');
+  var scheduleStarted = startSchedule(req);
+  res.status(200).send(scheduleStarted);
+});
+
+app.get('/schedule/stop', function(req, res) {
+  var scheduleStopped = stopSchedule();
+  res.status(200).send(scheduleStopped);
+});
+
+app.get('/schedule/status', function(req, res) {
+  console.log('Schedule status requested');
+  res.status(200).send(getStatus(schedule));
+});
 
 // Express route for any other unrecognised incoming requests
 app.get('*', function(req, res) {
