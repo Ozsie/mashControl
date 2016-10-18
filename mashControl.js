@@ -28,12 +28,14 @@ var parseTemp = function(data) {
   if (available === 'YES') {
     temperature = data.match(/(t=)[0-9]{5}/g)[0];
     temperature = temperature.split("=")[1];
-    temperature = temperature / 1000;
   }
   var temp = {
     crc: crc,
     available: available,
-    temperature: temperature
+    temperature: {
+      raw: temperature,
+      celcius: temperature / 1000
+    }
   };
   console.log("Temp status: " + temp);
 
