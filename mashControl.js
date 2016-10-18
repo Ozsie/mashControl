@@ -3,16 +3,12 @@ var express = require('express');
 var fs = require('fs');
 var exec = require('child_process').exec;
 
-exec("modprobe w1-gpio", function(error, stdout, stderr) {
-  // command output is in stdout
-});
-
-exec("modprobe w1-therm", function(error, stdout, stderr) {
-});
-
-var app = express();
-
-app.use(express['static'](__dirname ));
+var modprobe = function(error, stdout, stderr) {
+ if (error) {
+   console.log("MODPROB ERROR:  " + error);
+   console.log("MODPROB STDERR: " + stderr);
+ }
+}
 
 var readTemp = function() {
   readTemp(function(err, data) {
@@ -24,10 +20,19 @@ var readTemp = function(callback) {
   fs.readFile("/sys/bus/w1/devices/28-800000263717/w1_slave", 'utf8', callback);
 }
 
+exec("modprobe w1-gpio", modprobe);
+exec("modprobe w1-therm", modprobe);
+
+var app = express();
+
+app.use(express['static'](__dirname ));
+
 // Express route for incoming requests for a customer name
 app.get('/temp/current', function(req, res) {
   readTemp(function(error, data) {
     if (!error) {
+      var match = data.match(/([A-Z])\w+/g);
+      console.log("match: " + match);
       res.status(200).send(data);
     }
   });
