@@ -6,10 +6,7 @@ var exec = require('child_process').exec;
 var schedule;
 
 var runSchedule = function(callback) {
-  while (schedule.step < 100000) {
-    schedule.step++;
-  }
-  callback();
+  setTimeout(callback, 30000);
 };
 
 var startSchedule = function(newSchedule) {
