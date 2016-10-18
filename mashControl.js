@@ -20,6 +20,20 @@ var readTemp = function(callback) {
   fs.readFile("/sys/bus/w1/devices/28-800000263717/w1_slave", 'utf8', callback);
 }
 
+var parseTemp = function(data) {
+  var crc = data.match(/(crc=)[a-z0-9]*/g);
+  var available = data.match(/([A-Z])\w+/g);
+  var temperature = data.match(/(t=)[0-9]{5}/g);
+  var temp = {
+    crc: crc,
+    available: available,
+    temperature: temperature
+  };
+  console.log("Temp status: " + temp);
+
+  return temp;
+}
+
 exec("modprobe w1-gpio", modprobe);
 exec("modprobe w1-therm", modprobe);
 
@@ -29,14 +43,12 @@ app.use(express['static'](__dirname ));
 
 // Express route for incoming requests for a customer name
 app.get('/temp/current', function(req, res) {
+  console.log('Temp requested');
   readTemp(function(error, data) {
     if (!error) {
-      var match = data.match(/([A-Z])\w+/g);
-      console.log("match: " + match);
-      res.status(200).send(data);
+      res.status(200).send(parseTemp(data));
     }
   });
-  console.log('Temp requested');
 }); 
 
 // Express route for any other unrecognised incoming requests
