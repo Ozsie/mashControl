@@ -7,7 +7,7 @@ var startSchedule = function(newSchedule) {
   if (newSchedule) {
     console.log(schedule);
     var schedule = {
-      status = 'started';
+      status: 'started'
     }
     return true;
   } else {
@@ -18,9 +18,7 @@ var startSchedule = function(newSchedule) {
 var stopSchedule = function() {
   if (schedule) {
     console.log(schedule);
-    var schedule = {
-      status = 'stopped';
-    }
+    schedule.status = 'stopped';
     return true;
   } else {
     return false;
