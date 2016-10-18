@@ -5,12 +5,23 @@ var exec = require('child_process').exec;
 
 var schedule;
 
+var runSchedule = function(callback) {
+  while (schedule.step < 100000) {
+    schedule.step++;
+  }
+  callback();
+};
+
 var startSchedule = function(newSchedule) {
   if (newSchedule) {
     console.log(schedule);
     schedule = {
-      status: 'started'
+      status: 'started',
+      step: 0
     }
+    runSchedule(function() {
+      schedule.status = 'done';
+    });
     return true;
   } else {
     return false;
