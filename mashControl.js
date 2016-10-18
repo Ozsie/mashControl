@@ -3,6 +3,8 @@ var express = require('express');
 var fs = require('fs');
 var exec = require('child_process').exec;
 
+var schedule;
+
 var startSchedule = function(newSchedule) {
   if (newSchedule) {
     console.log(schedule);
