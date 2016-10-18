@@ -8,7 +8,7 @@ var schedule;
 var startSchedule = function(newSchedule) {
   if (newSchedule) {
     console.log(schedule);
-    var schedule = {
+    schedule = {
       status: 'started'
     }
     return true;
@@ -27,7 +27,7 @@ var stopSchedule = function() {
   }
 };
 
-var getStatus = function(schedule) {
+var getStatus = function() {
   if (!schedule) {
     return "unavailable";
   } else {
@@ -99,13 +99,15 @@ app.post('/schedule/start', function(req, res) {
 });
 
 app.get('/schedule/stop', function(req, res) {
+  console.log('Stop schedule requested');
   var scheduleStopped = stopSchedule();
   res.status(200).send(scheduleStopped);
 });
 
 app.get('/schedule/status', function(req, res) {
   console.log('Schedule status requested');
-  res.status(200).send(getStatus(schedule));
+  var status = getStatus();
+  res.status(200).send(status);
 });
 
 // Express route for any other unrecognised incoming requests
@@ -125,4 +127,3 @@ app.use(function(err, req, res, next) {
 app.listen(3000);
 console.log('App Server running at port 3000');
 console.log('Current temp: ' + readTemp());
-console.log('REST: /temp/current');
