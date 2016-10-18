@@ -21,9 +21,15 @@ var readTemp = function(callback) {
 }
 
 var parseTemp = function(data) {
-  var crc = data.match(/(crc=)[a-z0-9]*/g);
-  var available = data.match(/([A-Z])\w+/g);
-  var temperature = data.match(/(t=)[0-9]{5}/g);
+  var crc = data.match(/(crc=)[a-z0-9]*/g)[0];
+  var available = data.match(/([A-Z])\w+/g)[0];
+  available = available.split("=")[1];
+  var temperature = 'n/a';
+  if (available === 'YES') {
+    temperature = data.match(/(t=)[0-9]{5}/g)[0];
+    temperature = temperature.split("=")[1];
+    temperature = temperature / 1000;
+  }
   var temp = {
     crc: crc,
     available: available,
