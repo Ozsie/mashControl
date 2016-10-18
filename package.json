@@ -1,0 +1,29 @@
+{
+  "name": "mashcontrol",
+  "version": "1.0.0",
+  "description": "mash controller",
+  "main": "index.js",
+  "scripts": {
+    "test": "getCurrentTemp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ozsie/mashControl.git"
+  },
+  "keywords": [
+    "mash",
+    "beer",
+    "control",
+    "automated"
+  ],
+  "author": "Oscar Djupfeldt",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ozsie/mashControl/issues"
+  },
+  "homepage": "https://github.com/Ozsie/mashControl#readme",
+  "dependencies": {
+    "connect": "^3.5.0",
+    "express": "^4.14.0"
+  }
+}
