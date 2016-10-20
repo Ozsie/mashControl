@@ -1,15 +1,10 @@
 var mashControl = angular.module('mashControl', ['ngResource']);
 
 mashControl.controller('MashControlCtrl', function($scope, vesselRestService) {
-  $scope.variable = 1;
-  $scope.increment = function() {
-
-  }
-
-  var function updateCurrentTemperature() {
+  var updateCurrentTemperature = function() {
     setTimeout(function () {
       vesselRestService.getCurrentTemperature().then(function(data) {
-          $scope.variable = data.temperature.celcius;
+          $scope.currentTemp = data.temperature.celcius;
         });
       updateCurrentTemperature();
     }, 1000);
