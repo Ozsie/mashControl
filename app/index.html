@@ -8,6 +8,8 @@
 <body ng-app="mashControl">
 <div ng-controller="MashControlCtrl">
   Nuvarande temperatur: {{currentTemp.temperature.celcius}} @ {{currentTempTime}}
+  <textarea ng-model="schedule"></textarea>
+  <button ng-click="start()">Start</button>
 </div>
 </body>
 </html>
