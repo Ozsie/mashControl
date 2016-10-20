@@ -1,8 +1,8 @@
 angular.module('mashControl', [])
-.controller('MashControlCtrl', function($scope) {
+.controller('MashControlCtrl', function($scope, vesselRestService) {
   $scope.variable = 1;
   $scope.increment = function() {
-    $scope.variable += 1;
+    $scope.variable = vesselRestService.getCurrentTemperature().celcius;
   }
 })
 .factory('mashControlRestFactory',function($resource) {
