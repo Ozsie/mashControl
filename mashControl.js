@@ -90,6 +90,7 @@ exec("modprobe w1-therm", modprobe);
 var app = express();
 
 app.use(express['static']('app'));
+app.use(express.bodyParser());
 
 // Express route for incoming requests for a customer name
 app.get('/temp/current', function(req, res) {
