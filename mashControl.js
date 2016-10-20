@@ -102,8 +102,8 @@ app.get('/temp/current', function(req, res) {
 });
 
 app.post('/schedule/start', function(req, res) {
-  console.log('Start schedule requested ' + JSON.stringify(req));
-  var scheduleStarted = startSchedule(req);
+  console.log('Start schedule requested ' + JSON.stringify(req.body));
+  var scheduleStarted = startSchedule(req.body);
   res.status(200).send(scheduleStarted);
 });
 
