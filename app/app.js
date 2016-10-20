@@ -1,4 +1,4 @@
-var mashControl = angular.module('mashControl', []);
+var mashControl = angular.module('mashControl', [ngResource]);
 
 mashControl.controller('MashControlCtrl', function($scope, vesselRestService) {
   $scope.variable = 1;
