@@ -1,4 +1,7 @@
-angular.module('mashControl', [])
+angular.module('mashControl', [['$resourceProvider', function($resourceProvider) {
+  // Don't strip trailing slashes from calculated URLs
+  $resourceProvider.defaults.stripTrailingSlashes = false;
+}])
 .controller('MashControlCtrl', function($scope, vesselRestService) {
   $scope.variable = 1;
   $scope.increment = function() {
