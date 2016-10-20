@@ -4,7 +4,9 @@ mashControl.controller('MashControlCtrl', function($scope, vesselRestService) {
   var updateCurrentTemperature = function() {
     setTimeout(function () {
       vesselRestService.getCurrentTemperature().then(function(data) {
-          $scope.currentTemp = data.temperature.celcius;
+          $scope.currentTemp = data;
+          $scope.currentTempTime = new Date(0);
+          $scope.currentTempTime.setUTCSeconds(utcSeconds);
         });
       updateCurrentTemperature();
     }, 1000);

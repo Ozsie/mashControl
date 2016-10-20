@@ -77,6 +77,7 @@ var parseTemp = function(data) {
       raw: temperature,
       celcius: temperature / 1000
     }
+    time: Date.now();
   };
   console.log("Temp status: " + temp);
 
