@@ -79,7 +79,7 @@ var parseTemp = function(data) {
     },
     time: Date.now()
   };
-  console.log("Temp status: " + temp);
+  //console.log("Temp status: " + temp);
 
   return temp;
 };
@@ -93,7 +93,7 @@ app.use(express['static']('app'));
 
 // Express route for incoming requests for a customer name
 app.get('/temp/current', function(req, res) {
-  console.log('Temp requested');
+  //console.log('Temp requested');
   readTemp(function(error, data) {
     if (!error) {
       res.status(200).send(parseTemp(data));
