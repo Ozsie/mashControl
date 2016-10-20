@@ -3,7 +3,9 @@ var mashControl = angular.module('mashControl', ['ngResource']);
 mashControl.controller('MashControlCtrl', function($scope, vesselRestService) {
   $scope.variable = 1;
   $scope.increment = function() {
-    $scope.variable = vesselRestService.getCurrentTemperature().celcius;
+    vesselRestService.getCurrentTemperature().then(function(data) {
+      $scope.variable = data.celcius;
+    });
   }
 });
 
@@ -20,7 +22,7 @@ mashControl.factory('vesselRestService', function($q, $http, mashControlRestFact
     var deferred = $q.defer();
     mashControlRestFactory.getCurrentTemperature().get({},
       function(response) {
-        deferred.resolve(response.data);
+        deferred.resolve(response);
       }, function(error) {
         console.error("Error getting current temperature");
         deferred.reject(error);
