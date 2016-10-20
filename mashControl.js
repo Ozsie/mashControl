@@ -11,7 +11,7 @@ var runSchedule = function(callback) {
 
 var startSchedule = function(newSchedule) {
   if (newSchedule) {
-    console.log(schedule);
+    console.log(JSON.stringify(schedule));
     schedule = {
       status: 'started',
       step: 0

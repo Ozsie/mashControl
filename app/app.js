@@ -1,15 +1,18 @@
 var mashControl = angular.module('mashControl', ['ngResource']);
 
-mashControl.controller('MashControlCtrl', function($scope, vesselRestService) {
+mashControl.controller('MashControlCtrl', function($scope, mashControlRestService) {
   $scope.start = function() {
+    mashControlRestService.startSchedule($scope.schedule).then(function(data) {
+      $scope.startResponse = data;
+    });
   };
 
   var updateCurrentTemperature = function() {
     setTimeout(function () {
-      vesselRestService.getCurrentTemperature().then(function(data) {
-          $scope.currentTemp = data;
-          $scope.currentTempTime = new Date(data.time);
-        });
+      mashControlRestService.getCurrentTemperature().then(function(data) {
+        $scope.currentTemp = data;
+        $scope.currentTempTime = new Date(data.time);
+      });
       updateCurrentTemperature();
     }, 1000);
   };
@@ -23,14 +26,14 @@ mashControl.factory('mashControlRestFactory',function($resource) {
       return $resource('/temp/current/');
     },
     startSchedule: function() {
-      return $resource('/asset/rest/asset/list/',{},{
+      return $resource('/schedule/start/',{},{
         start : { method: 'POST'}
       });
     }
   };
 })
 
-mashControl.factory('vesselRestService', function($q, $http, mashControlRestFactory){
+mashControl.factory('mashControlRestService', function($q, $http, mashControlRestFactory){
   var getCurrentTemperature = function (){
     var deferred = $q.defer();
     mashControlRestFactory.getCurrentTemperature().get({},
@@ -46,7 +49,7 @@ mashControl.factory('vesselRestService', function($q, $http, mashControlRestFact
   var startSchedule = function(schedule){
     var deferred = $q.defer();
 
-    vesselRestFactory.startSchedule().start(schedule,
+    mashControlRestFactory.startSchedule().start(schedule,
       function(response) {
         deferred.resolve(response);
       }, function(error) {
