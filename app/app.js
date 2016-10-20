@@ -1,19 +1,21 @@
-var mashControl = angular.module('mashControl', ['$resourceProvider']);
+var mashControl = angular.module('mashControl', []);
 
 mashControl.controller('MashControlCtrl', function($scope, vesselRestService) {
   $scope.variable = 1;
   $scope.increment = function() {
     $scope.variable = vesselRestService.getCurrentTemperature().celcius;
   }
-})
-.factory('mashControlRestFactory',function($resource) {
+});
+
+mashControl.factory('mashControlRestFactory',function($resource) {
   return {
     getCurrentTemperature : function(){
       return $resource('/temp/current/');
     }
   };
 })
-.factory('vesselRestService', function($q, $http, mashControlRestFactory){
+
+mashControl.factory('vesselRestService', function($q, $http, mashControlRestFactory){
   var getCurrentTemperature = function (){
     var deferred = $q.defer();
     mashControlRestFactory.getCurrentTemperature().get({},
