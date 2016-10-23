@@ -22,10 +22,12 @@ var adjustTemperature = function(targetTemp) {
 }
 
 var runSchedule = function(callback) {
+  console.log("Schedule: " + JSON.stringify(schedule));
   for (var index in schedule.steps) {
     var step = schedule.steps[index];
     console.log("Starting step " + (index + 1) + ", " + step.name);
     var stepTime = (step.riseTime + step.time) * 60 * 1000;
+    console.log("Will run for " + stepTime + " ms");
     while (Date.now() - schedule.startTime < stepTime) {
         setTimeout(adjustTemperature(step.temperature), 1000);
     }
