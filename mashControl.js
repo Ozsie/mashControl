@@ -19,7 +19,6 @@ var adjustTemperature = function(targetTemp) {
         }
       }
     })
-    if (targetTemp < )
 }
 
 var runSchedule = function(callback) {
