@@ -2,6 +2,7 @@ var http = require('http');
 var express = require('express');
 var fs = require('fs');
 var exec = require('child_process').exec;
+var bodyParser = require('body-parser');
 
 var schedule;
 
@@ -90,7 +91,7 @@ exec("modprobe w1-therm", modprobe);
 var app = express();
 
 app.use(express['static']('app'));
-app.use(express.bodyParser());
+app.use(bodyParser.json());
 
 // Express route for incoming requests for a customer name
 app.get('/temp/current', function(req, res) {

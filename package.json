@@ -24,6 +24,7 @@
   "homepage": "https://github.com/Ozsie/mashControl#readme",
   "dependencies": {
     "connect": "^3.5.0",
-    "express": "^4.14.0"
+    "express": "^4.14.0",
+    "body-parser": "~1.15"
   }
 }
