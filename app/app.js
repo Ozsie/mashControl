@@ -6,6 +6,11 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       $scope.startResponse = data;
     });
   };
+  $scope.getSchedule = function() {
+    mashControlRestService.getSchedule().then(function(data) {
+      $scope.schedule = data;
+    });
+  };
 
   var updateCurrentTemperature = function() {
     setTimeout(function () {
@@ -24,6 +29,9 @@ mashControl.factory('mashControlRestFactory',function($resource) {
   return {
     getCurrentTemperature : function(){
       return $resource('/temp/current/');
+    },
+    getSchedule : function(){
+      return $resource('/schedule/');
     },
     startSchedule: function() {
       return $resource('/schedule/start/',{},{
@@ -45,6 +53,17 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
       });
     return deferred.promise;
   };
+  var getSchedule = function (){
+    var deferred = $q.defer();
+    mashControlRestFactory.getSchedule().get({},
+      function(response) {
+        deferred.resolve(response);
+      }, function(error) {
+        console.error("Error getting current schedule");
+        deferred.reject(error);
+      });
+    return deferred.promise;
+  };
 
   var startSchedule = function(schedule){
     var deferred = $q.defer();
@@ -61,6 +80,7 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
 
   return {
     getCurrentTemperature: getCurrentTemperature,
+    getSchedule: getSchedule,
     startSchedule: startSchedule
   };
 });

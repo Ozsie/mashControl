@@ -6,17 +6,39 @@ var bodyParser = require('body-parser');
 
 var schedule;
 
+var adjustTemperature = function(targetTemp) {
+    readTemp(function(error, data) {
+      if (!error) {
+        currentTemp = parseTemp(data);
+        if (currentTemp.temperature.celcius < targetTemp) {
+            console.log(currentTemp.temperature.celcius + " < " + targetTemp + " increasing heat.");
+        } else if (currentTemp.temperature.celcius > targetTemp) {
+            console.log(currentTemp.temperature.celcius + " > " + targetTemp + " decreasing heat.");
+        } else {
+            console.log(currentTemp.temperature.celcius + " = " + targetTemp + " holding.");
+        }
+      }
+    })
+    if (targetTemp < )
+}
+
 var runSchedule = function(callback) {
-  setTimeout(callback, 30000);
+  for (var index in schedule.steps) {
+    var step = schedule.steps[index];
+    console.log("Starting step " + (index + 1) + ", " + step.name);
+    var stepTime = (step.riseTime + step.time) * 60 * 1000;
+    while (Date.now() - schedule.startTime < stepTime) {
+        setTimeout(adjustTemperature(step.temperature), 1000);
+    }
+  }
 };
 
 var startSchedule = function(newSchedule) {
   if (newSchedule) {
     console.log(JSON.stringify(schedule));
-    schedule = {
-      status: 'started',
-      step: 0
-    }
+    schedule = newSchedule;
+    schedule.startTime = Date.now();
+    schedule.status = 'running';
     runSchedule(function() {
       schedule.status = 'done';
     });
@@ -120,6 +142,11 @@ app.get('/schedule/status', function(req, res) {
   console.log('Schedule status requested');
   var status = getStatus();
   res.status(200).send(status);
+});
+
+app.get('/schedule', function(req, res) {
+  console.log('Get Schedule');
+  res.status(200).send(schedule);
 });
 
 // Express route for any other unrecognised incoming requests
