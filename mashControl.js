@@ -29,7 +29,7 @@ var runSchedule = function(callback) {
     var stepTime = (step.riseTime + step.time) * 60 * 1000;
     console.log("Will run for " + stepTime + " ms");
 
-    var function run() {
+    var run = function() {
       setTimeout(function() {
         if (Date.now() - schedule.startTime < stepTime) {
           adjustTemperature(step.temperature);
