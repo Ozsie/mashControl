@@ -23,7 +23,10 @@ var adjustTemperature = function(targetTemp) {
 
 var runSchedule = function(callback) {
   console.log("Schedule: " + JSON.stringify(schedule));
-  for (var index in schedule.steps) {
+  var i = 0;
+
+  var nextStep = function(index) {
+    var step = schedule.steps[index];
     var step = schedule.steps[index];
     console.log("Starting step " + (index + 1) + ", " + step.name);
     var stepTime = (step.riseTime + step.time) * 60 * 1000;
@@ -39,7 +42,20 @@ var runSchedule = function(callback) {
     };
 
     run();
-  }
+    return stepTime;
+  };
+
+  var nexInMs = nextStep(i);
+  console.log("Next step in " + nexInMs + " ms");
+  var doStep = function() {
+    setTimeout(function() {
+      i++;
+      if (i < schedule.steps.length) {
+        nexInMs = nextStep();
+        doStep();
+      }
+    }, nexInMs);
+  };
 };
 
 var startSchedule = function(newSchedule) {
