@@ -26,7 +26,7 @@ var runSchedule = function(callback) {
   var i = 0;
 
   var nextStep = function(index) {
-    var step = schedule.steps[index];
+    console.log("Index: " + index);
     var step = schedule.steps[index];
     console.log("Starting step " + (index + 1) + ", " + step.name);
     var stepTime = (step.riseTime + step.time) * 60 * 1000;
@@ -47,16 +47,18 @@ var runSchedule = function(callback) {
   };
 
   var nexInMs = nextStep(i);
-  console.log("Next step in " + nexInMs + " ms");
   var doStep = function() {
+    console.log("Next step in " + nexInMs + " ms");
     setTimeout(function() {
       i++;
       if (i < schedule.steps.length) {
-        nexInMs = nextStep();
+        console.log("It's time for the next step");
+        nexInMs = nextStep(i);
         doStep();
       }
     }, nexInMs);
   };
+  doStep();
 };
 
 var startSchedule = function(newSchedule) {
