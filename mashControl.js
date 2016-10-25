@@ -55,6 +55,8 @@ var runSchedule = function(callback) {
         console.log("It's time for the next step");
         nexInMs = nextStep(i);
         doStep();
+      } else {
+        callback();
       }
     }, nexInMs);
   };

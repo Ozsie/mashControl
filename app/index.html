@@ -5,13 +5,9 @@
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-resource.js"></script>
 </head>
 <script type="text/javascript" src="app.js"></script>
+<script type="text/javascript" src="services/restService.js"></script>
+<script type="text/javascript" src="partials/mashControl/mashControlCtrl.js"></script>
 <body ng-app="mashControl">
-<div ng-controller="MashControlCtrl">
-  Nuvarande temperatur: {{currentTemp.temperature.celcius}} @ {{currentTempTime}}
-  <textarea ng-model="schedule"></textarea>
-  <button ng-click="start()">Start</button>
-
-  <button ng-click="getSchedule()">Schedule</button>
-</div>
+  <ng-include src="'partials/mashControl/mashControl.html"></ng-include>
 </body>
 </html>
