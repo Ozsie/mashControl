@@ -28,13 +28,14 @@ var runSchedule = function(callback) {
   var nextStep = function(index) {
     console.log("Index: " + index);
     var step = schedule.steps[index];
+    step.startTime = Date.now();
     console.log("Starting step " + (index + 1) + ", " + step.name);
     var stepTime = (step.riseTime + step.time) * 60 * 1000;
     console.log("Will run for " + stepTime + " ms");
 
     var run = function() {
       setTimeout(function() {
-        if (Date.now() - schedule.startTime < stepTime) {
+        if (Date.now() - step.startTime < stepTime) {
           console.log("Time left: " + (stepTime - (Date.now() - schedule.startTime)));
           adjustTemperature(step.temperature);
           run();
