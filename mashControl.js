@@ -29,14 +29,14 @@ var runSchedule = function(callback) {
     console.log("Index: " + index);
     var step = schedule.steps[index];
     step.startTime = Date.now();
-    console.log("Starting step " + (index + 1) + ", " + step.name);
+    console.log("Starting step " + (index + 1) + ", " + step.name + " at " + step.startTime);
     var stepTime = (step.riseTime + step.time) * 60 * 1000;
     console.log("Will run for " + stepTime + " ms");
 
     var run = function() {
       setTimeout(function() {
         if (Date.now() - step.startTime < stepTime) {
-          console.log("Time left: " + (stepTime - (Date.now() - schedule.startTime)));
+          console.log("Time left: " + (stepTime - (Date.now() - step.startTime)));
           adjustTemperature(step.temperature);
           run();
         }
@@ -71,6 +71,8 @@ var startSchedule = function(newSchedule) {
     schedule.startTime = Date.now();
     schedule.status = 'running';
     runSchedule(function() {
+      schedule.endTime = Date.now();
+      console.log("Mash done after " + (schedule.startTime - schedule.endTime) + " ms");
       schedule.status = 'done';
     });
     return true;
