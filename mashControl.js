@@ -5,6 +5,8 @@ var exec = require('child_process').exec;
 var bodyParser = require('body-parser');
 
 var schedule;
+//"/sys/bus/w1/devices/28-800000263717/w1_slave"
+var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
 var adjustTemperature = function(targetTemp) {
     readTemp(function(error, data) {
@@ -72,7 +74,7 @@ var startSchedule = function(newSchedule) {
     schedule.status = 'running';
     runSchedule(function() {
       schedule.endTime = Date.now();
-      console.log("Mash done after " + (schedule.startTime - schedule.endTime) + " ms");
+      console.log("Mash done after " + (schedule.endTime - schedule.startTime) + " ms");
       schedule.status = 'done';
     });
     return true;
@@ -113,7 +115,7 @@ var readTemp = function() {
 };
 
 var readTemp = function(callback) {
-  fs.readFile("/sys/bus/w1/devices/28-800000263717/w1_slave", 'utf8', callback);
+  fs.readFile(settings.input, 'utf8', callback);
 };
 
 var parseTemp = function(data) {
@@ -140,8 +142,10 @@ var parseTemp = function(data) {
   return temp;
 };
 
-exec("modprobe w1-gpio", modprobe);
-exec("modprobe w1-therm", modprobe);
+if (settings.installKernelMod) {
+    exec("modprobe w1-gpio", modprobe);
+    exec("modprobe w1-therm", modprobe);
+}
 
 var app = express();
 

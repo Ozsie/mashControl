@@ -6,6 +6,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       $scope.startResponse = data;
     });
   };
+
   $scope.getSchedule = function() {
     mashControlRestService.getSchedule().then(function(data) {
       $scope.schedule = data;
@@ -24,5 +25,3 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
 
   updateCurrentTemperature();
 });
-
-
