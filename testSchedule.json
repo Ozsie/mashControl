@@ -1,21 +1,21 @@
 {
   "steps":[ {
     "name" : "Proteinrast",
-    "riseTime" : 0.1,
+    "riseTime" : 1,
     "temperature" : 50,
-    "time" : 0.3,
+    "time" : 1,
     "type" : "infusion"
   }, {
     "name" : "Försockring",
-    "riseTime" : 0,
+    "riseTime" : 1,
     "temperature" : 66.7,
-    "time" : 0.1,
+    "time" : 2,
     "type" : "infusion"
   }, {
     "name" : "Mäskslut",
-    "riseTime" : 0,
+    "riseTime" : 1,
     "temperature" : 75.5,
-    "time" : 0.2,
+    "time" : 1,
     "type" : "infusion"
   } ]
 }

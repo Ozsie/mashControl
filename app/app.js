@@ -1,1 +1,1 @@
-var mashControl = angular.module('mashControl', ['ngResource']);
+var mashControl = angular.module('mashControl', ['ngResource', 'googlechart']);

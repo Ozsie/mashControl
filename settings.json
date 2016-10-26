@@ -1,4 +1,5 @@
 {
   "input": "testTemp.txt",
-  "installKernelMod": false
+  "installKernelMod": false,
+  "publishedModules": ["angular", "angular-resource", "angular-google-chart"]
 }

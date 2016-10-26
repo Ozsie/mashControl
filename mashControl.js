@@ -149,7 +149,12 @@ if (settings.installKernelMod) {
 
 var app = express();
 
-app.use(express['static']('app'));
+app.use(express.static('app'));
+for (var index in settings.publishedModules) {
+  var script = settings.publishedModules[index];
+  console.log("Publishing " + 'node_modules/' + script + " as /static/" + script);
+  app.use('/static/' + script, express.static('node_modules/' + script));
+}
 app.use(bodyParser.json());
 
 // Express route for incoming requests for a customer name

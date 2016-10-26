@@ -1,9 +1,9 @@
 <div ng-controller="MashControlCtrl">
     Nuvarande temperatur: {{currentTemp.temperature.celcius}} @ {{currentTempTime}}
-    <textarea ng-model="schedule"></textarea>
+    <textarea ng-model="schedule" ng-disabled="inputDisabled"></textarea>
     <button ng-click="start()">Start</button>
 
     <button ng-click="getSchedule()">Schedule</button>
     <br>
-    <canvas id="myChart" width="400" height="400"></canvas>
+    <div google-chart chart="tempChart" style="height:600px; width:100%;"></div>
 </div>

@@ -4,6 +4,8 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
   $scope.start = function() {
     mashControlRestService.startSchedule($scope.schedule).then(function(data) {
       $scope.startResponse = data;
+      $scope.inputDisabled = true;
+      $scope.startCheckTemp($scope.totalRunTime);
     });
   };
 
@@ -13,15 +15,157 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     });
   };
 
-  var updateCurrentTemperature = function() {
+  $scope.startCheckTemp = function(runTime) {
+    $scope.running = true;
+    $scope.updates = 0;
+    updateCurrentTemperature(runTime);
+  };
+
+  var updateCurrentTemperature = function(runTime) {
     setTimeout(function () {
+      if (!$scope.running) {
+        return;
+      }
       mashControlRestService.getCurrentTemperature().then(function(data) {
         $scope.currentTemp = data;
         $scope.currentTempTime = new Date(data.time);
+        if ($scope.updates % 60 === 0) {
+          var rows = $scope.tempChart.data.rows;
+          var minute = $scope.updates/60;
+          var updated = false;
+          var insertIndex = -1;
+          for (var rowIndex in rows) {
+            var row = rows[rowIndex];
+            if (row.c[0].v > minute) {
+              insertIndex = rowIndex;
+              break;
+            }
+            if (row.c[0].v === minute) {
+              var val = {
+                "v": data.temperature.celcius
+              }
+              row.c.push(val);
+              updated = true;
+              break;
+            }
+          }
+          if (!updated) {
+            var val = {
+              c: [
+                {v: minute},
+                {v: 0},
+                {v: data.temperature.celcius}
+              ]
+            }
+            if (insertIndex === -1) {
+              rows.push(val);
+            } else {
+              rows.splice(insertIndex, 0, val);
+            }
+          }
+
+          if (minute >= runTime) {
+            console.log("Done!");
+            $scope.running = false;
+            $scope.inputDisabled = false;
+            return;
+          }
+        }
+        $scope.updates++;
       });
-      updateCurrentTemperature();
+      updateCurrentTemperature(runTime);
     }, 1000);
   };
 
-  updateCurrentTemperature();
+  //updateCurrentTemperature();
+
+  $scope.tempChart = {};
+
+  $scope.$watch(function () {
+    return $scope.schedule;
+  }, function() {
+    $scope.tempChart.data.rows = {};
+    var rows = [
+      {
+        c: [
+          {v: 0},
+          {v: 0}
+        ]
+      }
+    ];
+
+    if (!$scope.schedule) {
+      return;
+    }
+
+    var jsonSchedule = JSON.parse($scope.schedule);
+
+    var runTime = 0;
+    $scope.totalRunTime = 0;
+    for (var index in jsonSchedule.steps) {
+      var step = jsonSchedule.steps[index];
+      runTime += step.riseTime;
+      rows.push({
+        c: [
+          {v: runTime},
+          {v: step.temperature}
+        ]
+      });
+
+      for (var m = 1; m <= step.time; m++) {
+        runTime += 1;
+
+        rows.push({
+          c: [
+            {v: runTime},
+            {v: step.temperature}
+          ]
+        });
+      }
+      $scope.totalRunTime += step.riseTime + step.time;
+    }
+
+    $scope.tempChart.data.rows = rows;
+  }, true);
+
+  $scope.tempChart.type = "LineChart";
+  $scope.tempChart.data = {
+    "cols": [
+      {id: "time", label: "time", type: "number"},
+      {id: "expected", label: "Expected", type: "number"},
+      {id: "actual", label: "Actual", type: "number"}
+    ],
+    "rows": [
+      {
+        c: [
+          {v: 0},
+          {v: 10}
+        ]
+      }, {
+        c: [
+          {v: 1},
+          {v: 15}
+        ]
+      }, {
+        c: [
+          {v: 2},
+          {v: 3}
+        ]
+      }
+    ]
+  };
+
+  $scope.tempChart.options = {
+    "title": "Mash Temperature",
+    "fill": 20,
+    "displayExactValues": true,
+    "vAxis": {
+        "title": "Temperature",
+        "gridlines": {"count": 6}
+    },
+    "hAxis": {
+        "title": "Time"
+    }
+  };
+
 });
