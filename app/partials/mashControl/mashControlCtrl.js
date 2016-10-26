@@ -5,6 +5,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     mashControlRestService.startSchedule($scope.schedule).then(function(data) {
       $scope.startResponse = data;
       $scope.inputDisabled = true;
+      $scope.parseInput();
       $scope.startCheckTemp($scope.totalRunTime);
     });
   };
@@ -81,9 +82,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
 
   $scope.tempChart = {};
 
-  $scope.$watch(function () {
-    return $scope.schedule;
-  }, function() {
+  $scope.parseInput = function() {
     $scope.tempChart.data.rows = {};
     var rows = [
       {
@@ -98,7 +97,12 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       return;
     }
 
-    var jsonSchedule = JSON.parse($scope.schedule);
+    var jsonSchedule = {};
+    if ($scope.schedule.constructor == Object) {
+      jsonSchedule = $scope.schedule;
+    } else {
+      jsonSchedule = JSON.parse($scope.schedule);
+    }
 
     var runTime = 0;
     $scope.totalRunTime = 0;
@@ -110,7 +114,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
           {v: runTime},
           {v: step.temperature}
         ]
-      });
+     });
 
       for (var m = 1; m <= step.time; m++) {
         runTime += 1;
@@ -126,7 +130,11 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     }
 
     $scope.tempChart.data.rows = rows;
-  }, true);
+  };
+
+  $scope.$watch(function () {
+    return $scope.schedule;
+  }, $scope.parseInput, true);
 
   $scope.tempChart.type = "LineChart";
   $scope.tempChart.data = {
@@ -135,24 +143,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       {id: "expected", label: "Expected", type: "number"},
       {id: "actual", label: "Actual", type: "number"}
     ],
-    "rows": [
-      {
-        c: [
-          {v: 0},
-          {v: 10}
-        ]
-      }, {
-        c: [
-          {v: 1},
-          {v: 15}
-        ]
-      }, {
-        c: [
-          {v: 2},
-          {v: 3}
-        ]
-      }
-    ]
+    "rows": []
   };
 
   $scope.tempChart.options = {

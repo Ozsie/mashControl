@@ -1,5 +1,6 @@
 {
   "input": "testTemp.txt",
   "installKernelMod": false,
-  "publishedModules": ["angular", "angular-resource", "angular-google-chart"]
+  "publishedModules": ["angular", "angular-resource", "angular-google-chart"],
+  "heatCutOff": 85
 }
