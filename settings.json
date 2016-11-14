@@ -2,5 +2,12 @@
   "input": "testTemp.txt",
   "installKernelMod": false,
   "publishedModules": ["angular", "angular-resource", "angular-google-chart"],
-  "heatCutOff": 85
+  "heatCutOff": 85,
+  "motor": {
+    "enablePin": 12,
+    "coilA1Pin": 7,
+    "coilA2Pin": 11,
+    "coilB1Pin": 16,
+    "coilB2Pin": 18
+  }
 }
