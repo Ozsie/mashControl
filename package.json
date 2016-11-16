@@ -28,7 +28,6 @@
     "body-parser": "~1.15",
     "angular": "~1.5",
     "angular-resource": "~1.5",
-    "angular-google-chart": "~0.1",
-    "pi-gpio": "~0.0.8"
+    "angular-google-chart": "~0.1"
   }
 }

@@ -1,5 +1,4 @@
 var fs = require('fs');
-var gpio = require("pi-gpio");
 
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
@@ -61,13 +60,10 @@ var setStep = function(w1, w2, w3, w4) {
   output(settings.motor.coilB2Pin, w4)
 };
 
-var output = function(pin, value, close) {
-  gpio.write(pin, value, function(err) {
-    console.log(err);
-    console.log("Writing to " + pin + ": " + value);
-    if (close && close === true) {
-      console.log("closing pin " + pin);
-      gpio.close(pin);
+var output = function(pin, value) {
+  fs.writeFile("/sys/class/gpio/gpio" + pin + "/value", value, function(err) {
+    if (err) {
+      console.log("Error writing to pin " + pin + ": ", err);
     }
   });
 };

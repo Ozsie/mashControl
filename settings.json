@@ -4,10 +4,10 @@
   "publishedModules": ["angular", "angular-resource", "angular-google-chart"],
   "heatCutOff": 85,
   "motor": {
-    "enablePin": 12,
-    "coilA1Pin": 7,
-    "coilA2Pin": 11,
-    "coilB1Pin": 16,
-    "coilB2Pin": 18
+    "enablePin": 18,
+    "coilA1Pin": 4,
+    "coilA2Pin": 17,
+    "coilB1Pin": 23,
+    "coilB2Pin": 24
   }
 }
