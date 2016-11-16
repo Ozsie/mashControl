@@ -45,7 +45,6 @@ var backwards = function(steps) {
 };
 
 var setStep = function(w1, w2, w3, w4) {
-  console.log("set step: " + w1 + ", " + w2 + ", " + w3 + ", " + w4);
   output(settings.motor.coilA1Pin, w1)
   output(settings.motor.coilA2Pin, w2)
   output(settings.motor.coilB1Pin, w3)
@@ -53,6 +52,7 @@ var setStep = function(w1, w2, w3, w4) {
 };
 
 var output = function(pin, value, close) {
+  console.log("output: " + pin);
   gpio.open(pin, "output", function(err) {
     if (err) {
       console.err("Error: " + err);
@@ -68,7 +68,7 @@ var output = function(pin, value, close) {
 };
 
 turnOn();
-forward(100);
+forward(500);
 turnOff();
 
 function exitHandler() {
