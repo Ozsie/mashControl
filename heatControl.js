@@ -3,6 +3,8 @@ var gpio = require("pi-gpio");
 
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
+console.log(JSON.stringify(settings.motor));
+
 var increase = function (inputTemp, targetTemp) {
   console.log(inputTemp + " < " + targetTemp + " increasing heat.");
 };
@@ -51,7 +53,11 @@ var setStep = function(w1, w2, w3, w4) {
 
 var output = function(pin, value, close) {
   gpio.open(pin, "output", function(err) {
+    if (err) {
+      console.err("Error: " + err);
+    }
     gpio.write(pin, value, function() {
+      console.log("Writing to " + pin + ": " + value);
       if (close && close === true) {
         console.log("closing pin " + pin);
         gpio.close(pin);
@@ -63,6 +69,22 @@ var output = function(pin, value, close) {
 turnOn();
 forward(100);
 turnOff();
+
+function exitHandler() {
+    output(settings.motor.coilA1Pin, 0, true);
+    output(settings.motor.coilA2Pin, 0, true);
+    output(settings.motor.coilB1Pin, 0, true);
+    output(settings.motor.coilB2Pin, 0, true);
+    output(settings.motor.enablePin, 0, true);
+}
+
+process.on('exit', exitHandler.bind());
+
+//catches ctrl+c event
+process.on('SIGINT', exitHandler.bind());
+
+//catches uncaught exceptions
+process.on('uncaughtException', exitHandler.bind());
 
 module.exports = {
   increase: increase,
