@@ -15,6 +15,11 @@ var decrease = function (inputTemp, targetTemp) {
 
 var turnOn = function() {
   console.log("Turn on. Enable Pin: " + settings.motor.enablePin);
+  open(settings.motor.enablePin);
+  open(settings.motor.coilA1Pin);
+  open(settings.motor.coilA2Pin);
+  open(settings.motor.coilB1Pin);
+  open(settings.motor.coilB2Pin);
   output(settings.motor.enablePin, 1);
 };
 
@@ -22,6 +27,11 @@ var turnOff = function() {
   console.log("Turn off. Enable Pin: " + settings.motor.enablePin);
   backwards(500);
   output(settings.motor.enablePin, 0, true);
+  close(settings.motor.enablePin);
+  close(settings.motor.coilA1Pin);
+  close(settings.motor.coilA2Pin);
+  close(settings.motor.coilB1Pin);
+  close(settings.motor.coilB2Pin);
 };
 
 var forward = function(steps) {
@@ -52,19 +62,32 @@ var setStep = function(w1, w2, w3, w4) {
 };
 
 var output = function(pin, value, close) {
+  gpio.write(pin, value, function(err) {
+    console.log(err);
+    console.log("Writing to " + pin + ": " + value);
+    if (close && close === true) {
+      console.log("closing pin " + pin);
+      gpio.close(pin);
+    }
+  });
+};
+
+var open = function(pin) {
+  gpio.close(pin, function(err) {
+    if (err) {
+      console.err("Error closing pin: " + pin + ": " + err);
+    } else {
+      console.log("Pin closed: " + pin);
+    }
+  });
+};
+
+var open = function(pin) {
   gpio.open(pin, "output", function(err) {
     if (err) {
-      console.err("Error: " + err);
+      console.err("Error opening pin: " + pin + ": " + err);
     } else {
-      console.log("output: " + pin);
-      gpio.write(pin, value, function(err) {
-        console.log(err);
-        console.log("Writing to " + pin + ": " + value);
-        if (close && close === true) {
-          console.log("closing pin " + pin);
-          gpio.close(pin);
-        }
-      });
+      console.log("Pin open: " + pin);
     }
   });
 };
