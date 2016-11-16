@@ -45,6 +45,7 @@ var backwards = function(steps) {
 };
 
 var setStep = function(w1, w2, w3, w4) {
+  console.log("set step: " + w1 + ", " + w2 + ", " + w3 + ", " + w4);
   output(settings.motor.coilA1Pin, w1)
   output(settings.motor.coilA2Pin, w2)
   output(settings.motor.coilB1Pin, w3)
