@@ -15,11 +15,11 @@ var decrease = function (inputTemp, targetTemp) {
 
 var turnOn = function() {
   console.log("Turn on. Enable Pin: " + settings.motor.enablePin);
-  open(settings.motor.enablePin);
-  open(settings.motor.coilA1Pin);
-  open(settings.motor.coilA2Pin);
-  open(settings.motor.coilB1Pin);
-  open(settings.motor.coilB2Pin);
+  open(4);
+  open(17);
+  open(18);
+  open(23);
+  open(24);
   output(settings.motor.enablePin, 1);
 };
 
@@ -27,11 +27,11 @@ var turnOff = function() {
   console.log("Turn off. Enable Pin: " + settings.motor.enablePin);
   backwards(5);
   output(settings.motor.enablePin, 0, true);
-  close(settings.motor.enablePin);
-  close(settings.motor.coilA1Pin);
-  close(settings.motor.coilA2Pin);
-  close(settings.motor.coilB1Pin);
-  close(settings.motor.coilB2Pin);
+  close(4);
+  close(17);
+  close(18);
+  close(23);
+  close(24);
 };
 
 var forward = function(steps) {
