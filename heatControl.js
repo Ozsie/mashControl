@@ -93,8 +93,6 @@ var close = function(pin) {
 };
 
 turnOn();
-forward(500);
-turnOff();
 
 function exitHandler() {
     output(settings.motor.coilA1Pin, 0, true);
