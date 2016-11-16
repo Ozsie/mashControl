@@ -52,18 +52,20 @@ var setStep = function(w1, w2, w3, w4) {
 };
 
 var output = function(pin, value, close) {
-  console.log("output: " + pin);
   gpio.open(pin, "output", function(err) {
     if (err) {
       console.err("Error: " + err);
+    } else {
+      console.log("output: " + pin);
+      gpio.write(pin, value, function(err) {
+        console.log(err);
+        console.log("Writing to " + pin + ": " + value);
+        if (close && close === true) {
+          console.log("closing pin " + pin);
+          gpio.close(pin);
+        }
+      });
     }
-    gpio.write(pin, value, function() {
-      console.log("Writing to " + pin + ": " + value);
-      if (close && close === true) {
-        console.log("closing pin " + pin);
-        gpio.close(pin);
-      }
-    });
   });
 };
 
