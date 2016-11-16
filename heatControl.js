@@ -25,7 +25,7 @@ var turnOn = function() {
 
 var turnOff = function() {
   console.log("Turn off. Enable Pin: " + settings.motor.enablePin);
-  backwards(500);
+  backwards(5);
   output(settings.motor.enablePin, 0, true);
   close(settings.motor.enablePin);
   close(settings.motor.coilA1Pin);
@@ -93,7 +93,7 @@ var close = function(pin) {
 };
 
 turnOn();
-forward(500);
+forward(5);
 turnOff();
 
 function exitHandler() {
