@@ -73,27 +73,27 @@ var output = function(pin, value, close) {
 };
 
 var open = function(pin) {
-  gpio.close(pin, function(err) {
+  fs.writeFile("/sys/class/gpio/export", pin, function(err) {
     if (err) {
-      console.err("Error closing pin: " + pin + ": " + err);
+      console.log("Error opening pin " + pin + ": ", err);
     } else {
-      console.log("Pin closed: " + pin);
+      console.log("Pin " + pin + " open");
     }
   });
 };
 
 var close = function(pin) {
-  gpio.open(pin, "output", function(err) {
+  fs.writeFile("/sys/class/gpio/unexport", pin, function(err) {
     if (err) {
-      console.err("Error opening pin: " + pin + ": " + err);
+      console.log("Error closing pin " + pin + ": ", err);
     } else {
-      console.log("Pin open: " + pin);
+      console.log("Pin " + pin + " closed");
     }
   });
 };
 
 turnOn();
-forward(5);
+forward(500);
 turnOff();
 
 function exitHandler() {
