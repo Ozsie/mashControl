@@ -95,11 +95,11 @@ var close = function(pin) {
 turnOn();
 
 function exitHandler() {
-    output(settings.motor.coilA1Pin, 0, true);
-    output(settings.motor.coilA2Pin, 0, true);
-    output(settings.motor.coilB1Pin, 0, true);
-    output(settings.motor.coilB2Pin, 0, true);
-    output(settings.motor.enablePin, 0, true);
+    //output(settings.motor.coilA1Pin, 0, true);
+    //output(settings.motor.coilA2Pin, 0, true);
+    //output(settings.motor.coilB1Pin, 0, true);
+    //output(settings.motor.coilB2Pin, 0, true);
+    //output(settings.motor.enablePin, 0, true);
 }
 
 process.on('exit', exitHandler.bind());
