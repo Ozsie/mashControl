@@ -19,7 +19,7 @@ var turnOn = function() {
   open(18);
   open(23);
   open(24);
-  output(settings.motor.enablePin, 1);
+  setTimeout(output(settings.motor.enablePin, 1), 500);
 };
 
 var turnOff = function() {
