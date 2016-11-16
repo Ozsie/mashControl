@@ -82,7 +82,7 @@ var open = function(pin) {
   });
 };
 
-var open = function(pin) {
+var close = function(pin) {
   gpio.open(pin, "output", function(err) {
     if (err) {
       console.err("Error opening pin: " + pin + ": " + err);
