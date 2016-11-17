@@ -14,12 +14,13 @@ var decrease = function (inputTemp, targetTemp) {
 
 var turnOn = function() {
   console.log("Turn on. Enable Pin: " + settings.motor.enablePin);
+  open(18, function() {
+    output(settings.motor.enablePin, 1);
+  });
   open(4);
   open(17);
-  open(18);
   open(23);
   open(24);
-  setTimeout(output(settings.motor.enablePin, 1), 500);
 };
 
 var turnOff = function() {
@@ -68,12 +69,13 @@ var output = function(pin, value) {
   });
 };
 
-var open = function(pin) {
+var open = function(pin, callback) {
   fs.writeFile("/sys/class/gpio/export", pin, function(err) {
     if (err) {
       console.log("Error opening pin " + pin + ": ", err);
     } else {
       console.log("Pin " + pin + " open");
+      callback();
     }
   });
 };
