@@ -75,7 +75,9 @@ var open = function(pin, callback) {
       console.log("Error opening pin " + pin + ": ", err);
     } else {
       console.log("Pin " + pin + " open");
-      callback();
+      if (callback) {
+        callback();
+      }
     }
   });
 };
