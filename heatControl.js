@@ -74,10 +74,16 @@ var open = function(pin, callback) {
     if (err) {
       console.log("Error opening pin " + pin + ": ", err);
     } else {
-      console.log("Pin " + pin + " open");
-      if (callback) {
-        callback();
-      }
+      fs.writeFile("/sys/class/gpio/gpio" + pin + "/direction", "out", "utf8", function(err) {
+        if (!err) {
+          console.log("Pin " + pin + " open");
+          if (callback) {
+            callback();
+          }
+        } else {
+          console.log("Could not set direction to out");
+        }
+      });
     }
   });
 };
