@@ -25,7 +25,6 @@ var turnOn = function() {
 
 var turnOff = function() {
   console.log("Turn off. Enable Pin: " + settings.motor.enablePin);
-  backwards(5);
   output(settings.motor.enablePin, 0, true);
   close(4);
   close(17);
@@ -99,15 +98,10 @@ var close = function(pin) {
 };
 
 turnOn();
+forward(100);
 
-/*
 function exitHandler() {
-    //output(settings.motor.coilA1Pin, 0, true);
-    //output(settings.motor.coilA2Pin, 0, true);
-    //output(settings.motor.coilB1Pin, 0, true);
-    //output(settings.motor.coilB2Pin, 0, true);
-    //output(settings.motor.enablePin, 0, true);
-    turnOff();
+  turnOff();
 }
 
 process.on('exit', exitHandler.bind());
@@ -117,7 +111,6 @@ process.on('SIGINT', exitHandler.bind());
 
 //catches uncaught exceptions
 process.on('uncaughtException', exitHandler.bind());
-*/
 
 module.exports = {
   increase: increase,
