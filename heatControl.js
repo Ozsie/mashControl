@@ -2,6 +2,14 @@ var fs = require('fs');
 
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
+var open = {
+  "enable": false,
+  "coilA1": false,
+  "coilA2": false,
+  "coilB1": false,
+  "coilB2": false
+}
+
 console.log(JSON.stringify(settings.motor));
 
 var increase = function (inputTemp, targetTemp) {
@@ -15,12 +23,21 @@ var decrease = function (inputTemp, targetTemp) {
 var turnOn = function() {
   console.log("Turn on. Enable Pin: " + settings.motor.enablePin);
   open(18, function() {
+    open.enable = true;
     output(settings.motor.enablePin, 1);
   });
-  open(4);
-  open(17);
-  open(23);
-  open(24);
+  open(4, function() {
+    open.coilA1 = true;
+  });
+  open(17, function() {
+    open.coilA2 = true;
+  });
+  open(23, function() {
+    open.coilB1 = true;
+  });
+  open(24, function() {
+    open.coilB2 = true;
+  });
 };
 
 var turnOff = function() {
@@ -34,6 +51,9 @@ var turnOff = function() {
 };
 
 var forward = function(steps) {
+  while (!open.enable && !open.coilA1 && !open.coilA2 && !open.coilB1 && !open.coilB2) {
+    console.log("Waiting for pins to open")
+  }
   console.log("Forward " + steps + " steps");
   for(var i = 0; i < steps; i++) {
     setTimeout(setStep(1, 0, 1, 0), 5);
@@ -44,6 +64,9 @@ var forward = function(steps) {
 }
 
 var backwards = function(steps) {
+  while (!open.enable && !open.coilA1 && !open.coilA2 && !open.coilB1 && !open.coilB2) {
+    console.log("Waiting for pins to open")
+  }
   console.log("Backward " + steps + " steps");
   for (var i = 0; i < steps; i++) {
     setTimeout(setStep(1, 0, 0, 1), 5);
