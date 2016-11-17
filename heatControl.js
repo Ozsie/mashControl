@@ -96,6 +96,7 @@ function exitHandler() {
     //output(settings.motor.coilB1Pin, 0, true);
     //output(settings.motor.coilB2Pin, 0, true);
     //output(settings.motor.enablePin, 0, true);
+    turnOff();
 }
 
 process.on('exit', exitHandler.bind());
