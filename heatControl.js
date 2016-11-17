@@ -62,7 +62,7 @@ var setStep = function(w1, w2, w3, w4) {
 };
 
 var output = function(pin, value) {
-  fs.writeFile("/sys/class/gpio/gpio" + pin + "/value", value, function(err) {
+  fs.writeFile("/sys/class/gpio/gpio" + pin + "/value", value, 'utf8', function(err) {
     if (err) {
       console.log("Error writing to pin " + pin + ": ", err);
     }
