@@ -92,6 +92,7 @@ var close = function(pin) {
 
 turnOn();
 
+/*
 function exitHandler() {
     //output(settings.motor.coilA1Pin, 0, true);
     //output(settings.motor.coilA2Pin, 0, true);
@@ -108,6 +109,7 @@ process.on('SIGINT', exitHandler.bind());
 
 //catches uncaught exceptions
 process.on('uncaughtException', exitHandler.bind());
+*/
 
 module.exports = {
   increase: increase,
