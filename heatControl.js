@@ -170,7 +170,7 @@ setInterval(function () {
       }
     }
   }
-}, 2000)
+}, 1400)
 
 forward();
 forward();
