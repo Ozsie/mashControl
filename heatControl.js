@@ -3,6 +3,7 @@ var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
 var open = false;
+var stepping = false;
 
 var commands = [];
 
@@ -105,7 +106,7 @@ var setStep = function(w1, w2, w3, w4) {
   output(settings.motor.coilB2Pin, w4)})})})
 };
 
-var stepForward = function(steps) {
+var stepForward = function(steps, callback) {
   var currentStep = 0;
   var doStep = function() {
     setTimeout(function() {
@@ -123,6 +124,8 @@ var stepForward = function(steps) {
             currentStep++;
             if (currentStep < steps) {
               doStep();
+            } else {
+              callback();
             }
           }, 5);
         }, 5);
@@ -133,7 +136,7 @@ var stepForward = function(steps) {
   doStep();
 };
 
-var stepBackward = function(steps) {
+var stepBackward = function(steps, callback) {
   var currentStep = 0;
   var doStep = function() {
     setTimeout(function() {
@@ -147,6 +150,8 @@ var stepBackward = function(steps) {
             currentStep++;
             if (currentStep < steps) {
               doStep();
+            } else {
+              callback();
             }
           }, 5);
         }, 5);
@@ -160,17 +165,22 @@ var stepBackward = function(steps) {
 turnOn();
 
 setInterval(function () {
-  if (open) {
+  if (open && !stepping) {
     var command = commands.shift();
     if (command) {
+      stepping = true;
       if (command === "forward") {
-        stepForward(64);
+        stepForward(64, function() {
+          stepping = false;
+        });
       } else {
-        stepBackward(64);
+        stepBackward(64, function() {
+          stepping = false;
+        });
       }
     }
   }
-}, 1400)
+}, 200)
 
 forward();
 forward();
