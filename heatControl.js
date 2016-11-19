@@ -64,7 +64,9 @@ var output = function(pin, value, callback) {
     if (err) {
       console.log("Error writing to pin " + pin + ": ", err);
     }
-    callback();
+    if (callback) {
+      callback();
+    }
   });
 };
 
