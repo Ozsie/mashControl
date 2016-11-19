@@ -170,7 +170,7 @@ setInterval(function () {
     if (command) {
       stepping = true;
       if (command === "forward") {
-        stepForward(64, function() {
+        stepForward(1024, function() {
           stepping = false;
         });
       } else {
@@ -182,21 +182,6 @@ setInterval(function () {
   }
 }, 200)
 
-forward();
-forward();
-forward();
-forward();
-forward();
-forward();
-forward();
-forward();
-forward();
-forward();
-forward();
-forward();
-forward();
-forward();
-forward();
 forward();
 
 
