@@ -18,14 +18,19 @@ var decrease = function (inputTemp, targetTemp) {
 
 var turnOn = function() {
   console.log("Turn on. Enable Pin: " + settings.motor.enablePin);
-  open(18);
-  open(4);
-  open(17);
-  open(23);
-  open(24);
-  output(settings.motor.enablePin, 1, function() {
-    open = true;
-    console.log("Motor communication is open. Waiting for commands.");
+  open(18, function() {
+    open(4, function() {
+      open(17, function() {
+        open(23, function() {
+          open(24, function() {
+            output(settings.motor.enablePin, 1, function() {
+              open = true;
+              console.log("Motor communication is open. Waiting for commands.");
+            });
+          });
+        });
+      });
+    });
   });
 };
 
@@ -55,24 +60,45 @@ var setStep = function(w1, w2, w3, w4) {
 };
 
 var output = function(pin, value, callback) {
-  fs.writeFileSync("/sys/class/gpio/gpio" + pin + "/value", value, 'utf8');
-  if (callback) {
-    callback();
-  }
+  fs.writeFile("/sys/class/gpio/gpio" + pin + "/value", value, 'utf8', function(err) {
+    if (err) {
+      console.log("Error writing to pin " + pin + ": ", err);
+    }
+    if (callback) {
+      callback();
+    }
+  });
 };
 
 var open = function(pin, callback) {
   if (fs.existsSync("/sys/class/gpio/gpio" + pin)) {
-    fs.writeFileSync("/sys/class/gpio/export", pin);
-    fs.writeFileSync("/sys/class/gpio/gpio" + pin + "/direction", "out", "utf8");
-    if (callback) {
-      callback();
-    }
+    fs.writeFile("/sys/class/gpio/export", pin, function(err) {
+      if (err) {
+        console.log("Error opening pin " + pin + ": ", err);
+      } else {
+        fs.writeFile("/sys/class/gpio/gpio" + pin + "/direction", "out", "utf8", function(err) {
+          if (!err) {
+            console.log("Pin " + pin + " open");
+            if (callback) {
+              callback();
+            }
+          } else {
+            console.log("Could not set direction to out");
+          }
+        });
+      }
+    });
   }
 };
 
 var close = function(pin) {
-  fs.writeFileSync("/sys/class/gpio/unexport", pin);
+  fs.writeFile("/sys/class/gpio/unexport", pin, function(err) {
+    if (err) {
+      console.log("Error closing pin " + pin + ": ", err);
+    } else {
+      console.log("Pin " + pin + " closed");
+    }
+  });
 };
 
 var stepForward = function(steps) {
