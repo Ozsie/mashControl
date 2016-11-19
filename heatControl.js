@@ -58,14 +58,16 @@ var output = function(pin, value, callback) {
     if (err) {
       console.log("Error writing to pin " + pin + ": ", err);
     }
-    if (callback) {
+    if (callback && typeof callback === "function") {
       callback();
-    }
+    } else {
+                     console.log("callbak error in output");
+                   }
   });
 };
 
 var outputSync = function(pin, value) {
-  fs.writeFileSync("/sys/class/gpio/gpio" + pin + "/value", value, 'utf8');
+  fs.writeFileSync("/sys/class/gpio/gpio" + pin + "/value", value);
 };
 
 var open = function(pin, callback) {
@@ -77,9 +79,11 @@ var open = function(pin, callback) {
         fs.writeFile("/sys/class/gpio/gpio" + pin + "/direction", "out", "utf8", function(err) {
           if (!err) {
             console.log("Pin " + pin + " open");
-            if (callback) {
+            if (callback && typeof callback === "function") {
               callback();
-            }
+            } else {
+                             console.log("callbak error in open 1");
+                           }
           } else {
             console.log("Could not set direction to out");
           }
@@ -87,9 +91,11 @@ var open = function(pin, callback) {
       }
     });
   } else {
-    if (callback) {
+    if (callback && typeof callback === "function") {
       callback();
-    }
+    } else {
+                     console.log("callbak error in open 2");
+                   }
   }
 };
 
@@ -134,9 +140,11 @@ var stepForward = function(steps, callback) {
               start = Date.now();
               doStep();
             } else {
-              if (callback) {
+              if (callback && typeof callback === "function") {
                 callback();
-              }
+              } else {
+               console.log("callbak error in stepForwards");
+             }
             }
           }, 5);
         }, 5);
@@ -162,8 +170,10 @@ var stepBackward = function(steps, callback) {
             if (currentStep < steps) {
               doStep();
             } else {
-              if (callback) {
+              if (callback && typeof callback === "function") {
                 callback();
+              } else {
+                console.log("callbak error in stepBackwards");
               }
             }
           }, 5);
