@@ -4,6 +4,8 @@ var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
 var open = false;
 
+var commands = [];
+
 console.log(JSON.stringify(settings.motor));
 
 var increase = function (inputTemp, targetTemp) {
@@ -23,6 +25,7 @@ var turnOn = function() {
           open(24, function() {
             output(settings.motor.enablePin, 1);
             open = true;
+            console.log("Motor communication is open. Waiting for commands.");
           });
         });
       });
@@ -40,30 +43,12 @@ var turnOff = function() {
   close(24);
 };
 
-var forward = function(steps) {
-  while (!open.enable && !open.coilA1 && !open.coilA2 && !open.coilB1 && !open.coilB2) {
-    console.log("Waiting for pins to open")
-  }
-  console.log("Forward " + steps + " steps");
-  for(var i = 0; i < steps; i++) {
-    setTimeout(setStep(1, 0, 1, 0), 5);
-    setTimeout(setStep(0, 1, 1, 0), 10);
-    setTimeout(setStep(0, 1, 0, 1), 15);
-    setTimeout(setStep(1, 0, 0, 1), 20);
-  }
+var forward = function() {
+  commands.push("forward");
 }
 
 var backwards = function(steps) {
-  while (!open.enable && !open.coilA1 && !open.coilA2 && !open.coilB1 && !open.coilB2) {
-    console.log("Waiting for pins to open")
-  }
-  console.log("Backward " + steps + " steps");
-  for (var i = 0; i < steps; i++) {
-    setTimeout(setStep(1, 0, 0, 1), 5);
-    setTimeout(setStep(0, 1, 0, 1), 10);
-    setTimeout(setStep(0, 1, 1, 0), 15);
-    setTimeout(setStep(1, 0, 1, 0), 20);
-  }
+  commands.push("backward");
 };
 
 var setStep = function(w1, w2, w3, w4) {
@@ -113,9 +98,24 @@ var close = function(pin) {
 turnOn();
 
 setInterval(function () {
-  console.log("Is it on? " + open);
+  if (open) {
+    var command = commands.pop();
+    if (command) {
+      if (command === "forward") {
+        console.log("Step forward");
+      } else {
+        console.log("Step backward");
+      }
+    }
+  }
 }, 300)
-//forward(100);
+
+forward();
+backward();
+forward();
+backward();
+
+
 
 function exitHandler() {
   turnOff();
