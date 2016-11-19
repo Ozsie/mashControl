@@ -144,7 +144,7 @@ var stepBackward = function(steps) {
           setStep(0, 1, 1, 0);
           setTimeout(function() {
             setStep(1, 0, 1, 0);
-            steps++;
+            currentStep++;
             if (currentStep < steps) {
               doStep();
             }
