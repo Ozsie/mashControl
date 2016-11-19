@@ -109,17 +109,21 @@ var setStep = function(w1, w2, w3, w4) {
 var stepForward = function(steps, callback) {
   var currentStep = 0;
   var doStep = function() {
+    var start = Date.now();
     setTimeout(function() {
-      console.log("Step " + currentStep + "Stage 1")
+      console.log("Step " + currentStep + "Stage 1 " + (start - Date.now()));
+      start = Date.now();
       setStep(1, 0, 1, 0);
       setTimeout(function() {
-        console.log("Step " + currentStep + "Stage 2")
+        console.log("Step " + currentStep + "Stage 2 " + (start - Date.now()))
+        start = Date.now();
         setStep(0, 1, 1, 0);
         setTimeout(function() {
-          console.log("Step " + currentStep + "Stage 3")
+          console.log("Step " + currentStep + "Stage 3 " + (start - Date.now()))
+          start = Date.now();
           setStep(0, 1, 0, 1);
           setTimeout(function() {
-            console.log("Step " + currentStep + "Stage 4")
+            console.log("Step " + currentStep + "Stage 4 " + (start - Date.now()))
             setStep(1, 0, 0, 1);
             currentStep++;
             if (currentStep < steps) {
