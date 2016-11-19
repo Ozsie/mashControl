@@ -187,24 +187,25 @@ var stepBackward = function(steps, callback) {
 
 turnOn();
 
-setTimeout(
-setInterval(function () {
-  if (open && !stepping) {
-    var command = commands.shift();
-    if (command) {
-      stepping = true;
-      if (command === "forward") {
-        stepForward(64, function() {
-          stepping = false;
-        });
-      } else {
-        stepBackward(64, function() {
-          stepping = false;
-        });
+setTimeout(function() {
+  setInterval(function () {
+    if (open && !stepping) {
+      var command = commands.shift();
+      if (command) {
+        stepping = true;
+        if (command === "forward") {
+          stepForward(64, function() {
+            stepping = false;
+          });
+        } else {
+          stepBackward(64, function() {
+            stepping = false;
+          });
+        }
       }
     }
-  }
-}, 200), 1000
+  }, 200)},
+  1000
 );
 
 forward();
