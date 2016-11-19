@@ -189,9 +189,6 @@ turnOn();
 
 setTimeout(
 setInterval(function () {
-  if (open) {
-    console.log("OPEN");
-  }
   if (open && !stepping) {
     var command = commands.shift();
     if (command) {
