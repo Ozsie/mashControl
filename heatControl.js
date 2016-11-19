@@ -23,9 +23,10 @@ var turnOn = function() {
       open(17, function() {
         open(23, function() {
           open(24, function() {
-            output(settings.motor.enablePin, 1);
-            open = true;
-            console.log("Motor communication is open. Waiting for commands.");
+            output(settings.motor.enablePin, 1, function() {
+              open = true;
+              console.log("Motor communication is open. Waiting for commands.");
+            });
           });
         });
       });
@@ -58,11 +59,12 @@ var setStep = function(w1, w2, w3, w4) {
   output(settings.motor.coilB2Pin, w4)
 };
 
-var output = function(pin, value) {
+var output = function(pin, value, callback) {
   fs.writeFile("/sys/class/gpio/gpio" + pin + "/value", value, 'utf8', function(err) {
     if (err) {
       console.log("Error writing to pin " + pin + ": ", err);
     }
+    callback();
   });
 };
 
@@ -95,6 +97,54 @@ var close = function(pin) {
   });
 };
 
+var stepForward = function(steps) {
+  var currentStep = 0;
+  var doStep = function() {
+    setTimeout(function() {
+      setStep(1, 0, 1, 0);
+      setTimeout(function() {
+        setStep(0, 1, 1, 0);
+        setTimeout(function() {
+          setStep(0, 1, 0, 1);
+          setTimeout(function() {
+            setStep(1, 0, 0, 1);
+            steps++;
+            if (currentStep < steps) {
+              doStep();
+            }
+          }, 5);
+        }, 5);
+      }, 5);
+    }, 0);
+  };
+
+  doStep();
+};
+
+var stepBackward = function(steps) {
+  var currentStep = 0;
+  var doStep = function() {
+    setTimeout(function() {
+      setStep(1, 0, 0, 1);
+      setTimeout(function() {
+        setStep(0, 1, 0, 1);
+        setTimeout(function() {
+          setStep(0, 1, 1, 0);
+          setTimeout(function() {
+            setStep(1, 0, 1, 0);
+            steps++;
+            if (currentStep < steps) {
+              doStep();
+            }
+          }, 5);
+        }, 5);
+      }, 5);
+    }, 0);
+  };
+
+  doStep();
+};
+
 turnOn();
 
 setInterval(function () {
@@ -103,12 +153,13 @@ setInterval(function () {
     if (command) {
       if (command === "forward") {
         console.log("Step forward");
+        stepForward(64);
       } else {
         console.log("Step backward");
       }
     }
   }
-}, 300)
+}, 2000)
 
 forward();
 backward();
