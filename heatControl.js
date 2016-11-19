@@ -187,6 +187,7 @@ var stepBackward = function(steps, callback) {
 
 turnOn();
 
+setTimeout(
 setInterval(function () {
   if (open) {
     console.log("OPEN");
@@ -206,7 +207,8 @@ setInterval(function () {
       }
     }
   }
-}, 200)
+}, 200), 1000
+);
 
 forward();
 forward();
