@@ -206,8 +206,16 @@ setInterval(function () {
 }, 200)
 
 forward();
+forward();
+forward();
+backward();
+backward();
 backward();
 forward();
+forward();
+forward();
+backward();
+backward();
 backward();
 
 
