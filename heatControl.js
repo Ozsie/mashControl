@@ -47,7 +47,7 @@ var forward = function() {
   commands.push("forward");
 }
 
-var backwards = function(steps) {
+var backward = function(steps) {
   commands.push("backward");
 };
 
