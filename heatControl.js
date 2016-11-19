@@ -52,13 +52,6 @@ var backward = function(steps) {
   commands.push("backward");
 };
 
-var setStep = function(w1, w2, w3, w4) {
-  output(settings.motor.coilA1Pin, w1)
-  output(settings.motor.coilA2Pin, w2)
-  output(settings.motor.coilB1Pin, w3)
-  output(settings.motor.coilB2Pin, w4)
-};
-
 var output = function(pin, value, callback) {
   fs.writeFile("/sys/class/gpio/gpio" + pin + "/value", value, 'utf8', function(err) {
     if (err) {
@@ -105,16 +98,27 @@ var close = function(pin) {
   });
 };
 
+var setStep = function(w1, w2, w3, w4) {
+  output(settings.motor.coilA1Pin, w1, function() {
+  output(settings.motor.coilA2Pin, w2, function() {
+  output(settings.motor.coilB1Pin, w3, function() {
+  output(settings.motor.coilB2Pin, w4)})})})
+};
+
 var stepForward = function(steps) {
   var currentStep = 0;
   var doStep = function() {
     setTimeout(function() {
+      console.log("Step " + currentStep + "Stage 1")
       setStep(1, 0, 1, 0);
       setTimeout(function() {
+        console.log("Step " + currentStep + "Stage 2")
         setStep(0, 1, 1, 0);
         setTimeout(function() {
+          console.log("Step " + currentStep + "Stage 3")
           setStep(0, 1, 0, 1);
           setTimeout(function() {
+            console.log("Step " + currentStep + "Stage 4")
             setStep(1, 0, 0, 1);
             steps++;
             if (currentStep < steps) {
@@ -160,10 +164,8 @@ setInterval(function () {
     var command = commands.shift();
     if (command) {
       if (command === "forward") {
-        console.log("Step forward");
         stepForward(64);
       } else {
-        console.log("Step backward");
         stepBackward(64);
       }
     }
