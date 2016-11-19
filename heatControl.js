@@ -2,13 +2,7 @@ var fs = require('fs');
 
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
-var open = {
-  "enable": false,
-  "coilA1": false,
-  "coilA2": false,
-  "coilB1": false,
-  "coilB2": false
-}
+var open = false;
 
 console.log(JSON.stringify(settings.motor));
 
@@ -23,20 +17,16 @@ var decrease = function (inputTemp, targetTemp) {
 var turnOn = function() {
   console.log("Turn on. Enable Pin: " + settings.motor.enablePin);
   open(18, function() {
-    open.enable = true;
-    output(settings.motor.enablePin, 1);
-  });
-  open(4, function() {
-    open.coilA1 = true;
-  });
-  open(17, function() {
-    open.coilA2 = true;
-  });
-  open(23, function() {
-    open.coilB1 = true;
-  });
-  open(24, function() {
-    open.coilB2 = true;
+    open(4, function() {
+      open(17, function() {
+        open(23, function() {
+          open(24, function() {
+            output(settings.motor.enablePin, 1);
+            open = true;
+          });
+        });
+      });
+    });
   });
 };
 
@@ -121,7 +111,11 @@ var close = function(pin) {
 };
 
 turnOn();
-forward(100);
+
+setInterval(function () {
+  console.log("Is it on? " + open);
+}, 300)
+//forward(100);
 
 function exitHandler() {
   turnOff();
