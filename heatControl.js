@@ -149,7 +149,7 @@ turnOn();
 
 setInterval(function () {
   if (open) {
-    var command = commands.pop();
+    var command = commands.shift();
     if (command) {
       if (command === "forward") {
         console.log("Step forward");
@@ -179,7 +179,10 @@ process.on('exit', exitHandler.bind());
 process.on('SIGINT', exitHandler.bind());
 
 //catches uncaught exceptions
-process.on('uncaughtException', exitHandler.bind());
+process.on('uncaughtException', (err) => {
+  console.log("Caught exception: " + err);
+  turnOff();
+});
 
 module.exports = {
   increase: increase,
