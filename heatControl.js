@@ -88,6 +88,10 @@ var open = function(pin, callback) {
         });
       }
     });
+  } else {
+    if (callback) {
+      callback();
+    }
   }
 };
 
@@ -167,9 +171,13 @@ setInterval(function () {
 }, 2000)
 
 forward();
-backward();
 forward();
-backward();
+forward();
+forward();
+forward();
+forward();
+forward();
+forward();
 
 
 
