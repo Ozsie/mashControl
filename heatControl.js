@@ -153,9 +153,10 @@ setInterval(function () {
     if (command) {
       if (command === "forward") {
         console.log("Step forward");
-        stepForward(64);
+        stepForward(1);
       } else {
         console.log("Step backward");
+        stepBackward(1);
       }
     }
   }
