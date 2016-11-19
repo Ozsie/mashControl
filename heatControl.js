@@ -61,7 +61,7 @@ var output = function(pin, value, callback) {
     if (callback && typeof callback === "function") {
       callback();
     } else {
-                     console.log("callbak error in output");
+                     console.log("callbak error in output: " + callback);
                    }
   });
 };
@@ -188,6 +188,9 @@ var stepBackward = function(steps, callback) {
 turnOn();
 
 setInterval(function () {
+  if (open) {
+    console.log("OPEN");
+  }
   if (open && !stepping) {
     var command = commands.shift();
     if (command) {
