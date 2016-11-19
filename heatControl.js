@@ -64,7 +64,7 @@ var output = function(pin, value, callback) {
   });
 };
 
-var outputSync = function(pin, value, callback) {
+var outputSync = function(pin, value) {
   fs.writeFileSync("/sys/class/gpio/gpio" + pin + "/value", value, 'utf8');
 };
 
@@ -134,7 +134,9 @@ var stepForward = function(steps, callback) {
               start = Date.now();
               doStep();
             } else {
-              callback();
+              if (callback) {
+                callback();
+              }
             }
           }, 5);
         }, 5);
@@ -160,7 +162,9 @@ var stepBackward = function(steps, callback) {
             if (currentStep < steps) {
               doStep();
             } else {
-              callback();
+              if (callback) {
+                callback();
+              }
             }
           }, 5);
         }, 5);
