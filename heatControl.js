@@ -64,6 +64,10 @@ var output = function(pin, value, callback) {
   });
 };
 
+var outputSync = function(pin, value, callback) {
+  fs.writeFileSync("/sys/class/gpio/gpio" + pin + "/value", value, 'utf8');
+};
+
 var open = function(pin, callback) {
   if (!fs.existsSync("/sys/class/gpio/gpio" + pin)) {
     fs.writeFile("/sys/class/gpio/export", pin, function(err) {
@@ -100,33 +104,34 @@ var close = function(pin) {
 };
 
 var setStep = function(w1, w2, w3, w4) {
-  output(settings.motor.coilA1Pin, w1, function() {
-  output(settings.motor.coilA2Pin, w2, function() {
-  output(settings.motor.coilB1Pin, w3, function() {
-  output(settings.motor.coilB2Pin, w4)})})})
+  outputSync(settings.motor.coilA1Pin, w1);
+  outputSync(settings.motor.coilA2Pin, w2);
+  outputSync(settings.motor.coilB1Pin, w3);
+  outputSync(settings.motor.coilB2Pin, w4);
 };
 
 var stepForward = function(steps, callback) {
   var currentStep = 0;
+  var start = Date.now();
   var doStep = function() {
-    var start = Date.now();
     setTimeout(function() {
-      console.log("Step " + currentStep + "Stage 1 " + (start - Date.now()));
+      console.log("Step " + currentStep + "Stage 1 " + (Date.now() - start));
       start = Date.now();
       setStep(1, 0, 1, 0);
       setTimeout(function() {
-        console.log("Step " + currentStep + "Stage 2 " + (start - Date.now()))
+        console.log("Step " + currentStep + "Stage 2 " + (Date.now() - start))
         start = Date.now();
         setStep(0, 1, 1, 0);
         setTimeout(function() {
-          console.log("Step " + currentStep + "Stage 3 " + (start - Date.now()))
+          console.log("Step " + currentStep + "Stage 3 " + (Date.now() - start))
           start = Date.now();
           setStep(0, 1, 0, 1);
           setTimeout(function() {
-            console.log("Step " + currentStep + "Stage 4 " + (start - Date.now()))
+            console.log("Step " + currentStep + "Stage 4 " + (Date.now() - start))
             setStep(1, 0, 0, 1);
             currentStep++;
             if (currentStep < steps) {
+              start = Date.now();
               doStep();
             } else {
               callback();
