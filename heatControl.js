@@ -155,10 +155,10 @@ setInterval(function () {
     if (command) {
       if (command === "forward") {
         console.log("Step forward");
-        stepForward(1);
+        stepForward(64);
       } else {
         console.log("Step backward");
-        stepBackward(1);
+        stepBackward(64);
       }
     }
   }
