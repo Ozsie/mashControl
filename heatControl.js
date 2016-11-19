@@ -64,7 +64,7 @@ var output = function(pin, value, callback) {
 };
 
 var open = function(pin, callback) {
-  if (fs.existsSync("/sys/class/gpio/gpio" + pin)) {
+  if (!fs.existsSync("/sys/class/gpio/gpio" + pin)) {
     fs.writeFile("/sys/class/gpio/export", pin, function(err) {
       if (err) {
         console.log("Error opening pin " + pin + ": ", err);
@@ -120,7 +120,7 @@ var stepForward = function(steps) {
           setTimeout(function() {
             console.log("Step " + currentStep + "Stage 4")
             setStep(1, 0, 0, 1);
-            steps++;
+            currentStep++;
             if (currentStep < steps) {
               doStep();
             }
