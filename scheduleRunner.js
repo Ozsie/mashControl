@@ -20,9 +20,11 @@ var adjustTemperature = function(targetTemp) {
         return;
       }
       if (currentTemp.temperature.celcius < targetTemp) {
-        heatControl.increase(currentTemp.temperature.celcius, targetTemp);
+        //heatControl.increase(currentTemp.temperature.celcius, targetTemp);
+        heatControl.increase();
       } else if (currentTemp.temperature.celcius > targetTemp) {
-        heatControl.decrease(currentTemp.temperature.celcius, targetTemp);
+        //heatControl.decrease(currentTemp.temperature.celcius, targetTemp);
+        heatControl.decrease();
       } else {
         console.log(currentTemp.temperature.celcius + " = " + targetTemp + " holding.");
       }

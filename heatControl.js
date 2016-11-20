@@ -239,8 +239,8 @@ process.on('uncaughtException', (err) => {
 });
 
 module.exports = {
-  increase: increase,
-  decrease: decrease,
+  increase: forward,
+  decrease: backward,
   turnOn: turnOn,
   turnOff: turnOff
 };
