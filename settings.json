@@ -1,5 +1,5 @@
 {
-  "input": "testTemp.txt",
+  "input": "/sys/bus/w1/devices/28-800000263717/w1_slave",
   "installKernelMod": false,
   "publishedModules": ["angular", "angular-resource", "angular-google-chart"],
   "heatCutOff": 85,

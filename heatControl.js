@@ -61,7 +61,7 @@ var output = function(pin, value, callback) {
     if (callback && typeof callback === "function") {
       callback();
     } else {
-                     console.log("callbak error in output: " + callback);
+                     console.log("callback error in output: " + callback);
                    }
   });
 };
@@ -82,7 +82,7 @@ var open = function(pin, callback) {
             if (callback && typeof callback === "function") {
               callback();
             } else {
-                             console.log("callbak error in open 1");
+                             console.log("callback error in open 1");
                            }
           } else {
             console.log("Could not set direction to out");
@@ -94,7 +94,7 @@ var open = function(pin, callback) {
     if (callback && typeof callback === "function") {
       callback();
     } else {
-                     console.log("callbak error in open 2");
+                     console.log("callback error in open 2");
                    }
   }
 };
@@ -118,33 +118,24 @@ var setStep = function(w1, w2, w3, w4) {
 
 var stepForward = function(steps, callback) {
   var currentStep = 0;
-  var start = Date.now();
   var doStep = function() {
     setTimeout(function() {
-      console.log("Step " + currentStep + "Stage 1 " + (Date.now() - start));
-      start = Date.now();
       setStep(1, 0, 1, 0);
       setTimeout(function() {
-        console.log("Step " + currentStep + "Stage 2 " + (Date.now() - start))
-        start = Date.now();
         setStep(0, 1, 1, 0);
         setTimeout(function() {
-          console.log("Step " + currentStep + "Stage 3 " + (Date.now() - start))
-          start = Date.now();
           setStep(0, 1, 0, 1);
           setTimeout(function() {
-            console.log("Step " + currentStep + "Stage 4 " + (Date.now() - start))
             setStep(1, 0, 0, 1);
             currentStep++;
             if (currentStep < steps) {
-              start = Date.now();
               doStep();
             } else {
               if (callback && typeof callback === "function") {
                 callback();
               } else {
-               console.log("callbak error in stepForwards");
-             }
+                console.log("callback error in stepForwards");
+              }
             }
           }, 5);
         }, 5);
@@ -173,7 +164,7 @@ var stepBackward = function(steps, callback) {
               if (callback && typeof callback === "function") {
                 callback();
               } else {
-                console.log("callbak error in stepBackwards");
+                console.log("callback error in stepBackwards");
               }
             }
           }, 5);
