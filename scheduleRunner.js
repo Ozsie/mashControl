@@ -47,11 +47,11 @@ var runSchedule = function(callback) {
     var run = function() {
       setTimeout(function() {
         if (Date.now() - step.startTime < stepTime) {
-          console.log("Time left: " + (stepTime - (Date.now() - step.startTime)));
+          //console.log("Time left: " + (stepTime - (Date.now() - step.startTime)));
           adjustTemperature(step.temperature);
           run();
         }
-      }, 1000);
+      }, 2000);
     };
 
     run();
