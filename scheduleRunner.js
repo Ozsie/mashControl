@@ -81,7 +81,7 @@ var startSchedule = function(newSchedule) {
     schedule = newSchedule;
     schedule.startTime = Date.now();
     schedule.status = 'running';
-    heatControl.turnOn();
+    //heatControl.turnOn();
     runSchedule(function() {
       schedule.endTime = Date.now();
       console.log("Mash done after " + (schedule.endTime - schedule.startTime) + " ms");
