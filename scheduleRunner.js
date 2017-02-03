@@ -30,7 +30,7 @@ var adjustTemperature = function(targetTemp) {
       console.log("Off by " + offMark + "C");
 
       if (currentTemp.temperature.celcius < targetTemp) {
-        if (offMark < (settings.tolerance + settings.overshoot)) {
+        if (offMark < (settings.tolerance + settings.offMarkBreak)) {
           console.log("Closing in, fast decrease");
           heatControl.fastDecrease();
         }
