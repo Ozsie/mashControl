@@ -5,10 +5,16 @@ var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
 var schedule;
 
+var previousTemp = undefined;
+
 var adjustTemperature = function(targetTemp) {
   tempSensor.readTemp(function(error, data) {
     if (!error) {
-      currentTemp = tempSensor.parseTemp(data);
+      var currentTemp = tempSensor.parseTemp(data);
+      if (previousTemp = undefined) {
+        previousTemp = currentTemp;
+      }
+      var diff = currentTemp - previousTemp;
       if (currentTemp > 90) {
         console.error("Temperature passed hard heat cut off @ 90C");
         stopSchedule();
@@ -19,15 +25,16 @@ var adjustTemperature = function(targetTemp) {
         stopSchedule();
         return;
       }
-      if (currentTemp.temperature.celcius < targetTemp) {
+      if (currentTemp.temperature.celcius < targetTemp && diff < 0.5) {
         //heatControl.increase(currentTemp.temperature.celcius, targetTemp);
         heatControl.increase();
-      } else if (currentTemp.temperature.celcius > targetTemp) {
+      } else if (currentTemp.temperature.celcius > targetTemp && diff > 0.5) {
         //heatControl.decrease(currentTemp.temperature.celcius, targetTemp);
         heatControl.decrease();
       } else {
         console.log(currentTemp.temperature.celcius + " = " + targetTemp + " holding.");
       }
+      previousTemp = currentTemp;
     }
   });
 }
@@ -51,7 +58,7 @@ var runSchedule = function(callback) {
           adjustTemperature(step.temperature);
           run();
         }
-      }, 2000);
+      }, 20000);
     };
 
     run();
