@@ -4,6 +4,7 @@
   "publishedModules": ["angular", "angular-resource", "angular-google-chart"],
   "heatCutOff": 85,
   "tolerance": 0.75,
+  "overshoot": 6,
   "motor": {
     "enablePin": 18,
     "coilA1Pin": 4,

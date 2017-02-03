@@ -27,7 +27,7 @@ var adjustTemperature = function(targetTemp) {
         return;
       }
       var offMark = abs(currentTemp.temperature.celcius - targetTemp);
-      if (currentTemp.temperature.celcius < targetTemp && (offMark > settings.tolerance || diff < 0.5)) {
+      if (currentTemp.temperature.celcius < targetTemp && (offMark > (settings.tolerance + settings.overshoot) || diff < 5)) {
         //heatControl.increase(currentTemp.temperature.celcius, targetTemp);
         heatControl.increase();
       } else if (currentTemp.temperature.celcius > targetTemp && (offMark > settings.tolerance || diff > 0.5)) {
