@@ -1,4 +1,5 @@
 var fs = require('fs');
+var winston = require('winston');
 
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
