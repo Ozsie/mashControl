@@ -15,6 +15,7 @@ var adjustTemperature = function(targetTemp) {
         previousTemp = currentTemp;
       }
       var diff = currentTemp - previousTemp;
+      console.log("Current diff = " + diff)
       if (currentTemp > 90) {
         console.error("Temperature passed hard heat cut off @ 90C");
         stopSchedule();
