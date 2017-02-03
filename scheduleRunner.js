@@ -35,7 +35,7 @@ var adjustTemperature = function(targetTemp) {
       } else {
         console.log(currentTemp.temperature.celcius + " = " + targetTemp + " holding.");
       }
-      previousTemp = currentTemp;
+      previousTemp = currentTemp.temperature.celcius;
     }
   });
 }
