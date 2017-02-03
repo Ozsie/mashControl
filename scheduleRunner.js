@@ -28,17 +28,28 @@ var adjustTemperature = function(targetTemp) {
       }
       var offMark = Math.abs(currentTemp.temperature.celcius - targetTemp);
       console.log("Off by " + offMark + "C");
-      if (currentTemp.temperature.celcius < targetTemp && (offMark > (settings.tolerance + settings.overshoot) || diff < 5)) {
-        heatControl.increase();
-      } else if (currentTemp.temperature.celcius > targetTemp && (offMark > settings.tolerance || diff > 0.5)) {
-        heatControl.decrease();
-      } else if (currentTemp.temperature.celcius < targetTemp && offMark > (settings.tolerance + settings.overshoot)) {
-      console.log("Closing in, fast decrease");
+
+      if (currentTemp.temperature.celcius < targetTemp) {
+        if (offMark < (settings.tolerance + settings.overshoot)) {
+          console.log("Closing in, fast decrease");
+          heatControl.decrease();
+          heatControl.decrease();
+          heatControl.decrease();
+        }
+        else if (offMark > (settings.tolerance + settings.overshoot) && diff < 20)) {
+          heatControl.increase();
+          heatControl.increase();
+        }
+        else if (offMark > (settings.tolerance + settings.overshoot) && diff < 10)) {
+          heatControl.increase();
+        }
+      } else if (currentTemp.temperature.celcius > targetTemp) {
+        console.log("Overshoot, fast decrease");
         heatControl.decrease();
         heatControl.decrease();
         heatControl.decrease();
       } else {
-        console.log(currentTemp.temperature.celcius + " = " + targetTemp + " holding.");
+        console.log("On mark " + currentTemp.temperature.celcius + " = " + targetTemp + " holding.");
       }
       previousTemp = currentTemp.temperature.celcius;
     }
