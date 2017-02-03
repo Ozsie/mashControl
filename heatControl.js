@@ -68,6 +68,12 @@ var fastBackward = function(steps) {
   commands.push("backward");
   commands.push("backward");
   commands.push("backward");
+  commands.push("backward");
+  commands.push("backward");
+  commands.push("backward");
+  commands.push("backward");
+  commands.push("backward");
+  commands.push("backward");
 };
 
 var output = function(pin, value, callback) {
