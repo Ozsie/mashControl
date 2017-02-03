@@ -1,5 +1,6 @@
 var fs = require('fs');
 var winston = require('winston');
+winston.add(winston.transports.File, { filename: 'logs/heatControl.log' });
 
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
@@ -27,7 +28,7 @@ var turnOn = function() {
           open(24, function() {
             output(settings.motor.enablePin, 1, function() {
               open = true;
-              console.log("Motor communication is open. Waiting for commands.");
+              winston.info("Motor communication is open. Waiting for commands.");
             });
           });
         });
@@ -37,7 +38,7 @@ var turnOn = function() {
 };
 
 var turnOff = function() {
-  console.log("Turn off. Enable Pin: " + settings.motor.enablePin);
+  winston.info("Turn off. Enable Pin: " + settings.motor.enablePin);
   output(settings.motor.enablePin, 0, true);
   close(4);
   close(17);
@@ -57,13 +58,13 @@ var backward = function(steps) {
 var output = function(pin, value, callback) {
   fs.writeFile("/sys/class/gpio/gpio" + pin + "/value", value, 'utf8', function(err) {
     if (err) {
-      console.log("Error writing to pin " + pin + ": ", err);
+      winston.error("Error writing to pin " + pin + ": ", err);
     }
     if (callback && typeof callback === "function") {
       callback();
     } else {
-                     console.log("callback error in output: " + callback);
-                   }
+      winston.error("callback error in output: " + callback);
+    }
   });
 };
 
@@ -75,18 +76,18 @@ var open = function(pin, callback) {
   if (!fs.existsSync("/sys/class/gpio/gpio" + pin)) {
     fs.writeFile("/sys/class/gpio/export", pin, function(err) {
       if (err) {
-        console.log("Error opening pin " + pin + ": ", err);
+        winston.error("Error opening pin " + pin + ": ", err);
       } else {
         fs.writeFile("/sys/class/gpio/gpio" + pin + "/direction", "out", "utf8", function(err) {
           if (!err) {
-            console.log("Pin " + pin + " open");
+            winston.info("Pin " + pin + " open");
             if (callback && typeof callback === "function") {
               callback();
             } else {
-                             console.log("callback error in open 1");
-                           }
+              winston.error("callback error in open 1");
+            }
           } else {
-            console.log("Could not set direction to out");
+            winston.warn("Could not set direction to out");
           }
         });
       }
@@ -95,8 +96,8 @@ var open = function(pin, callback) {
     if (callback && typeof callback === "function") {
       callback();
     } else {
-                     console.log("callback error in open 2");
-                   }
+      console.log("callback error in open 2");
+    }
   }
 };
 
@@ -186,11 +187,11 @@ setTimeout(function() {
       if (command) {
         stepping = true;
         if (command === "forward") {
-          stepForward(64, function() {
+          stepForward(24, function() {
             stepping = false;
           });
         } else {
-          stepBackward(64, function() {
+          stepBackward(24, function() {
             stepping = false;
           });
         }

@@ -36,11 +36,11 @@ var adjustTemperature = function(targetTemp) {
           heatControl.decrease();
           heatControl.decrease();
         }
-        else if (offMark > (settings.tolerance + settings.overshoot) && diff < 20)) {
+        else if (offMark > (settings.tolerance + settings.overshoot) && diff < 20) {
           heatControl.increase();
           heatControl.increase();
         }
-        else if (offMark > (settings.tolerance + settings.overshoot) && diff < 10)) {
+        else if (offMark > (settings.tolerance + settings.overshoot) && diff < 10) {
           heatControl.increase();
         }
       } else if (currentTemp.temperature.celcius > targetTemp) {
