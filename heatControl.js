@@ -51,7 +51,22 @@ var forward = function() {
   commands.push("forward");
 }
 
+var fastForward = function() {
+  commands.push("forward");
+  commands.push("forward");
+  commands.push("forward");
+}
+
 var backward = function(steps) {
+  commands.push("backward");
+};
+
+var fastBackward = function(steps) {
+  commands.push("backward");
+  commands.push("backward");
+  commands.push("backward");
+  commands.push("backward");
+  commands.push("backward");
   commands.push("backward");
 };
 
@@ -219,6 +234,8 @@ process.on('uncaughtException', (err) => {
 module.exports = {
   increase: forward,
   decrease: backward,
+  fastIncrease: fastForward,
+  fastDecrease: fastBackward,
   turnOn: turnOn,
   turnOff: turnOff
 };

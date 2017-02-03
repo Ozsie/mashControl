@@ -32,22 +32,19 @@ var adjustTemperature = function(targetTemp) {
       if (currentTemp.temperature.celcius < targetTemp) {
         if (offMark < (settings.tolerance + settings.overshoot)) {
           console.log("Closing in, fast decrease");
-          heatControl.decrease();
-          heatControl.decrease();
-          heatControl.decrease();
+          heatControl.fastDecrease();
         }
-        else if (offMark > (settings.tolerance + settings.overshoot) && diff < 20) {
-          heatControl.increase();
-          heatControl.increase();
+        else if (offMark > (settings.tolerance + (settings.offMarkBreak * 2)) && diff < 20) {
+          console.log("Much under, double increase");
+          heatControl.fastIncrease();
         }
-        else if (offMark > (settings.tolerance + settings.overshoot) && diff < 10) {
+        else if (offMark > (settings.tolerance + settings.offMarkBreak) && diff < 10) {
+          console.log("A little under, increase");
           heatControl.increase();
         }
       } else if (currentTemp.temperature.celcius > targetTemp) {
         console.log("Overshoot, fast decrease");
-        heatControl.decrease();
-        heatControl.decrease();
-        heatControl.decrease();
+        heatControl.fastDecrease();
       } else {
         console.log("On mark " + currentTemp.temperature.celcius + " = " + targetTemp + " holding.");
       }
