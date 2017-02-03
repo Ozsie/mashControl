@@ -11,11 +11,11 @@ var adjustTemperature = function(targetTemp) {
   tempSensor.readTemp(function(error, data) {
     if (!error) {
       var currentTemp = parseFloat(tempSensor.parseTemp(data));
-      if (previousTemp = undefined) {
+      if (previousTemp === undefined) {
         previousTemp = parseFloat(currentTemp);
       }
       var diff = parseFloat(currentTemp - previousTemp);
-      console.log("Current diff: " currentTemp + " - " + previousTemp + " = " + diff)
+      console.log("Current diff: " + currentTemp + " - " + previousTemp + " = " + diff);
       if (currentTemp > 90) {
         console.error("Temperature passed hard heat cut off @ 90C");
         stopSchedule();

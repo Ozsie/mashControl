@@ -28,6 +28,7 @@
     "body-parser": "~1.15",
     "angular": "~1.5",
     "angular-resource": "~1.5",
-    "angular-google-chart": "~0.1"
+    "angular-google-chart": "~0.1",
+    "jshint": "2.9.4"
   }
 }
