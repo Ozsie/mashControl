@@ -26,10 +26,11 @@ var adjustTemperature = function(targetTemp) {
         stopSchedule();
         return;
       }
-      if (currentTemp.temperature.celcius < targetTemp && diff < 0.5) {
+      var offMark = abs(currentTemp.temperature.celcius - targetTemp);
+      if (currentTemp.temperature.celcius < targetTemp && (offMark > settings.tolerance || diff < 0.5)) {
         //heatControl.increase(currentTemp.temperature.celcius, targetTemp);
         heatControl.increase();
-      } else if (currentTemp.temperature.celcius > targetTemp && diff > 0.5) {
+      } else if (currentTemp.temperature.celcius > targetTemp && (offMark > settings.tolerance || diff > 0.5)) {
         //heatControl.decrease(currentTemp.temperature.celcius, targetTemp);
         heatControl.decrease();
       } else {
