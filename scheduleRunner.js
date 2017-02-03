@@ -72,7 +72,7 @@ var runSchedule = function(callback) {
           adjustTemperature(step.temperature);
           run();
         }
-      }, 20000);
+      }, 12000);
     };
 
     run();
