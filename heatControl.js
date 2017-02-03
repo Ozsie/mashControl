@@ -199,21 +199,6 @@ setTimeout(function() {
   1000
 );
 
-forward();
-forward();
-forward();
-backward();
-backward();
-backward();
-forward();
-forward();
-forward();
-backward();
-backward();
-backward();
-
-
-
 function exitHandler() {
   turnOff();
 }
