@@ -11,5 +11,8 @@
     "coilA2Pin": 17,
     "coilB1Pin": 23,
     "coilB2Pin": 24
+  },
+  "logs": {
+    "directory": "./logs"
   }
 }

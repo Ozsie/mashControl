@@ -84,6 +84,22 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
 
   $scope.parseInput = function() {
     $scope.tempChart.data.rows = {};
+
+    if (!$scope.schedule) {
+      return;
+    }
+
+    $scope.jsonSchedule = {};
+    if ($scope.schedule.constructor == Object) {
+      $scope.jsonSchedule = $scope.schedule;
+    } else {
+      $scope.jsonSchedule = JSON.parse($scope.schedule);
+    }
+
+    $scope.handleJsonSchedule();
+  };
+
+  $scope.handleJsonSchedule = function() {
     var rows = [
       {
         c: [
@@ -92,22 +108,10 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         ]
       }
     ];
-
-    if (!$scope.schedule) {
-      return;
-    }
-
-    var jsonSchedule = {};
-    if ($scope.schedule.constructor == Object) {
-      jsonSchedule = $scope.schedule;
-    } else {
-      jsonSchedule = JSON.parse($scope.schedule);
-    }
-
     var runTime = 0;
     $scope.totalRunTime = 0;
-    for (var index in jsonSchedule.steps) {
-      var step = jsonSchedule.steps[index];
+    for (var index in $scope.jsonSchedule.steps) {
+      var step = $scope.jsonSchedule.steps[index];
       runTime += step.riseTime;
       rows.push({
         c: [
@@ -130,6 +134,18 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     }
 
     $scope.tempChart.data.rows = rows;
+  };
+
+  $scope.addStep = function() {
+    if (!$scope.jsonSchedule) {
+      $scope.jsonSchedule = {steps:[{}]};
+    } else {
+      $scope.jsonSchedule.steps.push({});
+    }
+  };
+
+  $scope.removeStep = function(step, index) {
+    $scope.jsonSchedule.steps.splice(index, 1);
   };
 
   $scope.$watch(function () {

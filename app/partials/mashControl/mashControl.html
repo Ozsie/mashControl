@@ -5,5 +5,25 @@
 
     <button ng-click="getSchedule()">Schedule</button>
     <br>
+    <table>
+        <tr>
+            <th>Step</th>
+            <th>Temperature</th>
+            <th>Rise time</th>
+            <th>Time</th>
+            <th></th>
+        </tr>
+        <tr ng-repeat="step in jsonSchedule.steps">
+            <td><input type="text" ng-model="step.name" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
+            <td><input type="number" ng-model="step.temperature" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
+            <td><input type="number" ng-model="step.riseTime" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
+            <td><input type="number" ng-model="step.time" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
+            <td><input type="button" ng-click="removeStep(step, $index)" value="-" ng-disabled="inputDisabled"></td>
+        </tr>
+        <tr>
+            <td><input type="button" value="+" ng-click="addStep()" ng-disabled="inputDisabled"></td>
+            <td colspan="3"></td>
+        </tr>
+    </table>
     <div google-chart chart="tempChart" style="height:600px; width:100%;"></div>
 </div>

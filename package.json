@@ -4,7 +4,9 @@
   "description": "mash controller",
   "main": "index.js",
   "scripts": {
-    "test": "getCurrentTemp"
+    "pretest": "jshint",
+    "prestart": "jshint",
+    "start": "node mashControl.js"
   },
   "repository": {
     "type": "git",

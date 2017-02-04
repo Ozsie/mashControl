@@ -1,8 +1,11 @@
+var gpio = require('./gpio');
 var fs = require('fs');
-var winston = require('winston');
-winston.add(winston.transports.File, { filename: 'logs/heatControl.log' });
 
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
+
+var winston = require('winston');
+winston.add(winston.transports.File, { name: "heatControl", filename: settings.logs.directory + '/heatControl.log' });
+
 
 var open = false;
 var stepping = false;
@@ -77,59 +80,19 @@ var fastBackward = function(steps) {
 };
 
 var output = function(pin, value, callback) {
-  fs.writeFile("/sys/class/gpio/gpio" + pin + "/value", value, 'utf8', function(err) {
-    if (err) {
-      winston.error("Error writing to pin " + pin + ": ", err);
-    }
-    if (callback && typeof callback === "function") {
-      callback();
-    } else {
-      winston.error("callback error in output: " + callback);
-    }
-  });
+  gpio.write(pin, value, callback);
 };
 
 var outputSync = function(pin, value) {
-  fs.writeFileSync("/sys/class/gpio/gpio" + pin + "/value", value);
+  gpio.writeSync(pin, value);
 };
 
 var open = function(pin, callback) {
-  if (!fs.existsSync("/sys/class/gpio/gpio" + pin)) {
-    fs.writeFile("/sys/class/gpio/export", pin, function(err) {
-      if (err) {
-        winston.error("Error opening pin " + pin + ": ", err);
-      } else {
-        fs.writeFile("/sys/class/gpio/gpio" + pin + "/direction", "out", "utf8", function(err) {
-          if (!err) {
-            winston.info("Pin " + pin + " open");
-            if (callback && typeof callback === "function") {
-              callback();
-            } else {
-              winston.error("callback error in open 1");
-            }
-          } else {
-            winston.warn("Could not set direction to out");
-          }
-        });
-      }
-    });
-  } else {
-    if (callback && typeof callback === "function") {
-      callback();
-    } else {
-      console.log("callback error in open 2");
-    }
-  }
+  gpio.openPinOut(pin, callback);
 };
 
 var close = function(pin) {
-  fs.writeFile("/sys/class/gpio/unexport", pin, function(err) {
-    if (err) {
-      console.log("Error closing pin " + pin + ": ", err);
-    } else {
-      console.log("Pin " + pin + " closed");
-    }
-  });
+  gpio.closePin(pin)
 };
 
 var setStep = function(w1, w2, w3, w4) {
@@ -223,7 +186,8 @@ setTimeout(function() {
 );
 
 function exitHandler() {
-  turnOff();
+  //turnOff();
+  process.exit();
 }
 
 process.on('exit', exitHandler.bind());
@@ -234,7 +198,7 @@ process.on('SIGINT', exitHandler.bind());
 //catches uncaught exceptions
 process.on('uncaughtException', (err) => {
   console.log("Caught exception: " + err);
-  turnOff();
+  //turnOff();
 });
 
 module.exports = {

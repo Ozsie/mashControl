@@ -7,6 +7,21 @@ var schedule;
 
 var previousTemp = undefined;
 
+var temperatureToLow = function(offMark, diff) {
+  if (offMark < (settings.tolerance + settings.offMarkBreak)) {
+    console.log("Closing in, fast decrease");
+    heatControl.fastDecrease();
+  }
+  else if (offMark > (settings.tolerance + (settings.offMarkBreak * 2)) && diff < 20) {
+    console.log("Much under, double increase");
+    heatControl.fastIncrease();
+  }
+  else if (offMark > (settings.tolerance + settings.offMarkBreak) && diff < 10) {
+    console.log("A little under, increase");
+    heatControl.increase();
+  }
+}
+
 var adjustTemperature = function(targetTemp) {
   tempSensor.readTemp(function(error, data) {
     if (!error) {
@@ -30,18 +45,7 @@ var adjustTemperature = function(targetTemp) {
       console.log("Off by " + offMark + "C");
 
       if (currentTemp.temperature.celcius < targetTemp) {
-        if (offMark < (settings.tolerance + settings.offMarkBreak)) {
-          console.log("Closing in, fast decrease");
-          heatControl.fastDecrease();
-        }
-        else if (offMark > (settings.tolerance + (settings.offMarkBreak * 2)) && diff < 20) {
-          console.log("Much under, double increase");
-          heatControl.fastIncrease();
-        }
-        else if (offMark > (settings.tolerance + settings.offMarkBreak) && diff < 10) {
-          console.log("A little under, increase");
-          heatControl.increase();
-        }
+        temperatureToLow(offMark, diff);
       } else if (currentTemp.temperature.celcius > targetTemp) {
         console.log("Overshoot, fast decrease");
         heatControl.fastDecrease();
@@ -53,31 +57,31 @@ var adjustTemperature = function(targetTemp) {
   });
 }
 
+var nextStep = function(index) {
+  console.log("Index: " + index);
+  var step = schedule.steps[index];
+  step.startTime = Date.now();
+  console.log("Starting step " + (index + 1) + ", " + step.name + " at " + step.startTime);
+  var stepTime = (step.riseTime + step.time) * 60 * 1000;
+  console.log("Will run for " + stepTime + " ms");
+
+  var run = function() {
+    setTimeout(function() {
+      if (Date.now() - step.startTime < stepTime) {
+        //console.log("Time left: " + (stepTime - (Date.now() - step.startTime)));
+        adjustTemperature(step.temperature);
+        run();
+      }
+    }, 12000);
+  };
+
+  run();
+  return stepTime;
+};
+
 var runSchedule = function(callback) {
   console.log("Schedule: " + JSON.stringify(schedule));
   var i = 0;
-
-  var nextStep = function(index) {
-    console.log("Index: " + index);
-    var step = schedule.steps[index];
-    step.startTime = Date.now();
-    console.log("Starting step " + (index + 1) + ", " + step.name + " at " + step.startTime);
-    var stepTime = (step.riseTime + step.time) * 60 * 1000;
-    console.log("Will run for " + stepTime + " ms");
-
-    var run = function() {
-      setTimeout(function() {
-        if (Date.now() - step.startTime < stepTime) {
-          //console.log("Time left: " + (stepTime - (Date.now() - step.startTime)));
-          adjustTemperature(step.temperature);
-          run();
-        }
-      }, 12000);
-    };
-
-    run();
-    return stepTime;
-  };
 
   var nexInMs = nextStep(i);
   var doStep = function() {

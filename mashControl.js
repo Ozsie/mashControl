@@ -11,6 +11,12 @@ var scheduleRunner = require('./scheduleRunner');
 //"/sys/bus/w1/devices/28-800000263717/w1_slave"
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
+var logDir = settings.logs.directory;
+
+if (!fs.existsSync(logDir)){
+    fs.mkdirSync(logDir);
+}
+
 var app = express();
 
 app.use(express.static('app'));
