@@ -14,7 +14,7 @@ mashControl.factory('mashControlRestFactory',function($resource) {
       });
     }
   };
-})
+});
 
 mashControl.factory('mashControlRestService', function($q, $http, mashControlRestFactory){
   var getCurrentTemperature = function (){
@@ -51,7 +51,7 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
         deferred.reject(error);
       });
     return deferred.promise;
-  }
+  };
 
   return {
     getCurrentTemperature: getCurrentTemperature,
