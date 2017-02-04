@@ -52,13 +52,13 @@ var turnOff = function() {
 
 var forward = function() {
   commands.push("forward");
-}
+};
 
 var fastForward = function() {
   commands.push("forward");
   commands.push("forward");
   commands.push("forward");
-}
+};
 
 var backward = function(steps) {
   commands.push("backward");
@@ -92,7 +92,7 @@ var open = function(pin, callback) {
 };
 
 var close = function(pin) {
-  gpio.closePin(pin)
+  gpio.closePin(pin);
 };
 
 var setStep = function(w1, w2, w3, w4) {
@@ -181,9 +181,9 @@ setTimeout(function() {
         }
       }
     }
-  }, 200)},
-  1000
-);
+  },
+  200);
+  }, 1000);
 
 function exitHandler() {
   //turnOff();
@@ -196,10 +196,7 @@ process.on('exit', exitHandler.bind());
 process.on('SIGINT', exitHandler.bind());
 
 //catches uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.log("Caught exception: " + err);
-  //turnOff();
-});
+process.on('uncaughtException',  exitHandler.bind());
 
 module.exports = {
   increase: forward,

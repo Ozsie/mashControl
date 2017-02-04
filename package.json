@@ -4,7 +4,7 @@
   "description": "mash controller",
   "main": "index.js",
   "scripts": {
-    "pretest": "jshint",
+    "pretest": "jshint *.js",
     "prestart": "jshint",
     "start": "node mashControl.js"
   },

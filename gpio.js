@@ -35,11 +35,11 @@ var openPin = function(pin, direction, callback) {
 
 var openPinOut = function(pin, callback) {
     openPin(pin, "out", callback);
-}
+};
 
 var openPinIn = function(pin, callback) {
     openPin(pin, "in", callback);
-}
+};
 
 var closePin = function(pin) {
   fs.writeFile("/sys/class/gpio/unexport", pin, function(err) {

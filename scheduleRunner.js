@@ -5,8 +5,6 @@ var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
 var schedule;
 
-var previousTemp = undefined;
-
 var temperatureToLow = function(offMark, diff) {
   if (offMark < (settings.tolerance + settings.offMarkBreak)) {
     console.log("Closing in, fast decrease");
@@ -20,7 +18,7 @@ var temperatureToLow = function(offMark, diff) {
     console.log("A little under, increase");
     heatControl.increase();
   }
-}
+};
 
 var adjustTemperature = function(targetTemp) {
   tempSensor.readTemp(function(error, data) {
@@ -55,7 +53,7 @@ var adjustTemperature = function(targetTemp) {
       previousTemp = currentTemp.temperature.celcius;
     }
   });
-}
+};
 
 var nextStep = function(index) {
   console.log("Index: " + index);
