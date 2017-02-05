@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "pretest": "jshint *.js app/**/*.js",
+    "test": "mocha test --recursive",
     "prestart": "jshint",
     "start": "node mashControl.js"
   },
@@ -32,6 +33,8 @@
     "angular-resource": "~1.5",
     "angular-google-chart": "~0.1",
     "jshint": "2.9.4",
-    "winston": "2.3.1"
+    "winston": "2.3.1",
+    "mocha": "3.2.0",
+    "chai": "4.0.0-canary.1"
   }
 }

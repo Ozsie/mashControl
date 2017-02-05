@@ -61,5 +61,6 @@ var readAndParse = function(callback) {
 module.exports = {
   readTemp: readTemp,
   parseTemp: parseTemp,
-  readAndParse: readAndParse
+  readAndParse: readAndParse,
+  settings: settings
 };
