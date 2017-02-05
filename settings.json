@@ -12,6 +12,9 @@
     "coilB1Pin": 23,
     "coilB2Pin": 24
   },
+  "gpio": {
+    "path": "/sys/class/gpio/"
+  },
   "logs": {
     "directory": "./logs"
   }

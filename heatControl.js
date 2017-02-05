@@ -92,7 +92,11 @@ var open = function(pin, callback) {
 };
 
 var close = function(pin) {
-  gpio.closePin(pin);
+  gpio.closePin(pin, function(err) {
+    if (err) {
+      winston.error("Could not close pin:", + err);
+    }
+  });
 };
 
 var setStep = function(w1, w2, w3, w4) {
