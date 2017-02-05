@@ -14,8 +14,6 @@ describe('GPIO', function() {
   it('closePin should return error when gpio file is not available', function(done) {
     gpio.closePin(0, function(err) {
       expect(err).to.exist;
-      expect(err.errno).to.equal(-2);
-      expect(err.code).to.equal('ENOENT');
       expect(err.syscall).to.equal('open');
       expect(err.path).to.equal('/sys/class/gpio/unexport');
       done();
