@@ -12,7 +12,7 @@ var openPin = function(pin, direction, callback) {
       if (err) {
         winston.error("Error opening pin " + pin + ": ", err);
       } else {
-        fs.writeFile(gpioPath + "gpio" + pin + "/direction", direction, "utf8", function(err) {
+        fs.writeFile(gpioPath + "/gpio" + pin + "/direction", direction, "utf8", function(err) {
           if (!err) {
             winston.info("Pin " + pin + " open");
             if (callback && typeof callback === "function") {
@@ -21,7 +21,7 @@ var openPin = function(pin, direction, callback) {
               winston.error("callback error in open 1");
             }
           } else {
-            winston.warn("Could not set direction to out");
+            winston.warn("Could not set direction to " + direction + " for pin " + pin);
           }
         });
       }
