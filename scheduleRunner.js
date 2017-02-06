@@ -20,6 +20,7 @@ var temperatureToLow = function(offMark, diff) {
   }
 };
 
+var previousTemp = undefined;
 var adjustTemperature = function(targetTemp) {
   tempSensor.readTemp(function(error, data) {
     if (!error) {
