@@ -7,7 +7,7 @@ var gpioPath = settings.gpio.path;
 
 var openPin = function(pin, direction, callback) {
   winston.info("Opening pin " + pin + " as " + direction);
-  if (fs.existsSync(gpioPath + "/gpio" + pin)) {
+  if (!fs.existsSync(gpioPath + "/gpio" + pin)) {
     fs.writeFile(gpioPath + "export", pin, function(err) {
       if (err) {
         winston.error("Error opening pin " + pin + ": ", err);
