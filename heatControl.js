@@ -200,7 +200,9 @@ process.on('exit', exitHandler.bind());
 process.on('SIGINT', exitHandler.bind());
 
 //catches uncaught exceptions
-process.on('uncaughtException',  exitHandler.bind());
+process.on('uncaughtException',  (err) => {
+                                   fs.writeSync(1, 'Caught exception: ${err}');
+                                 });
 
 module.exports = {
   increase: forward,
