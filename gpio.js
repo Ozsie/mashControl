@@ -21,7 +21,7 @@ var openPin = function(pin, direction, callback) {
               winston.error("callback error in open 1");
             }
           } else {
-            winston.warn("Could not set direction to " + direction + " for pin " + pin);
+            winston.warn("Could not set direction to " + direction + " for pin " + pin, err);
           }
         });
       }
