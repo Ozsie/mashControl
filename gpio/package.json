@@ -4,6 +4,7 @@
   "description": "RaspberryPI gpio lib",
   "main": "gpio.js",
   "scripts": {
+    "pretest": "jshint gpio.js",
     "test": "mocha test --recursive"
   },
   "repository": {
