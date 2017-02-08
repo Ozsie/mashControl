@@ -2,71 +2,76 @@ var heatControl = require('./heatControl');
 var tempSensor = require('./tempSensor');
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
+var winston = require('winston');
+winston.add(winston.transports.File, { name:"scheduleRunner", filename: settings.logs.directory + '/scheduleRunner.log' });
 
 var schedule;
+var previousTemp;
 
 var temperatureToLow = function(offMark, diff) {
   if (offMark < (settings.tolerance + settings.offMarkBreak)) {
-    console.log("Closing in, fast decrease");
+    winston.info("Closing in, fast decrease");
     heatControl.fastDecrease();
   }
   else if (offMark > (settings.tolerance + (settings.offMarkBreak * 2)) && diff < 20) {
-    console.log("Much under, double increase");
+    winston.info("Much under, double increase");
     heatControl.fastIncrease();
   }
   else if (offMark > (settings.tolerance + settings.offMarkBreak) && diff < 10) {
-    console.log("A little under, increase");
+    winston.info("A little under, increase");
     heatControl.increase();
   }
 };
 
 var adjustTemperature = function(targetTemp) {
-  tempSensor.readTemp(function(error, data) {
+  tempSensor.readAndParse(function(err, data) {
     if (!error) {
-      var currentTemp = tempSensor.parseTemp(data);
+      var currentTemp = data;
       if (previousTemp === undefined) {
         previousTemp = currentTemp.temperature.celcius;
       }
       var diff = parseFloat(currentTemp.temperature.celcius - previousTemp);
-      console.log("Current diff: " + currentTemp.temperature.celcius + " - " + previousTemp + " = " + diff);
+      winston.info("Current diff: " + currentTemp.temperature.celcius + " - " + previousTemp + " = " + diff);
       if (currentTemp > 90) {
-        console.error("Temperature passed hard heat cut off @ 90C");
+        winston.warn("Temperature passed hard heat cut off @ 90C");
         stopSchedule();
         return;
       }
       if (currentTemp > settings.heatCutOff) {
-        console.error("Temperature passed heat cut off @ " + settings.heatCutOff + "C");
+        winston.warn("Temperature passed heat cut off @ " + settings.heatCutOff + " C");
         stopSchedule();
         return;
       }
       var offMark = Math.abs(currentTemp.temperature.celcius - targetTemp);
-      console.log("Off by " + offMark + "C");
+      winston.info("Off by " + offMark + "C");
 
       if (currentTemp.temperature.celcius < targetTemp) {
         temperatureToLow(offMark, diff);
       } else if (currentTemp.temperature.celcius > targetTemp) {
-        console.log("Overshoot, fast decrease");
+        winston.info("Overshoot, fast decrease");
         heatControl.fastDecrease();
       } else {
-        console.log("On mark " + currentTemp.temperature.celcius + " = " + targetTemp + " holding.");
+        winston.info("On mark " + currentTemp.temperature.celcius + " = " + targetTemp + " holding.");
       }
       previousTemp = currentTemp.temperature.celcius;
+    } else {
+      winston.error(err);
+      callback(err);
     }
   });
 };
 
 var nextStep = function(index) {
-  console.log("Index: " + index);
   var step = schedule.steps[index];
   step.startTime = Date.now();
-  console.log("Starting step " + (index + 1) + ", " + step.name + " at " + step.startTime);
+  winston.info("Starting step " + (index + 1) + ", " + step.name + " at " + step.startTime);
   var stepTime = (step.riseTime + step.time) * 60 * 1000;
-  console.log("Will run for " + stepTime + " ms");
+  winston.info("Will run for " + stepTime + " ms");
 
   var run = function() {
     setTimeout(function() {
       if (Date.now() - step.startTime < stepTime) {
-        //console.log("Time left: " + (stepTime - (Date.now() - step.startTime)));
+        //winston.info("Time left: " + (stepTime - (Date.now() - step.startTime)));
         adjustTemperature(step.temperature);
         run();
       }
@@ -78,16 +83,16 @@ var nextStep = function(index) {
 };
 
 var runSchedule = function(callback) {
-  console.log("Schedule: " + JSON.stringify(schedule));
+  winston.info("Schedule: " + JSON.stringify(schedule));
   var i = 0;
 
   var nexInMs = nextStep(i);
   var doStep = function() {
-    console.log("Next step in " + nexInMs + " ms");
+    winston.info("Next step in " + nexInMs + " ms");
     setTimeout(function() {
       i++;
       if (i < schedule.steps.length) {
-        console.log("It's time for the next step");
+        winston.info("It's time for the next step");
         nexInMs = nextStep(i);
         doStep();
       } else {
@@ -100,14 +105,14 @@ var runSchedule = function(callback) {
 
 var startSchedule = function(newSchedule) {
   if (newSchedule) {
-    console.log(JSON.stringify(schedule));
+    winston.info(JSON.stringify(schedule));
     schedule = newSchedule;
     schedule.startTime = Date.now();
     schedule.status = 'running';
     //heatControl.turnOn();
     runSchedule(function() {
       schedule.endTime = Date.now();
-      console.log("Mash done after " + (schedule.endTime - schedule.startTime) + " ms");
+      winston.info("Mash done after " + (schedule.endTime - schedule.startTime) + " ms");
       schedule.status = 'done';
     });
     return true;
@@ -118,7 +123,7 @@ var startSchedule = function(newSchedule) {
 
 var stopSchedule = function() {
   if (schedule) {
-    console.log(schedule);
+    winston.info(schedule);
     heatControl.turnOff();
     schedule.status = 'stopped';
     return true;

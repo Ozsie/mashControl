@@ -3,6 +3,10 @@ var fs = require('fs');
 
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
+console.log("-------" + JSON.stringify(settings.gpio));
+gpio.settings = settings.gpio;
+console.log("-------" + JSON.stringify(gpio.settings));
+
 var winston = require('winston');
 winston.add(winston.transports.File, { name: "heatControl", filename: settings.logs.directory + '/heatControl.log' });
 
@@ -11,16 +15,6 @@ var open = false;
 var stepping = false;
 
 var commands = [];
-
-console.log(JSON.stringify(settings.motor));
-
-var increase = function (inputTemp, targetTemp) {
-  console.log(inputTemp + " < " + targetTemp + " increasing heat.");
-};
-
-var decrease = function (inputTemp, targetTemp) {
-  console.log(inputTemp + " > " + targetTemp + " decreasing heat.");
-};
 
 var turnOn = function() {
   console.log("Turn on. Enable Pin: " + settings.motor.enablePin);
@@ -201,8 +195,8 @@ process.on('SIGINT', exitHandler.bind());
 
 //catches uncaught exceptions
 process.on('uncaughtException',  (err) => {
-                                   console.log('Caught exception: ' + err);
-                                 });
+  console.log('Caught exception: ' + err);
+});
 
 module.exports = {
   increase: forward,
