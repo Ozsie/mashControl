@@ -16,7 +16,7 @@ describe('TempSensor', function() {
   });
 
   it('readTemp should return data when temperature file is available', function(done) {
-    tempSensor.settings.input = "./testTemp.txt";
+    tempSensor.settings.input = "./test/testTemp.txt";
     tempSensor.readTemp(function(err, data) {
       expect(data).to.exist;
       expect(data).to.equal('00 11 22 33 44 55 aa bb cc dd : crc=66 YES\n77 88 99 ee ff 00 11 22 33 44 t=35000');
@@ -26,7 +26,7 @@ describe('TempSensor', function() {
   });
 
   it('parseTemp should extract correct data from read temperature', function(done) {
-    tempSensor.settings.input = "./testTemp.txt";
+    tempSensor.settings.input = "./test/testTemp.txt";
     tempSensor.readTemp(function(err, data) {
       var temp = tempSensor.parseTemp(data);
       expect(temp.crc).to.equal('66');
