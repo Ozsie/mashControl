@@ -1,10 +1,12 @@
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
+var winston = require('winston');
+winston.add(winston.transports.File, { name:"tempSensor", filename: settings.logs.directory + '/tempSensor.log' });
 
 var modprobe = function(error, stdout, stderr) {
  if (error) {
-   console.log("MODPROB ERROR:  " + error);
-   console.log("MODPROB STDERR: " + stderr);
+   winstone.error("MODPROB ERROR:  ", error);
+   winstone.error("MODPROB STDERR: ", stderr);
  }
 };
 
@@ -14,14 +16,10 @@ if (settings.installKernelMod) {
 }
 
 var readTemp = function(callback) {
-  if (callback) {
-    fs.readFile(settings.input, 'utf8', callback);
+  if (!callback || typeof callback !== "function") {
+    throw new Error("Callback function required");
   }
-  else {
-    readTemp(function(err, data) {
-      console.log("data:" + data);
-    });
-  }
+  fs.readFile(settings.input, 'utf8', callback);
 };
 
 var parseTemp = function(data) {
@@ -48,12 +46,17 @@ var parseTemp = function(data) {
 };
 
 var readAndParse = function(callback) {
+  if (!callback || typeof callback !== "function") {
+    throw new Error("Callback function required");
+  }
   readTemp(function (err, data) {
     if (!err) {
       var temp = parseTemp(data);
-      callback(temp);
+      callback(undefined, temp);
     } else {
-      console.log("Error when reading temp: " + err);
+      err.tempSensorMessage = "Error when reading temperature";
+      winston.error(err.tempSensorMessage, err);
+      callback(err);
     }
   });
 };
