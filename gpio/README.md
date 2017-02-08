@@ -2,6 +2,7 @@ A simple library for accessing the RaspberryPI GPIO pins.
 
 Example:
 
+```
 var gpio = require('mc-gpio');
 
 gpio.openPin(0, "out", function(err, data) {
@@ -17,3 +18,4 @@ gpio.openPin(0, "out", function(err, data) {
     }
   }
 });
+```
