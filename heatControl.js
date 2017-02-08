@@ -1,4 +1,4 @@
-var gpio = require('./gpio');
+var gpio = require('mc-gpio');
 var fs = require('fs');
 
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
