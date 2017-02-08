@@ -3,37 +3,42 @@ var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
 winston.add(winston.transports.File, { name:"gpio", filename: settings.logs.directory + '/gpio.log' });
 
-var gpioPath = settings.gpio.path;
-
 var openPin = function(pin, direction, callback) {
+  if (!callback || typeof callback !== "function") {
+    throw new Error("Callback function required");
+  }
   winston.info("Opening pin " + pin + " as " + direction);
-  if (!fs.existsSync(gpioPath + "/gpio" + pin)) {
-    fs.writeFile(gpioPath + "/export", pin, function(err) {
+  console.log(settings.gpio.path);
+  if (!fs.existsSync(settings.gpio.path + "gpio" + pin)) {
+    fs.writeFile(settings.gpio.path + "export", pin, function(err) {
       if (err) {
-        winston.error("Error opening pin " + pin + ": ", err);
+        err.gpioMessage = "Error opening pin " + pin;
+        winston.error(err.gpioMessage, err);
+        callback(err);
       } else {
-        fs.writeFile(gpioPath + "/gpio" + pin + "/direction", direction, "utf8", function(err) {
-          if (!err) {
-            winston.info("Pin " + pin + " open");
-            if (callback && typeof callback === "function") {
-              callback(undefined, "open");
-            } else {
-              winston.error("callback error in open 1");
-            }
-          } else {
-            winston.warn("Could not set direction to " + direction + " for pin " + pin, err);
-          }
-        });
+        setPinDirection(pin, direction, callback);
       }
     });
   } else {
     winston.error("GPIO pin " + pin + " does not exist");
-    if (callback && typeof callback === "function") {
-      callback("GPIO pin " + pin + " does not exist", undefined);
-    } else {
-      winston.error("callback error in open 2");
-    }
+    setPinDirection(pin, direction, callback);
   }
+};
+
+var setPinDirection = function(pin, direction, callback) {
+  if (!callback || typeof callback !== "function") {
+    throw new Error("Callback function required");
+  }
+  fs.writeFile(settings.gpio.path + "gpio" + pin + "/direction", direction, "utf8", function(err) {
+    if (!err) {
+      winston.info("Pin " + pin + " open");
+      callback(undefined, "open");
+    } else {
+      err.gpioMessage = "Could not set direction to " + direction + " for pin " + pin;
+      winston.error(err.gpioMessage, err);
+      callback(err);
+    }
+  });
 };
 
 var openPinOut = function(pin, callback) {
@@ -45,31 +50,38 @@ var openPinIn = function(pin, callback) {
 };
 
 var closePin = function(pin, callback) {
-  fs.writeFile(gpioPath + "unexport", pin, function(err) {
+  if (!callback || typeof callback !== "function") {
+    throw new Error("Callback function required");
+  }
+  fs.writeFile(settings.gpio.path + "unexport", pin, function(err) {
     if (err) {
-      winston.error("Error closing pin " + pin + ": ", err);
+      err.gpioMessage = "Error closing pin " + pin;
+      winston.error(err.gpioMessage, err);
       callback(err);
     } else {
       winston.info("Pin " + pin + " closed");
+      callback(undefined, "closed");
     }
   });
 };
 
 var writeSync = function(pin, value) {
-  fs.writeFileSync(gpioPath + "gpio" + pin + "/value", value);
+  fs.writeFileSync(settings.gpio.path + "gpio" + pin + "/value", value);
   winston.debug("Pin " + pin + " = " + value);
 };
 
 var write = function(pin, value, callback) {
-  fs.writeFile(gpioPath + "gpio" + pin + "/value", value, 'utf8', function(err) {
+  if (!callback || typeof callback !== "function") {
+    throw new Error("Callback function required");
+  }
+  fs.writeFile(settings.gpio.path + "gpio" + pin + "/value", value, 'utf8', function(err) {
     if (err) {
-      winston.error("Error writing to pin " + pin + ": ", err);
-    }
-    if (callback && typeof callback === "function") {
-      winston.debug("Pin " + pin + " = " + value);
-      callback();
+      err.gpioMessage = "Error writing to pin " + pin;
+      winston.error(err.gpioMessage, err);
+      callback(err);
     } else {
-      winston.error("callback error in output: " + callback);
+      winston.info("Pin " + pin + " = " + value);
+      callback(undefined, value);
     }
   });
 };
@@ -79,6 +91,8 @@ module.exports = {
   openPinOut: openPinOut,
   openPinIn: openPinIn,
   closePin: closePin,
+  setPinDirection: setPinDirection,
   writeSync: writeSync,
-  write: write
+  write: write,
+  settings: settings.gpio
 };
