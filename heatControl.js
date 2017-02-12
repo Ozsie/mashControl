@@ -17,7 +17,7 @@ var turnOn = function() {
     winston.info("Motor communication already open.");
     return;
   }
-  console.log("Turn on. Enable Pin: " + settings.motor.enablePin);
+  winston.info("Turn on. Enable Pin: " + settings.motor.enablePin);
   open(18, function() {
     open(4, function() {
       open(17, function() {

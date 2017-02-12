@@ -1,6 +1,6 @@
 {
   "name": "mc-gpio",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "RaspberryPI gpio lib",
   "main": "gpio.js",
   "scripts": {

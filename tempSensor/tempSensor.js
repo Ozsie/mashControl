@@ -1,12 +1,17 @@
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
-winston.add(winston.transports.File, { name:"tempSensor", filename: settings.logs.directory + '/tempSensor.log' });
+var logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({ name:"tempSensor", filename: settings.logs.directory + '/tempSensor.log' })
+  ]
+});
 
 var modprobe = function(error, stdout, stderr) {
  if (error) {
-   winstone.error("MODPROB ERROR:  ", error);
-   winstone.error("MODPROB STDERR: ", stderr);
+   logger.error("MODPROB ERROR:  ", error);
+   logger.error("MODPROB STDERR: ", stderr);
  }
 };
 
@@ -55,7 +60,7 @@ var readAndParse = function(callback) {
       callback(undefined, temp);
     } else {
       err.tempSensorMessage = "Error when reading temperature";
-      winston.error(err.tempSensorMessage, err);
+      logger.error(err.tempSensorMessage, err);
       callback(err);
     }
   });

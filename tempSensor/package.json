@@ -1,6 +1,6 @@
 {
   "name": "mc-tempsensor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A RaspberryPi DS18B20 library",
   "main": "tempSensor.js",
   "scripts": {
