@@ -5,7 +5,7 @@ var exec = require('child_process').exec;
 var bodyParser = require('body-parser');
 
 var heatControl = require('./heatControl');
-var tempSensor = require('mc-tempSensor');
+var tempSensor = require('mc-tempsensor');
 var scheduleRunner = require('./scheduleRunner');
 var winston = require('winston');
 
