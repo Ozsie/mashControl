@@ -1,8 +1,0 @@
-{
-  "gpio": {
-    "path": "/sys/class/gpio/"
-  },
-  "logs": {
-    "directory": "./logs"
-  }
-}
