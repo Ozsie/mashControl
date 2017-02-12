@@ -3,10 +3,6 @@ var fs = require('fs');
 
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
-console.log("-------" + JSON.stringify(settings.gpio));
-gpio.settings = settings.gpio;
-console.log("-------" + JSON.stringify(gpio.settings));
-
 var winston = require('winston');
 winston.add(winston.transports.File, { name: "heatControl", filename: settings.logs.directory + '/heatControl.log' });
 
@@ -17,6 +13,10 @@ var stepping = false;
 var commands = [];
 
 var turnOn = function() {
+  if (open) {
+    winston.info("Motor communication already open.");
+    return;
+  }
   console.log("Turn on. Enable Pin: " + settings.motor.enablePin);
   open(18, function() {
     open(4, function() {
@@ -34,14 +34,24 @@ var turnOn = function() {
   });
 };
 
-var turnOff = function() {
+var turnOff = function(callback) {
+  if (!callback || typeof callback !== "function") {
+    throw new Error("Callback function required");
+  }
   winston.info("Turn off. Enable Pin: " + settings.motor.enablePin);
-  output(settings.motor.enablePin, 0, true);
-  close(4);
-  close(17);
-  close(18);
-  close(23);
-  close(24);
+  output(settings.motor.enablePin, 0, function(err, data) {
+    if (!err) {
+      close(4);
+      close(17);
+      close(18);
+      close(23);
+      close(24);
+      callback(undefined, data);
+    } else {
+      winston.error("Could not turn off heat control", err);
+      callback(err);
+    }
+  });
 };
 
 var forward = function() {
@@ -160,8 +170,6 @@ var stepBackward = function(steps, callback) {
   doStep();
 };
 
-turnOn();
-
 setTimeout(function() {
   setInterval(function () {
     if (open && !stepping) {
@@ -195,7 +203,7 @@ process.on('SIGINT', exitHandler.bind());
 
 //catches uncaught exceptions
 process.on('uncaughtException',  (err) => {
-  console.log('Caught exception: ' + err);
+  winston.error('Caught exception', err);
 });
 
 module.exports = {
@@ -204,5 +212,6 @@ module.exports = {
   fastIncrease: fastForward,
   fastDecrease: fastBackward,
   turnOn: turnOn,
-  turnOff: turnOff
+  turnOff: turnOff,
+  gpio: gpio
 };

@@ -121,14 +121,19 @@ var startSchedule = function(newSchedule) {
   }
 };
 
-var stopSchedule = function() {
+var stopSchedule = function(callback) {
   if (schedule) {
     winston.info(schedule);
-    heatControl.turnOff();
-    schedule.status = 'stopped';
-    return true;
+    heatControl.turnOff(function(err, data) {
+      if (!err) {
+        schedule.status = 'stopped';
+        callback(undefined, true);
+      } else {
+        callback(err);
+      }
+    });
   } else {
-    return false;
+    callback("No schedule available");
   }
 };
 
