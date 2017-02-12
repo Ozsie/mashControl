@@ -2,7 +2,7 @@
   "name": "mashcontrol",
   "version": "1.0.0",
   "description": "mash controller",
-  "main": "index.js",
+  "main": "mashControl.js",
   "scripts": {
     "pretest": "jshint *.js app/**/*.js",
     "test": "mocha test --recursive",

@@ -9,7 +9,7 @@ chai.use(chaiHttp);
 
 describe('mashControl', function() {
   beforeEach(function() {
-    mashControl.tempSensor.settings.input = "tempSensor/test/testTemp.txt";
+    mashControl.tempSensor.settings.input = "node_modules/mc-tempsensor/test/testTemp.txt";
     mashControl.heatControl.gpio.settings.path = "./gpio-mock/";
 
     var mockGpio = function(pin) {
