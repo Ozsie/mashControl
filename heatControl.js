@@ -191,16 +191,6 @@ setTimeout(function() {
   200);
   }, 1000);
 
-function exitHandler() {
-  //turnOff();
-  process.exit();
-}
-
-process.on('exit', exitHandler.bind());
-
-//catches ctrl+c event
-process.on('SIGINT', exitHandler.bind());
-
 //catches uncaught exceptions
 process.on('uncaughtException',  (err) => {
   winston.error('Caught exception', err);

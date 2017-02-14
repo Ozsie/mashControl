@@ -137,4 +137,8 @@ describe('mashControl', function() {
           done();
         });
   });
+
+  after(function() {
+    mashControl.server.close();
+  });
 });

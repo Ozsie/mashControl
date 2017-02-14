@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package mashControl;
+
+service TemperatureService {
+  rpc GetRawTemperature (GetCurrentTemperatureRequest) returns (RawTemperature);
+  rpc GetTemperature (GetCurrentTemperatureRequest) returns (CurrentTemperature);
+}
+
+service ScheduleService {
+  rpc StartSchedule (Schedule) returns (ScheduleResponse);
+  rpc StopSchedule (StopScheduleRequest) returns (ScheduleResponse);
+  rpc GetScheduleStatus (GetScheduleStatusRequest) returns (ScheduleStatus);
+  rpc GetCurrentSchedule (GetScheduleRequest) returns (Schedule);
+}
+
+message GetCurrentTemperatureRequest {}
+
+message RawTemperature {
+  string temperature = 1;
+}
+
+message CurrentTemperature {
+  string crc = 1;
+  string available = 2;
+  Temperature temperature = 3;
+  uint64 time = 4;
+}
+
+message Temperature {
+  sint32 raw = 1;
+  sint32 celcius = 2;
+}
+
+message GetScheduleStatusRequest {}
+message GetScheduleRequest {}
+message StopScheduleRequest {}
+
+message Schedule {
+  repeated Step steps = 1;
+}
+
+message Step {
+  string name = 1;
+  double riseTime = 2;
+  double temperature = 3;
+  double time = 4;
+  string type = 5;
+}
+
+message ScheduleResponse {
+  bool ok = 1;
+}
+
+
+message ScheduleStatus {
+  string status = 1;
+}

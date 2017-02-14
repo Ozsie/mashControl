@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var heatControl = require('./heatControl');
 var tempSensor = require('mc-tempsensor');
 var scheduleRunner = require('./scheduleRunner');
+var grpcServer = require('./mashControlGRPC');
 var winston = require('winston');
 
 //"/sys/bus/w1/devices/28-800000263717/w1_slave"
@@ -34,9 +35,9 @@ app.get('/temp/current', function(req, res) {
   //winston.info('Temp requested');
   tempSensor.readTemp(function(error, data) {
     if (!error) {
-      winston.error("Could not fetch temperature", error);
       res.status(200).send(tempSensor.parseTemp(data));
     } else {
+      winston.error("Could not fetch temperature", error);
       res.status(500).send(error);
     }
   });
@@ -90,8 +91,23 @@ app.use(function(err, req, res, next) {
   }
 });
 
+grpcServer.startServer();
+
 var server = app.listen(3000);
 winston.info('App Server running at port 3000');
+
+function exitHandler() {
+  //turnOff();
+  winston.info("EXIT!");
+  grpcServer.stopServer();
+  server.close();
+  process.exit();
+}
+
+process.on('exit', exitHandler.bind());
+
+//catches ctrl+c event
+process.on('SIGINT', exitHandler.bind());
 
 process.on('uncaughtException',  (err) => {
   winston.error('Caught exception', err);
