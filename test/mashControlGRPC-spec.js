@@ -83,7 +83,7 @@ describe('mashControlGRPC', function() {
     });
   });
 
-  it('GetRawTemperature should return a raw temperature string', function(done) {
+  it('GetScheduleStatus should return "stopped"', function(done) {
     var mcProto = grpc.load('./mashControl.proto').mashControl;
     var client = new mcProto.ScheduleService('localhost:50051', grpc.credentials.createInsecure());
 
