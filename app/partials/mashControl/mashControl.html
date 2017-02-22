@@ -1,10 +1,10 @@
-<div ng-controller="MashControlCtrl">
+<input ng-controller="MashControlCtrl">
     Current temperature: {{currentTemp.temperature.celcius}} @ {{currentTempTime}}
     <!-- textarea ng-model="schedule" ng-disabled="inputDisabled"></textarea -->
     <br>
     <input type="text" ng-model="jsonSchedule.volume" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Volume">
     <br>
-    <input type="checkbox" ng-model="calculateRiseTime">Calculate rise time</div>
+    <input type="checkbox" ng-model="calculateRiseTime">Calculate rise time</input>
     <table>
         <tr>
             <th>Step</th>
