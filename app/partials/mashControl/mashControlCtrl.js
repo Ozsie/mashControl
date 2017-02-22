@@ -140,6 +140,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     }
 
     $scope.tempChart.data.rows = rows;
+    $scope.schedule = JSON.stringify($scope.jsonSchedule);
   };
 
   $scope.addStep = function() {
