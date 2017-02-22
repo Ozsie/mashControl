@@ -25,7 +25,7 @@ var temperatureToLow = function(offMark, diff) {
 
 var adjustTemperature = function(targetTemp) {
   tempSensor.readAndParse(function(err, data) {
-    if (!error) {
+    if (!err) {
       var currentTemp = data;
       if (previousTemp === undefined) {
         previousTemp = currentTemp.temperature.celcius;
