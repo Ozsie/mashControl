@@ -110,7 +110,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       {
         c: [
           {v: 0},
-          {v: 0}
+          {v: 10}
         ]
       }
     ];
@@ -118,6 +118,9 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     $scope.totalRunTime = 0;
     for (var index in $scope.jsonSchedule.steps) {
       var step = $scope.jsonSchedule.steps[index];
+      if (!step.riseTime) {
+        step.riseTime = (step.temperature - 10) / 2;
+      }
       runTime += step.riseTime;
       rows.push({
         c: [
