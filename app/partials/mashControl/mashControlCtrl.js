@@ -157,7 +157,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
 
   $scope.addStep = function() {
     if (!$scope.jsonSchedule) {
-      $scope.jsonSchedule = {steps:[{}]};
+      $scope.jsonSchedule = {steps:[{}], volume: 0};
     } else {
       if (!$scope.jsonSchedule.steps) {
         $scope.jsonSchedule.steps = [];
