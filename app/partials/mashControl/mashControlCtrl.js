@@ -105,7 +105,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     $scope.handleJsonSchedule();
   };
 
-  $scope.handleJsonSchedule = function() {
+  $scope.handleJsonSchedule = function(manualRiseTime) {
     var rows = [
       {
         c: [
@@ -118,8 +118,8 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     $scope.totalRunTime = 0;
     for (var index in $scope.jsonSchedule.steps) {
       var step = $scope.jsonSchedule.steps[index];
-      if (!step.riseTime) {
-        step.riseTime = (step.temperature - 10) / 2;
+      if (!manualRiseTime) {
+        step.riseTime = Math.ceil((step.temperature - 10) / 7);
       }
       runTime += step.riseTime;
       rows.push({
@@ -150,6 +150,9 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     if (!$scope.jsonSchedule) {
       $scope.jsonSchedule = {steps:[{}]};
     } else {
+      if (!$scope.jsonSchedule.steps) {
+        $scope.jsonSchedule.steps = [];
+      }
       $scope.jsonSchedule.steps.push({});
     }
   };
