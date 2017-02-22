@@ -87,6 +87,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
   //updateCurrentTemperature();
 
   $scope.tempChart = {};
+  $scope.calculateRiseTime = true;
 
   $scope.parseInput = function() {
     $scope.tempChart.data.rows = {};
@@ -105,7 +106,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     $scope.handleJsonSchedule();
   };
 
-  $scope.handleJsonSchedule = function(manualRiseTime) {
+  $scope.handleJsonSchedule = function() {
     var rows = [
       {
         c: [
@@ -118,7 +119,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     $scope.totalRunTime = 0;
     for (var index in $scope.jsonSchedule.steps) {
       var step = $scope.jsonSchedule.steps[index];
-      if (!manualRiseTime) {
+      if ($scope.calculateRiseTime) {
         var startingTemp = 10;
         if (index > 0) {
           startingTemp = $scope.jsonSchedule.steps[index - 1].temperature;
