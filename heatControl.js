@@ -7,13 +7,13 @@ var winston = require('winston');
 winston.add(winston.transports.File, { name: "heatControl", filename: settings.logs.directory + '/heatControl.log' });
 
 
-var open = false;
+var isOpen = false;
 var stepping = false;
 
 var commands = [];
 
 var turnOn = function() {
-  if (open) {
+  if (isOpen) {
     winston.info("Motor communication already open.");
     return;
   }
@@ -24,7 +24,7 @@ var turnOn = function() {
         open(23, function() {
           open(24, function() {
             output(settings.motor.enablePin, 1, function() {
-              open = true;
+              isOpen = true;
               winston.info("Motor communication is open. Waiting for commands.");
             });
           });
@@ -41,6 +41,7 @@ var turnOff = function(callback) {
   winston.info("Turn off. Enable Pin: " + settings.motor.enablePin);
   output(settings.motor.enablePin, 0, function(err, data) {
     if (!err) {
+      isOpen = false;
       close(4);
       close(17);
       close(18);
