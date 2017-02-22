@@ -12,7 +12,10 @@ mashControl.factory('mashControlRestFactory',function($resource) {
       return $resource('/schedule/start/',{},{
         start : { method: 'POST'}
       });
-    }
+    },
+    stopSchedule : function(){
+      return $resource('/schedule/stop/');
+    },
   };
 });
 
@@ -28,6 +31,7 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
       });
     return deferred.promise;
   };
+
   var getSchedule = function (){
     var deferred = $q.defer();
     mashControlRestFactory.getSchedule().get({},
@@ -53,9 +57,22 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
     return deferred.promise;
   };
 
+  var stopSchedule = function (){
+    var deferred = $q.defer();
+    mashControlRestFactory.stopSchedule().get({},
+      function(response) {
+        deferred.resolve(response);
+      }, function(error) {
+        console.error("Error getting current temperature");
+        deferred.reject(error);
+      });
+    return deferred.promise;
+  };
+
   return {
     getCurrentTemperature: getCurrentTemperature,
     getSchedule: getSchedule,
-    startSchedule: startSchedule
+    startSchedule: startSchedule,
+    stopSchedule: stopSchedule
   };
 });

@@ -10,6 +10,12 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     });
   };
 
+  $scope.stop = function() {
+    mashControlRestService.stopSchedule().then(function(data) {
+      console.log(data);
+    });
+  };
+
   $scope.getSchedule = function() {
     mashControlRestService.getSchedule().then(function(data) {
       $scope.schedule = data;
