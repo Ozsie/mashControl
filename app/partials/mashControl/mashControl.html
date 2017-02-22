@@ -1,6 +1,6 @@
 <div ng-controller="MashControlCtrl">
-    Nuvarande temperatur: {{currentTemp.temperature.celcius}} @ {{currentTempTime}}
-    <textarea ng-model="schedule" ng-disabled="inputDisabled"></textarea>
+    Current temperature: {{currentTemp.temperature.celcius}} @ {{currentTempTime}}
+    <!-- textarea ng-model="schedule" ng-disabled="inputDisabled"></textarea -->
     <button ng-click="start()">Start</button>
     <button ng-click="stop()">Stop</button>
 
@@ -19,8 +19,8 @@
         <tr ng-repeat="step in jsonSchedule.steps">
             <td><input type="text" ng-model="step.name" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
             <td><input type="number" ng-model="step.temperature" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
-            <td><input type="number" ng-model="step.riseTime" ng-disabled="inputDisabled" ng-change="handleJsonSchedule(true)"></td>
             <td><input type="number" ng-model="step.time" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
+            <td><input type="number" ng-model="step.riseTime" ng-disabled="inputDisabled" ng-change="handleJsonSchedule(true)"></td>
             <td><input type="button" ng-click="removeStep(step, $index)" value="-" ng-disabled="inputDisabled"></td>
         </tr>
         <tr>

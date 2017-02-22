@@ -123,7 +123,11 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         if (index > 0) {
           startingTemp = $scope.jsonSchedule.steps[index - 1].temperature;
         }
-        step.riseTime = Math.ceil((step.temperature - startingTemp) / 7);
+        if (startingTemp <= step.temperature) {
+          step.riseTime = Math.ceil((step.temperature - startingTemp) / 7);
+        } else {
+          step.riseTime = Math.ceil((startingTemp - step.temperature) / 0.5);
+        }
       }
       runTime += step.riseTime;
       rows.push({
