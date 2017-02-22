@@ -1,10 +1,6 @@
 <div ng-controller="MashControlCtrl">
     Current temperature: {{currentTemp.temperature.celcius}} @ {{currentTempTime}}
     <!-- textarea ng-model="schedule" ng-disabled="inputDisabled"></textarea -->
-    <button ng-click="start()">Start</button>
-    <button ng-click="stop()">Stop</button>
-
-    <button ng-click="getSchedule()">Schedule</button>
     <br>
     <input type="text" ng-model="jsonSchedule.volume" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Volume">
     <br>
@@ -28,5 +24,10 @@
             <td colspan="3"></td>
         </tr>
     </table>
+    <br>
+    <button ng-click="start()">Start</button>
+    <button ng-click="stop()">Stop</button>
+    <!--button ng-click="getSchedule()">Schedule</button-->
+    <br>
     <div google-chart chart="tempChart" style="height:600px; width:100%;"></div>
 </div>
