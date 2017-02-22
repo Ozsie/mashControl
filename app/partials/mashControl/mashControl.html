@@ -6,6 +6,8 @@
 
     <button ng-click="getSchedule()">Schedule</button>
     <br>
+    <input type="text" ng-model="jsonSchedule.volume" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Volume">
+    <br>
     <table>
         <tr>
             <th>Step</th>
