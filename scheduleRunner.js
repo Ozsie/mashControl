@@ -8,52 +8,36 @@ winston.add(winston.transports.File, { name:"scheduleRunner", filename: settings
 var schedule;
 var previousTemp;
 
-var temperatureToLow = function(offMark, diff) {
-  if (offMark < (settings.tolerance + settings.offMarkBreak)) {
-    winston.info("Closing in, fast decrease");
-    heatControl.fastDecrease();
-  }
-  else if (offMark > (settings.tolerance + (settings.offMarkBreak * 2)) && diff < 20) {
-    winston.info("Much under, double increase");
-    heatControl.fastIncrease();
-  }
-  else if (offMark > (settings.tolerance + settings.offMarkBreak) && diff < 10) {
-    winston.info("A little under, increase");
-    heatControl.increase();
-  }
-};
-
-var adjustTemperature = function(targetTemp) {
+var adjustTemperature = function(targetTemp, initialTemp, volume) {
   tempSensor.readAndParse(function(err, data) {
     if (!err) {
-      var currentTemp = data;
-      if (previousTemp === undefined) {
-        previousTemp = currentTemp.temperature.celcius;
-      }
-      var diff = parseFloat(currentTemp.temperature.celcius - previousTemp);
-      winston.info("Current diff: " + currentTemp.temperature.celcius + " - " + previousTemp + " = " + diff);
-      if (currentTemp > 90) {
-        winston.warn("Temperature passed hard heat cut off @ 90C");
+      if (currentTemp > 90 || currentTemp > settings.heatCutOff) {
+        winston.warn("Temperature passed cut off. Stopping.");
         stopSchedule();
         return;
       }
-      if (currentTemp > settings.heatCutOff) {
-        winston.warn("Temperature passed heat cut off @ " + settings.heatCutOff + " C");
-        stopSchedule();
-        return;
-      }
-      var offMark = Math.abs(currentTemp.temperature.celcius - targetTemp);
-      winston.info("Off by " + offMark + "C");
 
-      if (currentTemp.temperature.celcius < targetTemp) {
-        temperatureToLow(offMark, diff);
-      } else if (currentTemp.temperature.celcius > targetTemp) {
-        winston.info("Overshoot, fast decrease");
+      var currentTemp = data.temperature.celcius;
+      var initialDegreesToIncrease = targetTemp - initialTemp;
+      var heatCutOff = targetTemp - ((initialDegreesToIncrease / 5) * volume);
+      if (previousTemp === undefined) {
+        previousTemp = currentTemp;
+      }
+      var diff = parseFloat(currentTemp - previousTemp);
+      var degreesToIncrease = Math.abs(currentTemp - targetTemp);
+
+      winston.info("Increase from last: " + diff + "C. Degrees left: " + degreesToIncrease + "C of " + initialDegreesToIncrease + "C. Cut off at: " + heatCutOff + "C.");
+
+      if (currentTemp < heatCutOff) {
+        winston.info("Under, double increase");
+        heatControl.fastIncrease();
+      } else if (currentTemp >= heatCutOff) {
+        winston.info("Reached heat cut off point, fast decrease");
         heatControl.fastDecrease();
       } else {
         winston.info("On mark " + currentTemp.temperature.celcius + " = " + targetTemp + " holding.");
       }
-      previousTemp = currentTemp.temperature.celcius;
+      previousTemp = currentTemp;
     } else {
       winston.error(err);
       callback(err);
@@ -62,24 +46,39 @@ var adjustTemperature = function(targetTemp) {
 };
 
 var nextStep = function(index) {
-  var step = schedule.steps[index];
-  step.startTime = Date.now();
-  winston.info("Starting step " + (index + 1) + ", " + step.name + " at " + step.startTime);
-  var stepTime = (step.riseTime + step.time) * 60 * 1000;
-  winston.info("Will run for " + stepTime + " ms");
+  tempSensor.readAndParse(function(err, data) {
+    if (!err) {
+      var step = schedule.steps[index];
+      step.initialTemp = data.temperature.celcius;
+      step.startTime = Date.now();
+      step.stepTime = (step.riseTime + step.time) * 60 * 1000;
+      winston.info("######################################################################################");
+      winston.info("#                                                                                    #");
+      winston.info("    Starting step " + (index + 1) + ", " + step.name + " at " + step.startTime);
+      winston.info("    Will run for " + step.stepTime + " ms");
+      winston.info("    Temperature at start " + step.initialTemp + " C");
+      winston.info("    Mash water volume " + schedule.volume + " l");
+      winston.info("#                                                                                    #");
+      winston.info("######################################################################################");
 
-  var run = function() {
-    setTimeout(function() {
-      if (Date.now() - step.startTime < stepTime) {
-        //winston.info("Time left: " + (stepTime - (Date.now() - step.startTime)));
-        adjustTemperature(step.temperature);
-        run();
-      }
-    }, 12000);
-  };
+      var run = function() {
+        setTimeout(function() {
+          if (Date.now() - step.startTime < step.stepTime) {
+            adjustTemperature(step.temperature, step.initialTemp, schedule.volume);
+            run();
+          } else {
+            winston.info("## Step " + step.name + " ran for " + (Date.now() - step.startTime) + " ms. ##");
+          }
+        }, 12000);
+      };
 
-  run();
-  return stepTime;
+      run();
+      return step.stepTime;
+    } else {
+      winston.error("Could not read temperature", err);
+      throw new Error(err);
+    }
+  });
 };
 
 var runSchedule = function(callback) {
