@@ -10,7 +10,7 @@ var previousTemp;
 
 var calculateCutOffPoint = function(targetTemp, initialTemp, volume) {
   var initialDegreesToIncrease = targetTemp - initialTemp;
-  var heatCutOff = targetTemp - ((initialDegreesToIncrease / 4) * volume);
+  var heatCutOff = targetTemp - ((initialDegreesToIncrease / 3) * volume);
   return heatCutOff;
 };
 
