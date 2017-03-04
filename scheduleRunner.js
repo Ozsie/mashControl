@@ -90,10 +90,10 @@ var runSchedule = function(callback) {
     winston.info("Next step in " + nexInMs + " ms");
     setTimeout(function() {
       if (i < schedule.steps.length) {
-        i++;
         winston.info("It's time for the next step");
         nexInMs = nextStep(i);
         doStep();
+        i++;
       } else {
         callback();
       }
