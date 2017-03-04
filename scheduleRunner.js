@@ -57,7 +57,7 @@ var nextStep = function(index) {
       var step = schedule.steps[index];
       step.initialTemp = data.temperature.celcius;
       step.startTime = Date.now();
-      step.stepTime = (step.riseTime + step.time) * 60 * 1000;
+      step.stepTime = calculateStepTime(step);
       step.heatCutOff = calculateCutOffPoint(step.temperature, step.initialTemp, schedule.volume);
       winston.info("######################################################################################");
       winston.info("#                                                                                    #");
@@ -89,6 +89,10 @@ var nextStep = function(index) {
   });
 };
 
+var calculateStepTime = function(step) {
+  return (step.riseTime + step.time) * 60 * 1000;
+};
+
 var runSchedule = function(callback) {
   winston.info("Schedule: " + JSON.stringify(schedule));
   var i = 0;
@@ -99,7 +103,8 @@ var runSchedule = function(callback) {
     setTimeout(function() {
       if (i < schedule.steps.length) {
         winston.info("It's time for the next step");
-        nexInMs = nextStep(i);
+        nextStep(i);
+        nexInMs = calculateStepTime(schedule.steps[i]);
         doStep();
         i++;
       } else {
