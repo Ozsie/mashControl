@@ -32,7 +32,9 @@ var adjustTemperature = function(step, volume) {
       var diff = parseFloat(currentTemp - previousTemp);
       var degreesToIncrease = Math.abs(currentTemp - step.temperature);
 
-      winston.info("Increase from last: " + diff + "C. Degrees left: " + degreesToIncrease + "C of " + initialDegreesToIncrease + "C. Cut off at: " + heatCutOff + "C.");
+      winston.info("Increase from last: " + diff + "C. Degrees left: " + degreesToIncrease + "C of " +
+      initialDegreesToIncrease + "C. Cut off at: " + heatCutOff + "C. " +
+      "Time left: " + (step.stepTime - (Date.now() - step.startTime)) + " ms ");
 
       if (currentTemp < heatCutOff) {
         winston.info("Under, double increase");
