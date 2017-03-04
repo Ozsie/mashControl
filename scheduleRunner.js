@@ -85,12 +85,12 @@ var runSchedule = function(callback) {
   winston.info("Schedule: " + JSON.stringify(schedule));
   var i = 0;
 
-  var nexInMs = nextStep(i);
+  var nexInMs = 0;
   var doStep = function() {
     winston.info("Next step in " + nexInMs + " ms");
     setTimeout(function() {
-      i++;
       if (i < schedule.steps.length) {
+        i++;
         winston.info("It's time for the next step");
         nexInMs = nextStep(i);
         doStep();
