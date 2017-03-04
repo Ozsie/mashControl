@@ -8,7 +8,13 @@ winston.add(winston.transports.File, { name:"scheduleRunner", filename: settings
 var schedule;
 var previousTemp;
 
-var adjustTemperature = function(targetTemp, initialTemp, volume) {
+var calculateCutOffPoint = function(targetTemp, initialTemp, volume) {
+  var initialDegreesToIncrease = targetTemp - initialTemp;
+  var heatCutOff = targetTemp - ((initialDegreesToIncrease / 4) * volume);
+  return heatCutOff;
+};
+
+var adjustTemperature = function(step, volume) {
   tempSensor.readAndParse(function(err, data) {
     if (!err) {
       if (currentTemp > 90 || currentTemp > settings.heatCutOff) {
@@ -18,13 +24,13 @@ var adjustTemperature = function(targetTemp, initialTemp, volume) {
       }
 
       var currentTemp = data.temperature.celcius;
-      var initialDegreesToIncrease = targetTemp - initialTemp;
-      var heatCutOff = targetTemp - ((initialDegreesToIncrease / 5) * volume);
+      var initialDegreesToIncrease = step.temperature - step.initialTemp;
+      var heatCutOff = calculateCutOffPoint(step.temperature, step.initialTemp, volume);
       if (previousTemp === undefined) {
         previousTemp = currentTemp;
       }
       var diff = parseFloat(currentTemp - previousTemp);
-      var degreesToIncrease = Math.abs(currentTemp - targetTemp);
+      var degreesToIncrease = Math.abs(currentTemp - step.temperature);
 
       winston.info("Increase from last: " + diff + "C. Degrees left: " + degreesToIncrease + "C of " + initialDegreesToIncrease + "C. Cut off at: " + heatCutOff + "C.");
 
@@ -35,7 +41,7 @@ var adjustTemperature = function(targetTemp, initialTemp, volume) {
         winston.info("Reached heat cut off point, fast decrease");
         heatControl.fastDecrease();
       } else {
-        winston.info("On mark " + currentTemp.temperature.celcius + " = " + targetTemp + " holding.");
+        winston.info("On mark " + currentTemp + " = " + step.temperature + " holding.");
       }
       previousTemp = currentTemp;
     } else {
@@ -52,11 +58,13 @@ var nextStep = function(index) {
       step.initialTemp = data.temperature.celcius;
       step.startTime = Date.now();
       step.stepTime = (step.riseTime + step.time) * 60 * 1000;
+      step.heatCutOff = calculateCutOffPoint(step.temperature, step.initialTemp, schedule.volume);
       winston.info("######################################################################################");
       winston.info("#                                                                                    #");
       winston.info("    Starting step " + (index + 1) + ", " + step.name + " at " + step.startTime);
       winston.info("    Will run for " + step.stepTime + " ms");
       winston.info("    Temperature at start " + step.initialTemp + " C");
+      winston.info("    Heat cut-off point " + step.heatCutOff + " C");
       winston.info("    Mash water volume " + schedule.volume + " l");
       winston.info("#                                                                                    #");
       winston.info("######################################################################################");
@@ -64,7 +72,7 @@ var nextStep = function(index) {
       var run = function() {
         setTimeout(function() {
           if (Date.now() - step.startTime < step.stepTime) {
-            adjustTemperature(step.temperature, step.initialTemp, schedule.volume);
+            adjustTemperature(step, schedule.volume);
             run();
           } else {
             winston.info("## Step " + step.name + " ran for " + (Date.now() - step.startTime) + " ms. ##");
