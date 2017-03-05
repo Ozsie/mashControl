@@ -10,9 +10,15 @@ var previousTemp;
 
 var calculateCutOffPoint = function(targetTemp, initialTemp, volume) {
   var initialDegreesToIncrease = targetTemp - initialTemp;
-  var targetTempFactor = targetTemp / 20;
-  var heatCutOff = targetTemp - (((initialDegreesToIncrease + targetTempFactor) / 3) * volume);
-  return heatCutOff;
+  var targetTempFactor = targetTemp / 12;
+  var heatCutOff = targetTempFactor + targetTemp - (((initialDegreesToIncrease) / 3) * volume);
+  if (heatCutOff < targetTemp) {
+    console.log("calc");
+    return heatCutOff;
+  } else {
+    console.log("hard");
+    return targetTemp - 3;
+  }
 };
 
 var adjustTemperature = function(step, volume) {
@@ -168,5 +174,6 @@ module.exports = {
   startSchedule: startSchedule,
   stopSchedule: stopSchedule,
   getStatus: getStatus,
-  getSchedule: getSchedule
+  getSchedule: getSchedule,
+  calculateCutOffPoint: calculateCutOffPoint
 };

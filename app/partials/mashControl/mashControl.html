@@ -30,5 +30,8 @@
     <button ng-click="stop()">Stop</button>
     <!--button ng-click="getSchedule()">Schedule</button-->
     <br>
-    <div google-chart chart="tempChart" style="height:600px; width:100%;"></div>
+    <!--div google-chart chart="tempChart" style="height:600px; width:100%;"></div-->
+    <div class="chart">
+        <linechart data="data" options="options"></linechart>
+    </div>
 </div>

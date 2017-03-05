@@ -28,6 +28,59 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     updateCurrentTemperature(runTime);
   };
 
+  $scope.options = {
+    margin: {
+      top: 5
+    },
+    series: [
+      {
+        axis: "y",
+        dataset: "temperature",
+        key: "expected",
+        label: "Expected",
+        color: "hsla(88, 48%, 48%, 1)",
+        type: [
+          "line"
+        ],
+        id: "expected"
+      },
+      {
+        axis: "y",
+        dataset: "temperature",
+        key: {
+          y0: "toleranceUnder",
+          y1: "toleranceOver"
+        },
+        label: "Tolerance",
+        color: "hsla(50, 48%, 48%, 1)",
+        type: [
+          "area"
+        ],
+        id: "tolerance"
+      },
+      {
+        axis: "y",
+        dataset: "temperature",
+        key: "actual",
+        label: "Actual",
+        color: "hsla(88, 68%, 28%, 1)",
+        type: [
+          "line"
+        ],
+        id: "actual"
+      }
+    ],
+    axes: {
+      x: {
+        key: "minute"
+      }
+    }
+  };
+
+  $scope.data = {
+    temperature: []
+  };
+
   var updateCurrentTemperature = function(runTime) {
     setTimeout(function () {
       if (!$scope.running) {
@@ -50,7 +103,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
             if (row.c[0].v === minute) {
               var val = {
                 "v": data.temperature.celcius
-              }
+              };
               row.c.push(val);
               updated = true;
               break;
@@ -63,7 +116,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
                 {v: 0},
                 {v: data.temperature.celcius}
               ]
-            }
+            };
             if (insertIndex === -1) {
               rows.push(val);
             } else {
@@ -90,7 +143,6 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
   $scope.calculateRiseTime = true;
 
   $scope.parseInput = function() {
-    $scope.tempChart.data.rows = {};
 
     if (!$scope.schedule) {
       return;
@@ -107,62 +159,71 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
   };
 
   $scope.handleJsonSchedule = function() {
-    var rows = [
-      {
-        c: [
-          {v: 0},
-          {v: 10}
-        ]
-      }
-    ];
+    var data = {
+      temperature: []
+    };
     var runTime = 0;
     $scope.totalRunTime = 0;
     for (var index in $scope.jsonSchedule.steps) {
       var step = $scope.jsonSchedule.steps[index];
+      var startingTemp = 10;
+      if (index > 0) {
+        startingTemp = $scope.jsonSchedule.steps[index - 1].temperature;
+      }
       if ($scope.calculateRiseTime) {
-        var startingTemp = 10;
-        if (index > 0) {
-          startingTemp = $scope.jsonSchedule.steps[index - 1].temperature;
-        }
         if (startingTemp <= step.temperature) {
-          step.riseTime = Math.ceil((step.temperature - startingTemp) / (1.5 * $scope.jsonSchedule.volume));
+          step.riseTime = Math.ceil(((step.temperature - startingTemp) * $scope.jsonSchedule.volume) / 8);
         } else {
-          step.riseTime = Math.ceil((startingTemp - step.temperature) / (0.1 * $scope.jsonSchedule.volume));
+          step.riseTime = Math.ceil(((startingTemp - step.temperature) * $scope.jsonSchedule.volume) / 0.1);
         }
       }
-      runTime += step.riseTime;
-      rows.push({
-        c: [
-          {v: runTime},
-          {v: step.temperature}
-        ]
-     });
 
-      for (var m = 1; m <= step.time; m++) {
+      for (var i = 0; i < step.riseTime; i++) {
+        runTime++;
+        var expected = (((step.temperature - startingTemp) / step.riseTime) * i) + startingTemp;
+        data.temperature.push({
+          minute: runTime,
+          expected: expected,
+          actual: 0,
+          toleranceOver: expected + 1,
+          toleranceUnder: expected - 1
+        });
+      }
+
+      for (var m = 0; m < step.time; m++) {
         runTime += 1;
-
-        rows.push({
-          c: [
-            {v: runTime},
-            {v: step.temperature}
-          ]
+        data.temperature.push({
+          minute: runTime,
+          expected: step.temperature,
+          actual: 0,
+          toleranceOver: step.temperature + 1,
+          toleranceUnder: step.temperature - 1
         });
       }
       $scope.totalRunTime += step.riseTime + step.time;
     }
 
-    $scope.tempChart.data.rows = rows;
+    $scope.data = data;
     $scope.schedule = JSON.stringify($scope.jsonSchedule);
   };
 
   $scope.addStep = function() {
     if (!$scope.jsonSchedule) {
-      $scope.jsonSchedule = {steps:[{}], volume: 0};
+      $scope.jsonSchedule = {steps:[{
+          temperature: 0,
+          riseTime: 0,
+          time: 0
+        }],
+        volume: 1};
     } else {
       if (!$scope.jsonSchedule.steps) {
         $scope.jsonSchedule.steps = [];
       }
-      $scope.jsonSchedule.steps.push({});
+      $scope.jsonSchedule.steps.push({
+        temperature: 0,
+        riseTime: 0,
+        time: 0
+      });
     }
   };
 
