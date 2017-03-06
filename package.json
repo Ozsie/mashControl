@@ -32,10 +32,9 @@
     "express": "^4.14.0",
     "body-parser": "~1.15",
     "angular": "~1.5",
-    "angular-resource": "~1.5",
-    "angular-google-chart": "~0.1",
+    "angular-resource": "~1.5"
     "n3-charts": "^2.0.28",
-    "d3": "4.7.1",
+    "d3": "^3.5.17",
     "jshint": "^2.9.4",
     "winston": "^2.3.1",
     "mocha": "^3.2.0",

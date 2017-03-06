@@ -7,6 +7,32 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       $scope.inputDisabled = true;
       $scope.parseInput();
       $scope.startCheckTemp($scope.totalRunTime);
+      $scope.updateOptions();
+    });
+  };
+
+  $scope.updateOptions = function() {
+    for (var index in $scope.options.series) {
+      var series = $scope.options.series[index];
+      if (series.id === "actual") {
+        $scope.options.series.splice(index, 1);
+        break;
+      };
+    }
+
+    $scope.options.series.push({
+      axis: "y",
+      dataset: "temperature",
+      key: "actual",
+      label: "Actual",
+      color: "hsla(88, 68%, 28%, 1)",
+      defined: function(value) {
+        return value.y1 !== undefined;
+      },
+      type: [
+        "line"
+      ],
+      id: "actual"
     });
   };
 
@@ -43,31 +69,6 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
           "line"
         ],
         id: "expected"
-      },
-      {
-        axis: "y",
-        dataset: "temperature",
-        key: {
-          y0: "toleranceUnder",
-          y1: "toleranceOver"
-        },
-        label: "Tolerance",
-        color: "hsla(50, 48%, 48%, 1)",
-        type: [
-          "area"
-        ],
-        id: "tolerance"
-      },
-      {
-        axis: "y",
-        dataset: "temperature",
-        key: "actual",
-        label: "Actual",
-        color: "hsla(88, 68%, 28%, 1)",
-        type: [
-          "line"
-        ],
-        id: "actual"
       }
     ],
     axes: {
@@ -90,37 +91,13 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         $scope.currentTemp = data;
         $scope.currentTempTime = new Date(data.time);
         if ($scope.updates % 60 === 0) {
-          var rows = $scope.tempChart.data.rows;
           var minute = $scope.updates/60;
           var updated = false;
-          var insertIndex = -1;
-          for (var rowIndex in rows) {
-            var row = rows[rowIndex];
-            if (row.c[0].v > minute) {
-              insertIndex = rowIndex;
-              break;
-            }
-            if (row.c[0].v === minute) {
-              var val = {
-                "v": data.temperature.celcius
-              };
-              row.c.push(val);
-              updated = true;
-              break;
-            }
-          }
-          if (!updated) {
-            var val = {
-              c: [
-                {v: minute},
-                {v: 0},
-                {v: data.temperature.celcius}
-              ]
-            };
-            if (insertIndex === -1) {
-              rows.push(val);
-            } else {
-              rows.splice(insertIndex, 0, val);
+
+          for (var index in $scope.data.temperature) {
+            var point = $scope.data.temperature[index];
+            if (point.minute === minute) {
+              point.actual = data.temperature.celcius;
             }
           }
 
@@ -179,26 +156,20 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       }
 
       for (var i = 0; i < step.riseTime; i++) {
-        runTime++;
         var expected = (((step.temperature - startingTemp) / step.riseTime) * i) + startingTemp;
         data.temperature.push({
           minute: runTime,
-          expected: expected,
-          actual: 0,
-          toleranceOver: expected + 1,
-          toleranceUnder: expected - 1
+          expected: expected
         });
+        runTime++;
       }
 
-      for (var m = 0; m < step.time; m++) {
-        runTime += 1;
+      for (var m = 0; m <= step.time; m++) {
         data.temperature.push({
           minute: runTime,
-          expected: step.temperature,
-          actual: 0,
-          toleranceOver: step.temperature + 1,
-          toleranceUnder: step.temperature - 1
+          expected: step.temperature
         });
+        runTime += 1;
       }
       $scope.totalRunTime += step.riseTime + step.time;
     }
