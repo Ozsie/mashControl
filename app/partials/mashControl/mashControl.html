@@ -1,5 +1,7 @@
 <div ng-controller="MashControlCtrl">
     Current temperature: {{currentTemp.temperature.celcius}} @ {{currentTempTime}}
+    <br>
+    <span ng-if="startedTime">Starttid: {{ startedTime }}</span>
     <!-- textarea ng-model="schedule" ng-disabled="inputDisabled"></textarea -->
     <br>
     <input type="text" ng-model="jsonSchedule.volume" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Volume">

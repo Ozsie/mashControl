@@ -8,6 +8,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       $scope.parseInput();
       $scope.startCheckTemp($scope.totalRunTime);
       $scope.updateOptions();
+      $scope.startedTime = Date.now();
     });
   };
 
