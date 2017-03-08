@@ -32,7 +32,7 @@
     "express": "^4.14.0",
     "body-parser": "~1.15",
     "angular": "~1.5",
-    "angular-resource": "~1.5"
+    "angular-resource": "~1.5",
     "n3-charts": "^2.0.28",
     "d3": "^3.5.17",
     "jshint": "^2.9.4",
