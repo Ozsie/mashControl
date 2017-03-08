@@ -9,6 +9,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       $scope.startCheckTemp($scope.totalRunTime);
       $scope.updateOptions();
       $scope.startedTime = Date.now();
+      $scope.lastTempUpdate = undefined;
     });
   };
 
@@ -91,11 +92,16 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       if (!$scope.running) {
         return;
       }
+      $scope.runTime = Math.round((Date.now() - $scope.startedTime) / 1000);
       mashControlRestService.getCurrentTemperature().then(function(data) {
+        $scope.currentTempTime = data.time;
         $scope.currentTemp = data;
-        $scope.currentTempTime = new Date(data.time);
-        if ($scope.updates % 60 === 0) {
-          var minute = $scope.updates/60;
+        var now = Date.now();
+        var timeChange = now - $scope.lastTempUpdate;
+        if (!$scope.lastTempUpdate || timeChange >= 60000) {
+          $scope.lastTempUpdate = Date.now();
+          var minute = $scope.updates;
+          $scope.updates++;
           var updated = false;
 
           for (var index in $scope.data.temperature) {
@@ -112,7 +118,6 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
             return;
           }
         }
-        $scope.updates++;
       });
       updateCurrentTemperature(runTime);
     }, 1000);

@@ -1,7 +1,13 @@
 <div ng-controller="MashControlCtrl">
-    Current temperature: {{currentTemp.temperature.celcius}} @ {{currentTempTime}}
-    <br>
-    <span ng-if="startedTime">Starttid: {{ startedTime }}</span>
+    <span ng-if="currentTemp">Current temperature: {{currentTemp.temperature.celcius}}</span>
+    <br ng-if="startedTime">
+    <span ng-if="startedTime">Starttid: {{ startedTime | date : 'mediumTime' }}</span>
+    <br ng-if="lastTempUpdate">
+    <span ng-if="lastTempUpdate">Graf Uppdaterades: {{ lastTempUpdate | date : 'mediumTime' }}</span>
+    <br ng-if="currentTempTime">
+    <span ng-if="currentTempTime">Temp Uppdaterades: {{ currentTempTime | date : 'mediumTime' }}</span>
+    <br ng-if="runTime">
+    <span ng-if="runTime">Körtid: {{ runTime }}</span>
     <!-- textarea ng-model="schedule" ng-disabled="inputDisabled"></textarea -->
     <br>
     <input type="text" ng-model="jsonSchedule.volume" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Volume">

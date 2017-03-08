@@ -9,7 +9,7 @@ var schedule;
 var previousTemp;
 
 var calculateCutOffPoint = function(targetTemp, initialTemp, volume) {
-  return targetTemp - 5;
+  return targetTemp - Math.max(0, 6 - volume);
 };
 
 var adjustTemperature = function(step, volume) {
