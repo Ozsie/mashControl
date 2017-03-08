@@ -32,7 +32,7 @@ var adjustTemperature = function(step, volume) {
 
       winston.info("Increase from last: " + diff + "C. Degrees left: " + degreesToIncrease + "C of " +
       initialDegreesToIncrease + "C. Cut off at: " + heatCutOff + "C. " +
-      "Target: " + targetTemp + "C" +
+      "Target: " + step.targetTemp + "C" +
       "Time left: " + (step.stepTime - (Date.now() - step.startTime)) + " ms ");
 
       if (currentTemp < heatCutOff) {
