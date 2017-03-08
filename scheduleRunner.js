@@ -12,9 +12,9 @@ var calculateCutOffPoint = function(targetTemp, initialTemp, volume) {
   var initialDegreesToIncrease = targetTemp - initialTemp;
   var targetTempFactor = targetTemp / 12;
   if (volume > 5 && volume < 10) {
-    return heatCutOff * (volume / 10);
+    return targetTemp * (volume / 10);
   } else {
-    return heatCutOff * 0.85;
+    return targetTemp * 0.85;
   }
 };
 
