@@ -65,6 +65,9 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         key: "expected",
         label: "Expected",
         color: "hsla(88, 48%, 48%, 1)",
+        defined: function(value) {
+          return value.y1 !== undefined;
+        },
         type: [
           "line"
         ],
@@ -153,6 +156,13 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         } else {
           step.riseTime = Math.ceil(((startingTemp - step.temperature) * $scope.jsonSchedule.volume) / 0.1);
         }
+      }
+
+      if (!step.temperature) {
+        continue;
+      }
+      if (!step.riseTime && !step.time) {
+        continue;
       }
 
       for (var i = 0; i < step.riseTime; i++) {
