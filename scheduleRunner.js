@@ -166,7 +166,7 @@ var stopSchedule = function(callback) {
 
 var getStatus = function() {
   if (!schedule) {
-    status.status = 'unavailable'
+    status.status = 'unavailable';
     return status;
   } else {
     return status;
