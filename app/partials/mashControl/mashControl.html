@@ -1,13 +1,33 @@
 <div ng-controller="MashControlCtrl">
-    <span ng-if="currentTemp">Current temperature: {{currentTemp.temperature.celcius}}</span>
-    <br ng-if="startedTime">
-    <span ng-if="startedTime">Starttid: {{ startedTime | date : 'mediumTime' }}</span>
-    <br ng-if="lastTempUpdate">
-    <span ng-if="lastTempUpdate">Graf Uppdaterades: {{ lastTempUpdate | date : 'mediumTime' }}</span>
-    <br ng-if="currentTempTime">
-    <span ng-if="currentTempTime">Temp Uppdaterades: {{ currentTempTime | date : 'mediumTime' }}</span>
-    <br ng-if="runTime">
-    <span ng-if="runTime">Körtid: {{ runTime }}</span>
+    <table>
+        <tr>
+            <td>Current Temperature</td>
+            <td>{{currentTemp.temperature.celcius}} C</td>
+            <td>Temp update</td>
+            <td>{{ currentTempTime | date : 'mediumTime' }}</td>
+        </tr>
+        <tr>
+            <td>Start time</td>
+            <td>{{ startedTime | date : 'mediumTime' }}</td>
+            <td>Run time</td>
+            <td>{{ runTime }} s ( {{ millisToMinutes(runTime) }} min)</td>
+        </tr>
+        <tr>
+            <td>Graph update</td>
+            <td colspan="3">{{ lastTempUpdate | date : 'mediumTime' }}</td>
+        </tr>
+        <tr>
+            <td>Status</td>
+            <td>{{ status.status }}</td>
+            <td>Step</td>
+            <td>{{ status.step }}, {{ status.stepName }}</td>
+        </tr>
+        <tr>
+            <td>Heat Cut Off</td>
+            <td colspan="3">{{ status.heatCutOff }} C</td>
+        </tr>
+    </table>
+    <span ng-if="lastTempUpdate">Graph update: {{ lastTempUpdate | date : 'mediumTime' }}</span>
     <!-- textarea ng-model="schedule" ng-disabled="inputDisabled"></textarea -->
     <br>
     <input type="number" ng-model="jsonSchedule.volume" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Volume">
@@ -23,6 +43,7 @@
             <th>Time</th>
             <th>Rise time</th>
             <th></th>
+            <th ng-if="status.status == 'running'">Time Remaining</th>
         </tr>
         <tr ng-repeat="step in jsonSchedule.steps">
             <td><input type="text" ng-model="step.name" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
@@ -30,6 +51,7 @@
             <td><input type="number" ng-model="step.time" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
             <td><input type="number" ng-model="step.riseTime" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
             <td><input type="button" ng-click="removeStep(step, $index)" value="-" ng-disabled="inputDisabled"></td>
+            <th ng-class="{runningStep: $index+1==status.step}" ng-if="status.status == 'running' && status.step == $index+1">{{ millisToMinutes(status.timeRemaining) }} min</th>
         </tr>
         <tr>
             <td><input type="button" value="+" ng-click="addStep()" ng-disabled="inputDisabled"></td>

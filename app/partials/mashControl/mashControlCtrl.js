@@ -1,6 +1,7 @@
 var mashControl = angular.module('mashControl');
 
 mashControl.controller('MashControlCtrl', function($scope, mashControlRestService) {
+
   $scope.fetchStartTemp = function() {
     mashControlRestService.getCurrentTemperature().then(function(data) {
       $scope.startTemp = data.temperature.celcius;
@@ -19,6 +20,9 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       $scope.startedTime = Date.now();
       $scope.lastTempUpdate = undefined;
 
+      mashControlRestService.getStatus().then(function(data) {
+        $scope.status = data;
+      });
     });
   };
 
@@ -50,6 +54,14 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
   $scope.stop = function() {
     mashControlRestService.stopSchedule().then(function(data) {
       console.log(data);
+      $scope.inputDisabled = false;
+      $scope.running = false;
+
+      mashControlRestService.getStatus().then(function(data) {
+        $scope.status = data;
+      });
+    }, function(err) {
+      console.error(err);
     });
   };
 
@@ -63,6 +75,10 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     $scope.running = true;
     $scope.updates = 0;
     updateCurrentTemperature(runTime);
+    mashControlRestService.getStatus().then(function(data) {
+      $scope.status = data;
+    });
+    updateStatus();
   };
 
   $scope.options = {
@@ -96,6 +112,15 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     temperature: []
   };
 
+  var updateStatus = function() {
+    setTimeout(function() {
+      mashControlRestService.getStatus().then(function(data) {
+        $scope.status = data;
+      });
+      updateStatus();
+    }, 30000);
+  };
+
   var updateCurrentTemperature = function(runTime) {
     setTimeout(function () {
       if (!$scope.running) {
@@ -109,22 +134,29 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         var timeChange = now - $scope.lastTempUpdate;
         if (!$scope.lastTempUpdate || timeChange >= 60000) {
           $scope.lastTempUpdate = Date.now();
-          var minute = $scope.updates;
-          $scope.updates++;
-          var updated = false;
-
-          for (var index in $scope.data.temperature) {
-            var point = $scope.data.temperature[index];
-            if (point.minute === minute) {
-              point.actual = data.temperature.celcius;
-            }
+          if (!timeChange) {
+            timeChange = Date.now() - $scope.lastTempUpdate;
           }
+          var timeChangeTemp = timeChange;
+          while (timeChangeTemp > 500) {
+            var minute = $scope.updates;
+            $scope.updates++;
+            var updated = false;
 
-          if (minute >= runTime) {
-            console.log("Done!");
-            $scope.running = false;
-            $scope.inputDisabled = false;
-            return;
+            for (var index in $scope.data.temperature) {
+              var point = $scope.data.temperature[index];
+              if (point.minute === minute) {
+                point.actual = point.expected;
+              }
+            }
+
+            if (minute >= runTime) {
+              console.log("Done!");
+              $scope.running = false;
+              $scope.inputDisabled = false;
+              return;
+            }
+            timeChangeTemp -= 60000;
           }
         }
       });
@@ -159,6 +191,9 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     };
     var runTime = 0;
     $scope.totalRunTime = 0;
+    if (!$scope.startTemp) {
+      $scope.fetchStartTemp();
+    }
     for (var index in $scope.jsonSchedule.steps) {
       var step = $scope.jsonSchedule.steps[index];
       var startingTemp = $scope.startTemp;
@@ -254,4 +289,11 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     }
   };
 
+  $scope.millisToMinutes = function(millis) {
+    var sec = millis/1000;
+    var min = sec/60;
+    return Math.floor(min);
+  };
+
+  $scope.stop();
 });
