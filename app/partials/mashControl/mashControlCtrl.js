@@ -1,18 +1,67 @@
 var mashControl = angular.module('mashControl');
 
 mashControl.controller('MashControlCtrl', function($scope, mashControlRestService) {
+
+  $scope.fetchStartTemp = function() {
+    mashControlRestService.getCurrentTemperature().then(function(data) {
+      $scope.startTemp = data.temperature.celcius;
+    });
+  };
+
   $scope.start = function() {
+    $scope.fetchStartTemp();
+    $scope.handleJsonSchedule();
     mashControlRestService.startSchedule($scope.schedule).then(function(data) {
       $scope.startResponse = data;
       $scope.inputDisabled = true;
       $scope.parseInput();
       $scope.startCheckTemp($scope.totalRunTime);
+      $scope.updateOptions();
+      $scope.startedTime = Date.now();
+      $scope.lastTempUpdate = undefined;
+
+      mashControlRestService.getStatus().then(function(data) {
+        $scope.status = data;
+      });
+    });
+  };
+
+  $scope.updateOptions = function() {
+    for (var index in $scope.options.series) {
+      var series = $scope.options.series[index];
+      if (series.id === "actual") {
+        $scope.options.series.splice(index, 1);
+        break;
+      };
+    }
+
+    $scope.options.series.push({
+      axis: "y",
+      dataset: "temperature",
+      key: "actual",
+      label: "Actual",
+      color: "hsla(88, 68%, 28%, 1)",
+      defined: function(value) {
+        return value.y1 !== undefined;
+      },
+      type: [
+        "line"
+      ],
+      id: "actual"
     });
   };
 
   $scope.stop = function() {
     mashControlRestService.stopSchedule().then(function(data) {
       console.log(data);
+      $scope.inputDisabled = false;
+      $scope.running = false;
+
+      mashControlRestService.getStatus().then(function(data) {
+        $scope.status = data;
+      });
+    }, function(err) {
+      console.error(err);
     });
   };
 
@@ -26,6 +75,50 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     $scope.running = true;
     $scope.updates = 0;
     updateCurrentTemperature(runTime);
+    mashControlRestService.getStatus().then(function(data) {
+      $scope.status = data;
+    });
+    updateStatus();
+  };
+
+  $scope.options = {
+    margin: {
+      top: 5
+    },
+    series: [
+      {
+        axis: "y",
+        dataset: "temperature",
+        key: "expected",
+        label: "Expected",
+        color: "hsla(88, 48%, 48%, 1)",
+        defined: function(value) {
+          return value.y1 !== undefined;
+        },
+        type: [
+          "line"
+        ],
+        id: "expected"
+      }
+    ],
+    axes: {
+      x: {
+        key: "minute"
+      }
+    }
+  };
+
+  $scope.data = {
+    temperature: []
+  };
+
+  var updateStatus = function() {
+    setTimeout(function() {
+      mashControlRestService.getStatus().then(function(data) {
+        $scope.status = data;
+      });
+      updateStatus();
+    }, 30000);
   };
 
   var updateCurrentTemperature = function(runTime) {
@@ -33,52 +126,39 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       if (!$scope.running) {
         return;
       }
+      $scope.runTime = Math.round((Date.now() - $scope.startedTime) / 1000);
       mashControlRestService.getCurrentTemperature().then(function(data) {
+        $scope.currentTempTime = data.time;
         $scope.currentTemp = data;
-        $scope.currentTempTime = new Date(data.time);
-        if ($scope.updates % 60 === 0) {
-          var rows = $scope.tempChart.data.rows;
-          var minute = $scope.updates/60;
-          var updated = false;
-          var insertIndex = -1;
-          for (var rowIndex in rows) {
-            var row = rows[rowIndex];
-            if (row.c[0].v > minute) {
-              insertIndex = rowIndex;
-              break;
-            }
-            if (row.c[0].v === minute) {
-              var val = {
-                "v": data.temperature.celcius
-              }
-              row.c.push(val);
-              updated = true;
-              break;
-            }
+        var now = Date.now();
+        var timeChange = now - $scope.lastTempUpdate;
+        if (!$scope.lastTempUpdate || timeChange >= 60000) {
+          $scope.lastTempUpdate = Date.now();
+          if (!timeChange) {
+            timeChange = Date.now() - $scope.lastTempUpdate;
           }
-          if (!updated) {
-            var val = {
-              c: [
-                {v: minute},
-                {v: 0},
-                {v: data.temperature.celcius}
-              ]
-            }
-            if (insertIndex === -1) {
-              rows.push(val);
-            } else {
-              rows.splice(insertIndex, 0, val);
-            }
-          }
+          var timeChangeTemp = timeChange;
+          while (timeChangeTemp > 500) {
+            var minute = $scope.updates;
+            $scope.updates++;
+            var updated = false;
 
-          if (minute >= runTime) {
-            console.log("Done!");
-            $scope.running = false;
-            $scope.inputDisabled = false;
-            return;
+            for (var index in $scope.data.temperature) {
+              var point = $scope.data.temperature[index];
+              if (point.minute === minute) {
+                point.actual = point.expected;
+              }
+            }
+
+            if (minute >= runTime) {
+              console.log("Done!");
+              $scope.running = false;
+              $scope.inputDisabled = false;
+              return;
+            }
+            timeChangeTemp -= 60000;
           }
         }
-        $scope.updates++;
       });
       updateCurrentTemperature(runTime);
     }, 1000);
@@ -90,7 +170,6 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
   $scope.calculateRiseTime = true;
 
   $scope.parseInput = function() {
-    $scope.tempChart.data.rows = {};
 
     if (!$scope.schedule) {
       return;
@@ -107,62 +186,75 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
   };
 
   $scope.handleJsonSchedule = function() {
-    var rows = [
-      {
-        c: [
-          {v: 0},
-          {v: 10}
-        ]
-      }
-    ];
+    var data = {
+      temperature: []
+    };
     var runTime = 0;
     $scope.totalRunTime = 0;
+    if (!$scope.startTemp) {
+      $scope.fetchStartTemp();
+    }
     for (var index in $scope.jsonSchedule.steps) {
       var step = $scope.jsonSchedule.steps[index];
+      var startingTemp = $scope.startTemp;
+      if (index > 0) {
+        startingTemp = $scope.jsonSchedule.steps[index - 1].temperature;
+      }
       if ($scope.calculateRiseTime) {
-        var startingTemp = 10;
-        if (index > 0) {
-          startingTemp = $scope.jsonSchedule.steps[index - 1].temperature;
-        }
         if (startingTemp <= step.temperature) {
-          step.riseTime = Math.ceil((step.temperature - startingTemp) / (1.5 * $scope.jsonSchedule.volume));
+          step.riseTime = Math.ceil(((step.temperature - startingTemp) * $scope.jsonSchedule.volume) / 8);
         } else {
-          step.riseTime = Math.ceil((startingTemp - step.temperature) / (0.1 * $scope.jsonSchedule.volume));
+          step.riseTime = Math.ceil(((startingTemp - step.temperature) * $scope.jsonSchedule.volume) / 0.1);
         }
       }
-      runTime += step.riseTime;
-      rows.push({
-        c: [
-          {v: runTime},
-          {v: step.temperature}
-        ]
-     });
 
-      for (var m = 1; m <= step.time; m++) {
-        runTime += 1;
+      if (!step.temperature) {
+        continue;
+      }
+      if (!step.riseTime && !step.time) {
+        continue;
+      }
 
-        rows.push({
-          c: [
-            {v: runTime},
-            {v: step.temperature}
-          ]
+      for (var i = 0; i < step.riseTime; i++) {
+        var expected = (((step.temperature - startingTemp) / step.riseTime) * i) + startingTemp;
+        data.temperature.push({
+          minute: runTime,
+          expected: expected
         });
+        runTime++;
+      }
+
+      for (var m = 0; m <= step.time; m++) {
+        data.temperature.push({
+          minute: runTime,
+          expected: step.temperature
+        });
+        runTime += 1;
       }
       $scope.totalRunTime += step.riseTime + step.time;
     }
 
-    $scope.tempChart.data.rows = rows;
+    $scope.data = data;
     $scope.schedule = JSON.stringify($scope.jsonSchedule);
   };
 
   $scope.addStep = function() {
     if (!$scope.jsonSchedule) {
-      $scope.jsonSchedule = {steps:[{}], volume: 0};
+      $scope.jsonSchedule = {steps:[{
+          temperature: 0,
+          riseTime: 0,
+          time: 0
+        }],
+        volume: 1};
     } else {
       if (!$scope.jsonSchedule.steps) {
         $scope.jsonSchedule.steps = [];
       }
-      $scope.jsonSchedule.steps.push({});
+      $scope.jsonSchedule.steps.push({
+        temperature: 0,
+        riseTime: 0,
+        time: 0
+      });
     }
   };
 
@@ -197,4 +289,11 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     }
   };
 
+  $scope.millisToMinutes = function(millis) {
+    var sec = millis/1000;
+    var min = sec/60;
+    return Math.floor(min);
+  };
+
+  $scope.stop();
 });

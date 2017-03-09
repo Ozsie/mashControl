@@ -1,7 +1,7 @@
 {
-  "input": "/sys/bus/w1/devices/28-800000263717/w1_slave",
+  "input": "../tempSensor/test/testTemp.txt",
   "installKernelMod": false,
-  "publishedModules": ["angular", "angular-resource", "angular-google-chart"],
+  "publishedModules": ["angular", "angular-resource", "n3-charts", "d3"],
   "heatCutOff": 85,
   "tolerance": 0.75,
   "offMarkBreak": 5,

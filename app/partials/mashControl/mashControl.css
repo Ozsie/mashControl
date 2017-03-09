@@ -1,0 +1,8 @@
+.chart {
+  width: 600px;
+  height: 400px;
+}
+
+.runningStep {
+  background: green;
+}

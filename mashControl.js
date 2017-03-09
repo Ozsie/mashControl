@@ -57,15 +57,14 @@ app.get('/schedule/stop', function(req, res) {
     if (!err) {
       res.status(200).send(data);
     } else {
-      winston.error("Could not stop schedule", err);
-      res.status(500).send(err);
+      winston.warn("Stopped with error", err);
+      res.status(200).send(data);
     }
   });
 
 });
 
 app.get('/schedule/status', function(req, res) {
-  winston.info('Schedule status requested');
   var status = scheduleRunner.getStatus();
   res.status(200).send(status);
 });

@@ -39,6 +39,7 @@ var turnOff = function(callback) {
     throw new Error("Callback function required");
   }
   winston.info("Turn off. Enable Pin: " + settings.motor.enablePin);
+  commands = [];
   output(settings.motor.enablePin, 0, function(err, data) {
     if (!err) {
       isOpen = false;
@@ -50,7 +51,7 @@ var turnOff = function(callback) {
       callback(undefined, data);
     } else {
       winston.error("Could not turn off heat control", err);
-      callback(err);
+      callback(err, data);
     }
   });
 };
