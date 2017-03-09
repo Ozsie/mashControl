@@ -10,9 +10,12 @@
     <span ng-if="runTime">Körtid: {{ runTime }}</span>
     <!-- textarea ng-model="schedule" ng-disabled="inputDisabled"></textarea -->
     <br>
-    <input type="text" ng-model="jsonSchedule.volume" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Volume">
+    <input type="number" ng-model="jsonSchedule.volume" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Volume">
     <br>
     <input type="checkbox" ng-model="calculateRiseTime">Calculate rise time
+    <br>
+    <button ng-click="fetchStartTemp()">Fetch start temperature</button>
+    <input type="number" ng-model="startTemp" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Start temperature">
     <table>
         <tr>
             <th>Step</th>

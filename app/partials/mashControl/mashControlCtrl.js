@@ -1,7 +1,15 @@
 var mashControl = angular.module('mashControl');
 
 mashControl.controller('MashControlCtrl', function($scope, mashControlRestService) {
+  $scope.fetchStartTemp = function() {
+    mashControlRestService.getCurrentTemperature().then(function(data) {
+      $scope.startTemp = data.temperature.celcius;
+    });
+  };
+
   $scope.start = function() {
+    $scope.fetchStartTemp();
+    $scope.handleJsonSchedule();
     mashControlRestService.startSchedule($scope.schedule).then(function(data) {
       $scope.startResponse = data;
       $scope.inputDisabled = true;
@@ -10,6 +18,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       $scope.updateOptions();
       $scope.startedTime = Date.now();
       $scope.lastTempUpdate = undefined;
+
     });
   };
 
@@ -152,7 +161,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     $scope.totalRunTime = 0;
     for (var index in $scope.jsonSchedule.steps) {
       var step = $scope.jsonSchedule.steps[index];
-      var startingTemp = 10;
+      var startingTemp = $scope.startTemp;
       if (index > 0) {
         startingTemp = $scope.jsonSchedule.steps[index - 1].temperature;
       }
