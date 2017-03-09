@@ -41,7 +41,7 @@
     "chai": "^4.0.0-canary.1",
     "chai-http": "^3.0.0",
     "mc-gpio": "^1.0.3",
-    "mc-tempsensor": "^1.0.2",
+    "mc-tempsensor": "^1.0.4",
     "grpc": "^1.0.0"
   }
 }
