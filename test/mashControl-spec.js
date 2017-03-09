@@ -92,7 +92,7 @@ describe('mashControl', function() {
         .get('/schedule/status')
         .end(function(err, res){
           expect(res.status).to.equal(200);
-          expect(res.text).to.equal("running");
+          expect(JSON.parse(res.text).status).to.equal("running");
           done();
         });
   });
@@ -112,7 +112,7 @@ describe('mashControl', function() {
         .get('/schedule/status')
         .end(function(err, res){
           expect(res.status).to.equal(200);
-          expect(res.text).to.equal("stopped");
+          expect(JSON.parse(res.text).status).to.equal("stopped");
           done();
         });
   });
