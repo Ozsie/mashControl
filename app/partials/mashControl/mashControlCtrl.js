@@ -202,7 +202,11 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       }
       if ($scope.calculateRiseTime) {
         if (startingTemp <= step.temperature) {
-          step.riseTime = Math.ceil(((step.temperature - startingTemp) * $scope.jsonSchedule.volume) / 8);
+          var joules = 4184 * $scope.jsonSchedule.volume;
+          var watts = 1800;
+          var secondsPerDegree = joules/watts;
+          var minutesPerDegree = secondsPerDegree / 60;
+          step.riseTime = (startingTemp - step.temperature) * minutesPerDegree;
         } else {
           step.riseTime = Math.ceil(((startingTemp - step.temperature) * $scope.jsonSchedule.volume) / 0.1);
         }
