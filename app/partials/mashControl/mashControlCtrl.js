@@ -291,7 +291,11 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
 
   $scope.millisToMinutes = function(millis) {
     var sec = millis/1000;
-    var min = sec/60;
+    return $scope.secondsToMinutes(sec);
+  };
+
+  $scope.secondsToMinutes = function(seconds) {
+    var min = seconds/60;
     return Math.floor(min);
   };
 

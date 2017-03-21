@@ -1,70 +1,143 @@
-<div ng-controller="MashControlCtrl">
-    <table>
-        <tr>
-            <td>Current Temperature</td>
-            <td>{{currentTemp.temperature.celcius}} C</td>
-            <td>Temp update</td>
-            <td>{{ currentTempTime | date : 'mediumTime' }}</td>
-        </tr>
-        <tr>
-            <td>Start time</td>
-            <td>{{ startedTime | date : 'mediumTime' }}</td>
-            <td>Run time</td>
-            <td>{{ runTime }} s ( {{ millisToMinutes(runTime) }} min)</td>
-        </tr>
-        <tr>
-            <td>Graph update</td>
-            <td colspan="3">{{ lastTempUpdate | date : 'mediumTime' }}</td>
-        </tr>
-        <tr>
-            <td>Status</td>
-            <td>{{ status.status }}</td>
-            <td>Step</td>
-            <td>{{ status.step }}, {{ status.stepName }}</td>
-        </tr>
-        <tr>
-            <td>Heat Cut Off</td>
-            <td colspan="3">{{ status.heatCutOff }} C</td>
-        </tr>
-    </table>
-    <span ng-if="lastTempUpdate">Graph update: {{ lastTempUpdate | date : 'mediumTime' }}</span>
+<div ng-controller="MashControlCtrl" class="container">
+    <div class="page-header">
+        <h1>Mash Control <small>Simple mashing</small></h1>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">Status</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-xs-6 col-sm-6 col-md-3">Current Temperature</div>
+                <div class="col-xs-6 col-sm-6 col-md-3">
+                    <div ng-if="currentTemp">{{currentTemp.temperature.celcius}} C</div>
+                </div>
+                <div class="col-xs-6 col-sm-6 col-md-3">Temp update</div>
+                <div class="col-xs-6 col-sm-6 col-md-3">
+                    <div ng-if="currentTempTime">
+                        {{ currentTempTime | date : 'mediumTime' }}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6 col-sm-6 col-md-3">Start time</div>
+                <div class="col-xs-6 col-sm-6 col-md-3">
+                    <div ng-if="startedTime">
+                        {{ startedTime | date : 'mediumTime' }}
+                    </div>
+                </div>
+                <div class="col-xs-6 col-sm-6 col-md-3">Graph update</div>
+                <div class="col-xs-6 col-sm-6 col-md-3">
+                    <div ng-if="lastTempUpdate">
+                        {{ lastTempUpdate | date : 'mediumTime' }}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6 col-sm-6 col-md-3">Run time</div>
+                <div class="col-xs-6 col-sm-8 col-md-9">
+                    <div ng-if="runTime">
+                        {{ runTime }} s ( {{ secondsToMinutes(runTime) }} min)
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6 col-sm-6 col-md-3">Status</div>
+                <div class="col-xs-6 col-sm-6 col-md-3">
+                    <div ng-if="status">{{ status.status }}</div>
+                </div>
+                <div class="col-xs-6 col-sm-6 col-md-3">Step</div>
+                <div class="col-xs-6 col-sm-6 col-md-3">
+                    <div ng-if="status && status.step">
+                        {{ status.step }}<span ng-if="status.stepName">, {{ status.stepName }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6 col-sm-6 col-md-3">Heat cut off</div>
+                <div class="col-xs-6 col-sm-8 col-md-9">
+                    <div ng-if="status && status.heatCutOff">
+                        {{ status.heatCutOff }} C
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Mash schedule</div>
+        <div class="panel-body" ng-show="!running">
+            <div class="well">
+                <div class="input-group">
+                    <span class="input-group-addon">Volume</span>
+                    <input class="form-control" type="number" ng-model="jsonSchedule.volume" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Volume" aria-label="Volume">
+                    <span class="input-group-addon">l</span>
+                </div>
+                <div class="input-group">
+                    <button class="btn btn-primary btn-md" type="button" ng-click="calculateRiseTime = !calculateRiseTime">
+                        <span class="glyphicon" ng-class="{'glyphicon-check': calculateRiseTime, 'glyphicon-unchecked': !calculateRiseTime}" aria-hidden="true"></span>
+                    </button>
+                    <span>Calculate rise time</span>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon">Start temperature</span>
+                    <input class="form-control" type="number" ng-model="startTemp" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Start temperature" aria-label="Start temperature">
+                    <span class="input-group-addon">C</span>
+                </div>
+                <div class="input-group">
+                    <button class="btn btn-primary btn-md"  ng-click="fetchStartTemp()">
+                        <span class="glyphicon glyphicon-fire" aria-hidden="true"></span> Fetch start temperature
+                    </button>
+                </div>
+            </div>
+            <div class="well" ng-repeat="step in jsonSchedule.steps">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Name</span>
+                    <input type="text" class="form-control" ng-model="step.name" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Name" aria-label="Name">
+                    <span class="input-group-addon">Temperature</span>
+                    <input type="number" class="form-control" ng-model="step.temperature" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Temperature" aria-label="Temperature">
+                    <span class="input-group-addon">C</span>
+                </div>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Time</span>
+                    <input type="number" class="form-control" ng-model="step.time" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Time" aria-label="Time">
+                    <span class="input-group-addon">min</span>
+                    <span class="input-group-addon">Rise time</span>
+                    <input type="number" class="form-control" ng-model="step.riseTime" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Rise time" aria-label="Rise time">
+                    <span class="input-group-addon">min</span>
+                </div>
+                <div class="input-group input-group-sm">
+                    <button class="btn btn-danger btn-md" ng-click="removeStep(step, $index)" ng-disabled="inputDisabled">
+                        <span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span> Remove step
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-11"></div>
+                <div class="col-md-1">
+                    <div class="input-group">
+                        <button class="btn btn-primary btn-md" ng-click="addStep()" ng-disabled="inputDisabled">
+                            <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add step
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- textarea ng-model="schedule" ng-disabled="inputDisabled"></textarea -->
-    <br>
-    <input type="number" ng-model="jsonSchedule.volume" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Volume">
-    <br>
-    <input type="checkbox" ng-model="calculateRiseTime">Calculate rise time
-    <br>
-    <button ng-click="fetchStartTemp()">Fetch start temperature</button>
-    <input type="number" ng-model="startTemp" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Start temperature">
-    <table>
-        <tr>
-            <th>Step</th>
-            <th>Temperature</th>
-            <th>Time</th>
-            <th>Rise time</th>
-            <th></th>
-            <th ng-if="status.status == 'running'">Time Remaining</th>
-        </tr>
-        <tr ng-repeat="step in jsonSchedule.steps">
-            <td><input type="text" ng-model="step.name" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
-            <td><input type="number" ng-model="step.temperature" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
-            <td><input type="number" ng-model="step.time" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
-            <td><input type="number" ng-model="step.riseTime" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()"></td>
-            <td><input type="button" ng-click="removeStep(step, $index)" value="-" ng-disabled="inputDisabled"></td>
-            <th ng-class="{runningStep: $index+1==status.step}" ng-if="status.status == 'running' && status.step == $index+1">{{ millisToMinutes(status.timeRemaining) }} min</th>
-        </tr>
-        <tr>
-            <td><input type="button" value="+" ng-click="addStep()" ng-disabled="inputDisabled"></td>
-            <td colspan="3"></td>
-        </tr>
-    </table>
-    <br>
-    <button ng-click="start()">Start</button>
-    <button ng-click="stop()">Stop</button>
-    <!--button ng-click="getSchedule()">Schedule</button-->
-    <br>
-    <!--div google-chart chart="tempChart" style="height:600px; width:100%;"></div-->
-    <div class="chart">
-        <linechart data="data" options="options"></linechart>
+    <div class="btn-group" role="group" aria-label="...">
+        <button class="btn btn-primary bt-md" ng-click="start()">
+            <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Start
+        </button>
+        <button class="btn btn-danger bt-md" ng-click="stop()">
+            <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> Stop
+        </button>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Graph</div>
+        <div class="panel-body">
+            <div class="chart">
+                <linechart data="data" options="options"></linechart>
+            </div>
+        </div>
     </div>
 </div>
