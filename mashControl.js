@@ -30,12 +30,13 @@ for (var index in settings.publishedModules) {
 }
 app.use(bodyParser.json());
 
-// Express route for incoming requests for a customer name
 app.get('/temp/current', function(req, res) {
   //winston.info('Temp requested');
   tempSensor.readTemp(function(error, data) {
     if (!error) {
-      res.status(200).send(tempSensor.parseTemp(data));
+      var tempData = tempSensor.parseTemp(data);
+      tempData.minute = scheduleRunner.getRunningForMinutes();
+      res.status(200).send(tempData);
     } else {
       winston.error("Could not fetch temperature", error);
       res.status(500).send(error);

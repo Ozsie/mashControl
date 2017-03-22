@@ -13,6 +13,16 @@ var calculateCutOffPoint = function(targetTemp, initialTemp, volume) {
   return targetTemp - Math.max(2, 8 - volume);
 };
 
+var getRunningForMinutes = function() {
+  if (!schedule || !schedule.startTime) {
+    return -1;
+  }
+  var millis = Date.now() - schedule.startTime;
+  var seconds = millis / 1000;
+  var minutes = Math.floor(seconds/60);
+  return minutes;
+}
+
 var adjustTemperature = function(step, volume) {
   tempSensor.readAndParse(function(err, data) {
     if (!err) {
@@ -32,6 +42,7 @@ var adjustTemperature = function(step, volume) {
       var degreesToIncrease = Math.abs(currentTemp - step.temperature);
       status.timeRemaining = (step.stepTime - (Date.now() - step.startTime));
       status.temperature = currentTemp;
+      status.minutes = getRunningForMinutes();
 
       winston.info("Increase from last: " + diff + "C. Degrees left: " + degreesToIncrease + "C of " +
       initialDegreesToIncrease + "C. Cut off at: " + heatCutOff + "C. " +
@@ -182,5 +193,6 @@ module.exports = {
   stopSchedule: stopSchedule,
   getStatus: getStatus,
   getSchedule: getSchedule,
-  calculateCutOffPoint: calculateCutOffPoint
+  calculateCutOffPoint: calculateCutOffPoint,
+  getRunningForMinutes: getRunningForMinutes
 };

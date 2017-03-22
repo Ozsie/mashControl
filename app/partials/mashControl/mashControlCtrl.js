@@ -130,34 +130,13 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       mashControlRestService.getCurrentTemperature().then(function(data) {
         $scope.currentTempTime = data.time;
         $scope.currentTemp = data;
-        var now = Date.now();
-        var timeChange = now - $scope.lastTempUpdate;
-        if (!$scope.lastTempUpdate || timeChange >= 60000) {
-          $scope.lastTempUpdate = Date.now();
-          if (!timeChange) {
-            timeChange = Date.now() - $scope.lastTempUpdate;
-          }
-          var timeChangeTemp = timeChange;
-          while (timeChangeTemp > 500) {
-            var minute = $scope.updates;
-            $scope.updates++;
-            var updated = false;
+        $scope.updates++;
+        var updated = false;
 
-            for (var index in $scope.data.temperature) {
-              var point = $scope.data.temperature[index];
-              if (point.minute === minute) {
-                point.actual = point.expected;
-              }
-            }
-
-            if (minute >= runTime) {
-              console.log("Done!");
-              $scope.running = false;
-              $scope.inputDisabled = false;
-              return;
-            }
-            timeChangeTemp -= 60000;
-          }
+        var point = $scope.data.temperature[data.minute];
+        if (!point.actual) {
+          point.actual = $scope.currentTemp.temperature.celcius;
+          $scope.lastTempUpdate = $scope.currentTemp.time;
         }
       });
       updateCurrentTemperature(runTime);
@@ -206,7 +185,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
           var watts = 1800;
           var secondsPerDegree = joules/watts;
           var minutesPerDegree = secondsPerDegree / 60;
-          step.riseTime = (startingTemp - step.temperature) * minutesPerDegree;
+          step.riseTime = Math.ceil((step.temperature - startingTemp) * minutesPerDegree);
         } else {
           step.riseTime = Math.ceil(((startingTemp - step.temperature) * $scope.jsonSchedule.volume) / 0.1);
         }
