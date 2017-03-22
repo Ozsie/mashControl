@@ -147,6 +147,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
 
   $scope.tempChart = {};
   $scope.calculateRiseTime = true;
+  $scope.autoNameSteps = true;
 
   $scope.parseInput = function() {
 
@@ -164,6 +165,22 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     $scope.handleJsonSchedule();
   };
 
+  $scope.getName = function(step) {
+    if (step.temperature >= 35 && step.temperature < 40) {
+      return "Acidity";
+    } else if (step.temperature >= 40 && step.temperature <= 45) {
+      return "Phenol";
+    } else if (step.temperature >= 48 && step.temperature <= 52) {
+      return "Protein";
+    } else if (step.temperature >= 62 && step.temperature <= 70) {
+      return "Saccharification";
+    } else if (step.temperature > 70 && step.temperature <= 78) {
+      return "Mash out";
+    } else {
+      return "Custom " + step.temperature + " C";
+    }
+  };
+
   $scope.handleJsonSchedule = function() {
     var data = {
       temperature: []
@@ -175,6 +192,9 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     }
     for (var index in $scope.jsonSchedule.steps) {
       var step = $scope.jsonSchedule.steps[index];
+      if ($scope.autoNameSteps) {
+        step.name = $scope.getName(step);
+      }
       var startingTemp = $scope.startTemp;
       if (index > 0) {
         startingTemp = $scope.jsonSchedule.steps[index - 1].temperature;
