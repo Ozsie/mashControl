@@ -8,11 +8,11 @@
             <div class="row">
                 <div class="col-xs-6 col-sm-6 col-md-3">Current Temperature</div>
                 <div class="col-xs-6 col-sm-6 col-md-3">
-                    <div ng-if="currentTemp">{{currentTemp.temperature.celcius}} C</div>
+                    <div ng-show="currentTemp">{{currentTemp.temperature.celcius}} C</div>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-3">Temp update</div>
                 <div class="col-xs-6 col-sm-6 col-md-3">
-                    <div ng-if="currentTempTime">
+                    <div ng-show="currentTempTime">
                         {{ currentTempTime | date : 'mediumTime' }}
                     </div>
                 </div>
@@ -20,13 +20,13 @@
             <div class="row">
                 <div class="col-xs-6 col-sm-6 col-md-3">Start time</div>
                 <div class="col-xs-6 col-sm-6 col-md-3">
-                    <div ng-if="startedTime">
+                    <div ng-show="startedTime">
                         {{ startedTime | date : 'mediumTime' }}
                     </div>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-3">Graph update</div>
                 <div class="col-xs-6 col-sm-6 col-md-3">
-                    <div ng-if="lastTempUpdate">
+                    <div ng-show="lastTempUpdate">
                         {{ lastTempUpdate | date : 'mediumTime' }}
                     </div>
                 </div>
@@ -34,7 +34,7 @@
             <div class="row">
                 <div class="col-xs-6 col-sm-6 col-md-3">Run time</div>
                 <div class="col-xs-6 col-sm-8 col-md-9">
-                    <div ng-if="runTime">
+                    <div ng-show="runTime">
                         {{ runTime }} s ( {{ secondsToMinutes(runTime) }} min)
                     </div>
                 </div>
@@ -42,19 +42,19 @@
             <div class="row">
                 <div class="col-xs-6 col-sm-6 col-md-3">Status</div>
                 <div class="col-xs-6 col-sm-6 col-md-3">
-                    <div ng-if="status">{{ status.status }}</div>
+                    <div ng-show="status">{{ status.status }}</div>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-3">Step</div>
                 <div class="col-xs-6 col-sm-6 col-md-3">
-                    <div ng-if="status && status.step">
-                        {{ status.step }}<span ng-if="status.stepName">, {{ status.stepName }}</span>
+                    <div ng-show="status && status.step">
+                        {{ status.step }}<span ng-show="status.stepName">, {{ status.stepName }}</span>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-xs-6 col-sm-6 col-md-3">Heat cut off</div>
                 <div class="col-xs-6 col-sm-8 col-md-9">
-                    <div ng-if="status && status.heatCutOff">
+                    <div ng-show="status && status.heatCutOff">
                         {{ status.heatCutOff }} C
                     </div>
                 </div>
@@ -122,6 +122,45 @@
                     <div class="input-group">
                         <button class="btn btn-primary btn-md" ng-click="addStep()" ng-disabled="inputDisabled">
                             <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add step
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="well" ng-show="jsonSchedule.boilSteps.length > 0">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Sparge pause</span>
+                    <input type="number" class="form-control" ng-model="jsonSchedule.spargePause" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Time" aria-label="Time">
+                    <span class="input-group-addon">min</span>
+                    <span class="input-group-addon">Boil time</span>
+                    <input type="number" class="form-control" ng-model="jsonSchedule.boilTime" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Time" aria-label="Time">
+                    <span class="input-group-addon">min</span>
+                </div>
+            </div>
+            <div class="well" ng-repeat="step in jsonSchedule.boilSteps">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Time</span>
+                    <input type="number" class="form-control" ng-model="step.time" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Time" aria-label="Time">
+                    <span class="input-group-addon">min</span>
+                    <span class="input-group-addon">Hop</span>
+                    <input type="text" class="form-control" ng-model="step.hop" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Hop" aria-label="Hop">
+                </div>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon">Amount</span>
+                    <input type="number" class="form-control" ng-model="step.amount" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Amount" aria-label="Amount">
+                    <span class="input-group-addon">g</span>
+                </div>
+                <div class="input-group input-group-sm">
+                    <button class="btn btn-danger btn-md" ng-click="removeBoilStep(step, $index)" ng-disabled="inputDisabled">
+                        <span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span> Remove step
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-11"></div>
+                <div class="col-md-1">
+                    <div class="input-group">
+                        <button class="btn btn-primary btn-md" ng-click="addBoil()" ng-disabled="inputDisabled">
+                            <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add boil
                         </button>
                     </div>
                 </div>

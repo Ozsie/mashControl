@@ -51,6 +51,46 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     });
   };
 
+  $scope.addStepIndicator = function(data, stepIndicator) {
+    $scope.removeStepIndicator(stepIndicator.key);
+    $scope.options.series.push({
+      axis: "y",
+      dataset: "temperature",
+      key: stepIndicator.key,
+      label: stepIndicator.label,
+      color: stepIndicator.color,
+      defined: function(value) {
+        return value.y1 !== undefined;
+      },
+      type: [
+        "area", "line"
+      ],
+      id: stepIndicator.key
+    });
+
+    var m = stepIndicator.start;
+    while (m < stepIndicator.end) {
+      var s = data.temperature[m];
+      if (!s) {
+        s = {minute: m};
+        data.temperature.push(s);
+      }
+      s[stepIndicator.key] = stepIndicator.height;
+      data.temperature[m] = s;
+      m++;
+    }
+  };
+
+  $scope.removeStepIndicator = function(key) {
+    for (var index in $scope.options.series) {
+      var series = $scope.options.series[index];
+      if (series.id === key) {
+        $scope.options.series.splice(index, 1);
+        break;
+      };
+    }
+  };
+
   $scope.stop = function() {
     mashControlRestService.stopSchedule().then(function(data) {
       console.log(data);
@@ -98,7 +138,8 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         type: [
           "line"
         ],
-        id: "expected"
+        id: "expected",
+        visible: false
       }
     ],
     axes: {
@@ -145,7 +186,6 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
 
   //updateCurrentTemperature();
 
-  $scope.tempChart = {};
   $scope.calculateRiseTime = true;
   $scope.autoNameSteps = true;
 
@@ -181,17 +221,34 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     }
   };
 
+  $scope.getColor = function(index) {
+    var x = Math.sin(index + 1) * 10000;
+    var rnd = x - Math.floor(x);
+    return Math.floor(rnd*16777215).toString(16);
+  }
+
   $scope.handleJsonSchedule = function() {
     var data = {
       temperature: []
     };
-    var runTime = 0;
+    var runTime = 1;
+    var lastTemp = 0;
+    var startTime = 0;
     $scope.totalRunTime = 0;
     if (!$scope.startTemp) {
       $scope.fetchStartTemp();
     }
     for (var index in $scope.jsonSchedule.steps) {
       var step = $scope.jsonSchedule.steps[index];
+
+      $scope.addStepIndicator(data, {
+        key: "step" + index,
+        label: step.name,
+        color: $scope.getColor(index + 1)
+      });
+
+      runTime -= 1;
+      lastTemp = step.temperature;
       if ($scope.autoNameSteps) {
         step.name = $scope.getName(step);
       }
@@ -220,21 +277,105 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
 
       for (var i = 0; i < step.riseTime; i++) {
         var expected = (((step.temperature - startingTemp) / step.riseTime) * i) + startingTemp;
-        data.temperature.push({
+        var point = {
           minute: runTime,
-          expected: expected
-        });
+          expected: expected,
+        };
+        point["step" + index] = expected;
+        data.temperature.push(point);
         runTime++;
       }
 
       for (var m = 0; m <= step.time; m++) {
-        data.temperature.push({
+        point = {
           minute: runTime,
           expected: step.temperature
-        });
+        };
+        point["step" + index] = step.temperature;
+        data.temperature.push(point);
         runTime += 1;
       }
+      if (startTime !== 0) {
+        runTime++;
+      }
       $scope.totalRunTime += step.riseTime + step.time;
+    }
+
+    if ($scope.jsonSchedule.spargePause) {
+      runTime--;
+
+      $scope.addStepIndicator(data, stepIndicator = {
+        key: "spargePause",
+        label: "Sparge Pause",
+        color: $scope.getColor(1000),
+      });
+      $scope.totalRunTime += $scope.jsonSchedule.spargePause
+      for (var m = 0; m <= $scope.jsonSchedule.spargePause; m++) {
+        var point = {
+          minute: runTime,
+          expected: lastTemp
+        };
+        point["spargePause"] = lastTemp;
+        data.temperature.push(point);
+        runTime += 1;
+      }
+      if (startTime !== 0) {
+        runTime++;
+      }
+    }
+
+    if ($scope.jsonSchedule.boilTime) {
+      runTime--;
+
+      $scope.addStepIndicator(data, stepIndicator = {
+        key: "boilTime",
+        label: "Boil",
+        color: $scope.getColor(2000),
+      });
+      $scope.totalRunTime += $scope.jsonSchedule.boilTime
+
+      var joules = 4184 * $scope.jsonSchedule.volume;
+      var watts = 1800;
+      var secondsPerDegree = joules/watts;
+      var minutesPerDegree = secondsPerDegree / 60;
+      $scope.jsonSchedule.boilRiseTime = Math.ceil((100 - lastTemp) * minutesPerDegree);
+
+      for (var i = 0; i < $scope.jsonSchedule.boilRiseTime; i++) {
+        var expected = (((100 - lastTemp) / $scope.jsonSchedule.boilRiseTime) * i) + lastTemp;
+        var point = {
+          minute: runTime,
+          expected: expected,
+        };
+        point["boilTime"] = expected;
+        data.temperature.push(point);
+        runTime++;
+      }
+
+      for (var m = 0; m <= $scope.jsonSchedule.boilTime; m++) {
+        var point = {
+          minute: runTime,
+          expected: 100
+        };
+        point["boilTime"] = 100;
+        data.temperature.push(point);
+
+        for (var boilIndex in $scope.jsonSchedule.boilSteps) {
+          var boilStep = $scope.jsonSchedule.boilSteps[boilIndex];
+          if ($scope.jsonSchedule.boilTime - boilStep.time === m) {
+            $scope.addStepIndicator(data, stepIndicator = {
+              key: "boilStep" + boilIndex,
+              label: "Add hops: " + boilStep.hop,
+              color: $scope.getColor(boilIndex + 3001),
+            });
+
+            point["boilStep" + boilIndex] = boilStep.amount;
+          }
+        }
+        runTime += 1;
+      }
+      if (startTime !== 0) {
+        runTime++;
+      }
     }
 
     $scope.data = data;
@@ -259,38 +400,44 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         time: 0
       });
     }
+    $scope.handleJsonSchedule();
+  };
+
+  $scope.addBoil = function() {
+    var time = 60;
+    if (!$scope.jsonSchedule) {
+      $scope.jsonSchedule = {boilSteps:[{
+          time: time
+        }]};
+    } else {
+      if (!$scope.jsonSchedule.boilSteps) {
+        $scope.jsonSchedule.boilSteps = [];
+      }
+      time = Math.floor(60 / ($scope.jsonSchedule.boilSteps.length + 1));
+      $scope.jsonSchedule.boilSteps.push({
+        time: time
+      });
+    }
+    if (!$scope.jsonSchedule.spargePause) {
+      $scope.jsonSchedule.spargePause = 15;
+    }
+    if (!$scope.jsonSchedule.boilTime) {
+      $scope.jsonSchedule.boilTime = 60;
+    }
+    $scope.handleJsonSchedule();
   };
 
   $scope.removeStep = function(step, index) {
     $scope.jsonSchedule.steps.splice(index, 1);
   };
 
+  $scope.removeBoilStep = function(step, index) {
+    $scope.jsonSchedule.steps.splice(index, 1);
+  };
+
   $scope.$watch(function () {
     return $scope.schedule;
   }, $scope.parseInput, true);
-
-  $scope.tempChart.type = "LineChart";
-  $scope.tempChart.data = {
-    "cols": [
-      {id: "time", label: "time", type: "number"},
-      {id: "expected", label: "Expected", type: "number"},
-      {id: "actual", label: "Actual", type: "number"}
-    ],
-    "rows": []
-  };
-
-  $scope.tempChart.options = {
-    "title": "Mash Temperature",
-    "fill": 20,
-    "displayExactValues": true,
-    "vAxis": {
-        "title": "Temperature",
-        "gridlines": {"count": 6}
-    },
-    "hAxis": {
-        "title": "Time"
-    }
-  };
 
   $scope.millisToMinutes = function(millis) {
     var sec = millis/1000;
