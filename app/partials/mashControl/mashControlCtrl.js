@@ -365,7 +365,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
             $scope.addStepIndicator(data, stepIndicator = {
               key: "boilStep" + boilIndex,
               label: "Add hops: " + boilStep.hop,
-              color: $scope.getColor(boilIndex + 3001),
+              color: $scope.getColor(3002),
             });
 
             point["boilStep" + boilIndex] = boilStep.amount;
