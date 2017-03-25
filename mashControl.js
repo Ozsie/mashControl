@@ -70,6 +70,11 @@ app.get('/schedule/status', function(req, res) {
   res.status(200).send(status);
 });
 
+app.get('/schedule/tempLog', function(req, res) {
+  var tempLog = scheduleRunner.getTempLog();
+  res.status(200).send({log: tempLog});
+});
+
 app.get('/schedule', function(req, res) {
   winston.info('Get Schedule');
   res.status(200).send(scheduleRunner.getSchedule());

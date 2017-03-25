@@ -21,7 +21,7 @@ var getRunningForMinutes = function() {
   var seconds = millis / 1000;
   var minutes = Math.floor(seconds/60);
   return minutes;
-}
+};
 
 var adjustTemperature = function(step, volume) {
   tempSensor.readAndParse(function(err, data) {
@@ -118,7 +118,7 @@ var nextMashStep = function(index) {
       winston.info("######################################################################################");
 
       var run = function() {
-        if (status.status === 'stopped') {
+        if (status.status === 'stopped' || status.status === 'done') {
           winston.info("Running step stopped");
           return;
         }
@@ -159,7 +159,7 @@ var spargePause = function() {
       winston.info("######################################################################################");
 
       var run = function() {
-        if (status.status === 'stopped') {
+        if (status.status === 'stopped' || status.status === 'done') {
           winston.info("Running step stopped");
           return;
         }
@@ -199,7 +199,7 @@ var boil = function() {
       winston.info("######################################################################################");
 
       var run = function() {
-        if (status.status === 'stopped') {
+        if (status.status === 'stopped' || status.status === 'done') {
           winston.info("Running step stopped");
           return;
         }
@@ -226,6 +226,32 @@ var calculateStepTime = function(step) {
   return (step.riseTime + step.time) * 60 * 1000;
 };
 
+var getTempLog = function() {
+  return schedule.tempLog;
+};
+
+var logTemperature = function() {
+  schedule.tempLog = [];
+  var m = 0;
+  var readTemp = function() {
+    if (status.status === 'stopped' || status.status === 'done') {
+      winston.info("Running schedule stopped");
+      return;
+    }
+    setTimeout(function() {
+      tempSensor.readAndParse(function(err, data) {
+        if (!err) {
+          schedule.tempLog.push({minute: m, temperature: data.temperature.celcius});
+          console.log(JSON.stringify(schedule.tempLog));
+          m++;
+        }
+      });
+      readTemp();
+    }, 60000);
+  };
+  readTemp();
+};
+
 var runSchedule = function(callback) {
   winston.info("Schedule: " + JSON.stringify(schedule));
   var mashStepIndex = 0;
@@ -234,9 +260,11 @@ var runSchedule = function(callback) {
 
   winston.info("Schedule has " + schedule.steps.length + " mash steps, Sparge pause of " + schedule.spargePause + " m and boil time" + (schedule.boilRiseTime + schedule.boilTime) + " m");
 
+  logTemperature();
+
   var nexInMs = 0;
   var doStep = function() {
-    if (status.status === 'stopped') {
+    if (status.status === 'stopped' || status.status === 'done') {
       winston.info("Running schedule stopped");
       return;
     }
@@ -258,7 +286,7 @@ var runSchedule = function(callback) {
         winston.info("It's time for the next step");
         boil();
         nexInMs = (schedule.boilTime + schedule.boilRiseTime) * 60 * 1000;
-        boilDone = true
+        boilDone = true;
         doStep();
       } else {
       console.log("DONE--------------");
@@ -326,5 +354,6 @@ module.exports = {
   getStatus: getStatus,
   getSchedule: getSchedule,
   calculateCutOffPoint: calculateCutOffPoint,
-  getRunningForMinutes: getRunningForMinutes
+  getRunningForMinutes: getRunningForMinutes,
+  getTempLog: getTempLog
 };

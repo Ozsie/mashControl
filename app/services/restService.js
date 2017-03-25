@@ -18,6 +18,9 @@ mashControl.factory('mashControlRestFactory',function($resource) {
     },
     getStatus : function(){
       return $resource('/schedule/status');
+    },
+    getTempLog : function(){
+      return $resource('/schedule/tempLog');
     }
   };
 });
@@ -84,11 +87,24 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
     return deferred.promise;
   };
 
+  var getTempLog = function (){
+    var deferred = $q.defer();
+    mashControlRestFactory.getTempLog().get({},
+      function(response) {
+        deferred.resolve(response);
+      }, function(error) {
+        console.error("Error getting temp log");
+        deferred.reject(error);
+      });
+    return deferred.promise;
+  };
+
   return {
     getCurrentTemperature: getCurrentTemperature,
     getSchedule: getSchedule,
     startSchedule: startSchedule,
     stopSchedule: stopSchedule,
-    getStatus: getStatus
+    getStatus: getStatus,
+    getTempLog: getTempLog
   };
 });
