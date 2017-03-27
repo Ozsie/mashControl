@@ -9,7 +9,9 @@
     "pretest": "jshint *.js app/**/*.js",
     "test": "mocha test --recursive",
     "prestart": "jshint",
-    "start": "node mashControl.js"
+    "start": "node mashControl.js",
+    "predocker": "docker build -t ozsie/mash-control:$npm_package_version .",
+    "docker": "docker run -d --name mash-control ozsie/mash-control:$npm_package_version"
   },
   "repository": {
     "type": "git",
