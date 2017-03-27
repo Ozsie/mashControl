@@ -3,6 +3,11 @@ var mashControl = angular.module('mashControl');
 mashControl.controller('MashControlCtrl', function($scope, mashControlRestService) {
 
   $scope.init = function() {
+    Push.Permission.request(function() {
+      console.log("Push allowed");
+    }, function() {
+      console.log("Push blocked");
+    });
     mashControlRestService.getStatus().then(function(data) {
       $scope.status = data;
       if (data.status === 'running') {
@@ -56,7 +61,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       if (series.id === "actual") {
         $scope.options.series.splice(index, 1);
         break;
-      };
+      }
     }
 
     $scope.options.series.push({
@@ -111,13 +116,12 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       if (series.id === key) {
         $scope.options.series.splice(index, 1);
         break;
-      };
+      }
     }
   };
 
   $scope.stop = function() {
     mashControlRestService.stopSchedule().then(function(data) {
-      console.log(data);
       $scope.inputDisabled = false;
       $scope.running = false;
 
@@ -219,10 +223,31 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
             point.actual = value.temperature;
             $scope.lastTempUpdate = $scope.currentTemp.time;
           }
+          if ($scope.jsonSchedule.boilSteps && (log.length - $scope.tempLog.length === 1)) {
+            for (var boilIndex = 0; boilIndex < $scope.jsonSchedule.boilSteps.length; boilIndex++) {
+              var boilStep = $scope.jsonSchedule.boilSteps[boilIndex];
+              var actualTime = $scope.totalRunTime - boilStep.time;
+              if (actualTime === index) {
+                console.log("Time for hops!");
+                pushHop(boilStep);
+              }
+            }
+          }
         }
       }
 
       $scope.tempLog = log;
+    });
+  };
+
+  var pushHop = function(boilStep) {
+    Push.create('Time for hops!', {
+      body: "Add " + boilStep.amount + " g of " + boilStep.hop,
+      timeout: 30000,
+      onClick: function () {
+        window.focus();
+        this.close();
+      }
     });
   };
 
@@ -277,7 +302,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     var x = Math.sin(index + 1) * 10000;
     var rnd = x - Math.floor(x);
     return Math.floor(rnd*16777215).toString(16);
-  }
+  };
 
   $scope.handleJsonSchedule = function() {
     var data = {
@@ -286,6 +311,15 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     var runTime = 1;
     var lastTemp = 0;
     var startTime = 0;
+    var m;
+    var i;
+    var point;
+    var joules;
+    var watts;
+    var secondsPerDegree;
+    var minutesPerDegree;
+    var expected;
+
     $scope.totalRunTime = 0;
     if (!$scope.startTemp) {
       $scope.fetchStartTemp();
@@ -310,10 +344,10 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       }
       if ($scope.calculateRiseTime) {
         if (startingTemp <= step.temperature) {
-          var joules = 4184 * $scope.jsonSchedule.volume;
-          var watts = 1800;
-          var secondsPerDegree = joules/watts;
-          var minutesPerDegree = secondsPerDegree / 60;
+          joules = 4184 * $scope.jsonSchedule.volume;
+          watts = 1800;
+          secondsPerDegree = joules/watts;
+          minutesPerDegree = secondsPerDegree / 60;
           step.riseTime = Math.ceil((step.temperature - startingTemp) * minutesPerDegree);
         } else {
           step.riseTime = Math.ceil(((startingTemp - step.temperature) * $scope.jsonSchedule.volume) / 0.1);
@@ -327,9 +361,9 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         continue;
       }
 
-      for (var i = 0; i < step.riseTime; i++) {
-        var expected = (((step.temperature - startingTemp) / step.riseTime) * i) + startingTemp;
-        var point = {
+      for (i = 0; i < step.riseTime; i++) {
+        expected = (((step.temperature - startingTemp) / step.riseTime) * i) + startingTemp;
+        point = {
           minute: runTime,
           expected: expected,
         };
@@ -338,7 +372,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         runTime++;
       }
 
-      for (var m = 0; m <= step.time; m++) {
+      for (m = 0; m <= step.time; m++) {
         point = {
           minute: runTime,
           expected: step.temperature
@@ -359,15 +393,15 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       $scope.addStepIndicator(data, stepIndicator = {
         key: "spargePause",
         label: "Sparge Pause",
-        color: $scope.getColor(1000),
+        color: $scope.getColor(1000)
       });
-      $scope.totalRunTime += $scope.jsonSchedule.spargePause
-      for (var m = 0; m <= $scope.jsonSchedule.spargePause; m++) {
-        var point = {
+      $scope.totalRunTime += $scope.jsonSchedule.spargePause;
+      for (m = 0; m <= $scope.jsonSchedule.spargePause; m++) {
+        point = {
           minute: runTime,
           expected: lastTemp
         };
-        point["spargePause"] = lastTemp;
+        point.spargePause = lastTemp;
         data.temperature.push(point);
         runTime += 1;
       }
@@ -384,31 +418,31 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         label: "Boil",
         color: $scope.getColor(2000),
       });
-      $scope.totalRunTime += $scope.jsonSchedule.boilTime
+      $scope.totalRunTime += $scope.jsonSchedule.boilTime;
 
-      var joules = 4184 * $scope.jsonSchedule.volume;
-      var watts = 1800;
-      var secondsPerDegree = joules/watts;
-      var minutesPerDegree = secondsPerDegree / 60;
+      joules = 4184 * $scope.jsonSchedule.volume;
+      watts = 1800;
+      secondsPerDegree = joules/watts;
+      minutesPerDegree = secondsPerDegree / 60;
       $scope.jsonSchedule.boilRiseTime = Math.ceil((100 - lastTemp) * minutesPerDegree);
 
-      for (var i = 0; i < $scope.jsonSchedule.boilRiseTime; i++) {
-        var expected = (((100 - lastTemp) / $scope.jsonSchedule.boilRiseTime) * i) + lastTemp;
-        var point = {
+      for (i = 0; i < $scope.jsonSchedule.boilRiseTime; i++) {
+        expected = (((100 - lastTemp) / $scope.jsonSchedule.boilRiseTime) * i) + lastTemp;
+        point = {
           minute: runTime,
           expected: expected,
         };
-        point["boilTime"] = expected;
+        point.boilTime = expected;
         data.temperature.push(point);
         runTime++;
       }
 
-      for (var m = 0; m <= $scope.jsonSchedule.boilTime; m++) {
-        var point = {
+      for (m = 0; m <= $scope.jsonSchedule.boilTime; m++) {
+        point = {
           minute: runTime,
           expected: 100
         };
-        point["boilTime"] = 100;
+        point.boilTime = 100;
         data.temperature.push(point);
 
         for (var boilIndex in $scope.jsonSchedule.boilSteps) {

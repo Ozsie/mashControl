@@ -28,7 +28,11 @@ var logTemperature = function() {
     setTimeout(function() {
       tempSensor.readAndParse(function(err, data) {
         if (!err) {
-          schedule.tempLog.push({minute: m, temperature: data.temperature.celcius});
+          var entry = {
+            minute: m,
+            temperature: data.temperature.celcius
+          };
+          schedule.tempLog.push(entry);
           console.log(JSON.stringify(schedule.tempLog));
           m++;
         }
@@ -45,7 +49,7 @@ var runSchedule = function(callback) {
   var spargePauseRun = false;
   var boilDone = false;
 
-  winston.info("Schedule has " + schedule.steps.length + " mash steps, Sparge pause of " + schedule.spargePause + " m and boil time" + (schedule.boilRiseTime + schedule.boilTime) + " m");
+  winston.info("Schedule has " + schedule.steps ? 0 : schedule.steps.length + " mash steps, Sparge pause of " + schedule.spargePause + " m and boil time" + (schedule.boilRiseTime + schedule.boilTime) + " m");
 
   logTemperature();
 

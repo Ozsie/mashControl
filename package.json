@@ -46,6 +46,7 @@
     "mc-tempsensor": "^1.0.4",
     "grpc": "^1.0.0",
     "bootstrap": "3.3.7",
-    "jquery": "3.2.0"
+    "jquery": "3.2.0",
+    "push.js": "^0.0.12"
   }
 }
