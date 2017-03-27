@@ -2,6 +2,29 @@ var mashControl = angular.module('mashControl');
 
 mashControl.controller('MashControlCtrl', function($scope, mashControlRestService) {
 
+  $scope.init = function() {
+    mashControlRestService.getStatus().then(function(data) {
+      $scope.status = data;
+      if (data.status === 'running') {
+        mashControlRestService.getSchedule().then(function(data) {
+          $scope.jsonSchedule = data;
+          $scope.startedTime = data.startTime;
+          $scope.startTemp = data.steps[0].initialTemp;
+          $scope.handleJsonSchedule();
+          $scope.inputDisabled = true;
+          $scope.startCheckTemp();
+          $scope.updateOptions();
+          $scope.lastTempUpdate = undefined;
+          mashControlRestService.getCurrentTemperature().then(function(data) {
+            $scope.currentTempTime = data.time;
+            $scope.currentTemp = data;
+            getTempLog();
+          });
+        });
+      }
+    });
+  };
+
   $scope.fetchStartTemp = function() {
     mashControlRestService.getCurrentTemperature().then(function(data) {
       $scope.startTemp = data.temperature.celcius;
@@ -15,7 +38,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       $scope.startResponse = data;
       $scope.inputDisabled = true;
       $scope.parseInput();
-      $scope.startCheckTemp($scope.totalRunTime);
+      $scope.startCheckTemp();
       $scope.updateOptions();
       $scope.startedTime = Date.now();
       $scope.lastTempUpdate = undefined;
@@ -108,14 +131,14 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
 
   $scope.getSchedule = function() {
     mashControlRestService.getSchedule().then(function(data) {
-      $scope.schedule = data;
+      $scope.jsonSchedule = data;
     });
   };
 
   $scope.startCheckTemp = function(runTime) {
     $scope.running = true;
     $scope.updates = 0;
-    updateCurrentTemperature(runTime);
+    updateCurrentTemperature();
     updateGraph();
     mashControlRestService.getStatus().then(function(data) {
       $scope.status = data;
@@ -164,7 +187,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     }, 30000);
   };
 
-  var updateCurrentTemperature = function(runTime) {
+  var updateCurrentTemperature = function() {
     setTimeout(function () {
       if (!$scope.running) {
         return;
@@ -176,8 +199,31 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         $scope.updates++;
         var updated = false;
       });
-      updateCurrentTemperature(runTime);
+      updateCurrentTemperature();
     }, 1000);
+  };
+
+  var getTempLog = function() {
+    mashControlRestService.getTempLog().then(function(data) {
+      var log = data.log;
+
+      if (!$scope.tempLog) {
+        $scope.tempLog = [];
+      }
+
+      if ($scope.tempLog.length < log.length) {
+        for (var index = $scope.tempLog.length; index < log.length; index++) {
+          var point = $scope.data.temperature[index];
+          var value = log[index];
+          if (!point.actual) {
+            point.actual = value.temperature;
+            $scope.lastTempUpdate = $scope.currentTemp.time;
+          }
+        }
+      }
+
+      $scope.tempLog = log;
+    });
   };
 
   var updateGraph = function() {
@@ -185,26 +231,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       if (!$scope.running) {
         return;
       }
-      mashControlRestService.getTempLog().then(function(data) {
-        var log = data.log;
-
-        if (!$scope.tempLog) {
-          $scope.tempLog = [];
-        }
-
-        if ($scope.tempLog.length < log.length) {
-          for (var index = $scope.tempLog.length; index < log.length; index++) {
-            var point = $scope.data.temperature[index];
-            var value = log[index];
-            if (!point.actual) {
-              point.actual = value.temperature;
-              $scope.lastTempUpdate = $scope.currentTemp.time;
-            }
-          }
-        }
-
-        $scope.tempLog = log;
-      });
+      getTempLog();
       updateGraph();
     }, 60000);
   };
@@ -474,5 +501,5 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     return Math.floor(min);
   };
 
-  $scope.stop();
+  $scope.init();
 });
