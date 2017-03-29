@@ -10,13 +10,27 @@ winston.add(winston.transports.File, { name: "heatControl", filename: settings.l
 var isOpen = false;
 var stepping = false;
 
+var errCallback;
+
 var commands = [];
 
-var turnOn = function() {
+var flickHeaterSwitch = function(errorCallback) {
+  open(settings.relay['2'], function(err, data) {
+    if(!err) {
+      winston.debug("Heater off " + err);
+      close(settings.relay['2']);
+    } else {
+      winston.debug("Heater on " + data);
+    }
+  });
+};
+
+var turnOn = function(errorCallback) {
   if (isOpen) {
     winston.info("Motor communication already open.");
     return;
   }
+  errCallback = errorCallback;
   winston.info("Turn on. Enable Pin: " + settings.motor.enablePin);
   open(18, function() {
     open(4, function() {
@@ -50,6 +64,7 @@ var turnOff = function(callback) {
       close(24);
       callback(undefined, data);
     } else {
+      errCallback();
       winston.error("Could not turn off heat control", err);
       callback(err, data);
     }
@@ -100,6 +115,7 @@ var open = function(pin, callback) {
 var close = function(pin) {
   gpio.closePin(pin, function(err) {
     if (err) {
+      errCallback();
       winston.error("Could not close pin:", + err);
     }
   });
@@ -205,5 +221,6 @@ module.exports = {
   fastDecrease: fastBackward,
   turnOn: turnOn,
   turnOff: turnOff,
+  flickHeaterSwitch: flickHeaterSwitch,
   gpio: gpio
 };

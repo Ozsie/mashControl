@@ -50,6 +50,7 @@ var adjustTemperature = function(step, volume, status, schedule) {
       }
       previousTemp = currentTemp;
     } else {
+      status.thermometer = false;
       winston.error(err);
       callback(err);
     }
@@ -94,6 +95,7 @@ var nextMashStep = function(status, schedule, index) {
       run();
       return step.stepTime;
     } else {
+      status.thermometer = false;
       winston.error("Could not read temperature", err);
       throw new Error(err);
     }

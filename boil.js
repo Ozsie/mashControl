@@ -33,6 +33,7 @@ var adjustTemperatureForBoil = function(status, schedule) {
       }
       previousTemp = currentTemp;
     } else {
+      status.thermometer = false;
       winston.error(err);
       callback(err);
     }
@@ -74,6 +75,7 @@ var boil = function(status, schedule) {
       run();
       return status.timeRemaining;
     } else {
+      status.thermometer = false;
       winston.error("Could not read temperature", err);
       throw new Error(err);
     }

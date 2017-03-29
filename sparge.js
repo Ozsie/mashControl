@@ -7,7 +7,6 @@ winston.add(winston.transports.File, { name:"sparge", filename: settings.logs.di
 
 
 var spargePause = function(status, schedule) {
-  console.log("--------------------------------")
   tempSensor.readAndParse(function(err, data) {
     if (!err) {
       status.step = schedule.steps.length + 1;
@@ -41,6 +40,7 @@ var spargePause = function(status, schedule) {
       run();
       return status.timeRemaining;
     } else {
+      status.thermometer = false;
       winston.error("Could not read temperature", err);
       throw new Error(err);
     }

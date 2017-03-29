@@ -5,6 +5,12 @@
   "heatCutOff": 85,
   "tolerance": 0.75,
   "offMarkBreak": 5,
+  "relay": {
+    "1": "",
+    "2": "27",
+    "3": "",
+    "4": ""
+  },
   "motor": {
     "enablePin": 18,
     "coilA1Pin": 4,

@@ -35,6 +35,8 @@ var logTemperature = function() {
           schedule.tempLog.push(entry);
           console.log(JSON.stringify(schedule.tempLog));
           m++;
+        } else {
+          status.thermometer = false;
         }
       });
       readTemp();
@@ -90,6 +92,11 @@ var runSchedule = function(callback) {
 
 var startSchedule = function(newSchedule) {
   if (newSchedule) {
+    heatControl.turnOn(function() {
+      status.motor = false;
+    });
+    status.motor = true;
+    status.thermometer = true;
     winston.info(JSON.stringify(schedule));
     schedule = newSchedule;
     schedule.startTime = Date.now();

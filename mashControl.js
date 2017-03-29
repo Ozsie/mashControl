@@ -46,7 +46,6 @@ app.get('/temp/current', function(req, res) {
 
 app.post('/schedule/start', function(req, res) {
   winston.info('Start schedule requested');
-  heatControl.turnOn();
   var scheduleStarted = scheduleRunner.startSchedule(req.body);
   winston.info('Start ok = ' + scheduleStarted);
   res.status(200).send(scheduleStarted);
@@ -78,6 +77,13 @@ app.get('/schedule/tempLog', function(req, res) {
 app.get('/schedule', function(req, res) {
   winston.info('Get Schedule');
   res.status(200).send(scheduleRunner.getSchedule());
+});
+
+app.get('/heater', function(req, res) {
+  winston.info('Get Schedule');
+  res.status(200).send(heatControl.flickHeaterSwitch(function() {
+    winston.error("ERROR!");
+  }));
 });
 
 // Express route for any other unrecognised incoming requests
