@@ -11,21 +11,26 @@ var isOpen = false;
 var stepping = false;
 
 var errCallback;
+var heaterOpen = false;
 
 var commands = [];
 
 var flickHeaterSwitch = function(errorCallback) {
   var heaterPin = settings.relay['2'];
-  open(heaterPin, function(err, data) {
-    if(!err) {
-      winston.debug("Heater on " + err);
-      gpio.writeSync(heaterPin, 1);
-    } else {
-      winston.debug("Heater off " + err);
-      gpio.writeSync(heaterPin, 0);
-      close(settings.relay['2']);
-    }
-  });
+  if (!heaterOpen) {
+    open(heaterPin, function(err, data) {
+      if(!err) {
+        winston.debug("Heater on " + err);
+        gpio.writeSync(heaterPin, 1);
+        heaterOpen = true;
+      }
+    });
+  } else {
+    winston.debug("Heater off " + err);
+    gpio.writeSync(heaterPin, 0);
+    close(settings.relay['2']);
+    heaterOpen = false;
+  }
 };
 
 var turnOn = function(errorCallback) {
