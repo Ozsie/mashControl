@@ -15,11 +15,14 @@ var errCallback;
 var commands = [];
 
 var flickHeaterSwitch = function(errorCallback) {
-  open(settings.relay['2'], function(err, data) {
+  var heaterPin = settings.relay['2'];
+  open(heaterPin, function(err, data) {
     if(!err) {
-      winston.debug("Heater on " + data);
+      winston.debug("Heater on " + err);
+      gpio.writeSync(heaterPin, 1);
     } else {
       winston.debug("Heater off " + err);
+      gpio.writeSync(heaterPin, 0);
       close(settings.relay['2']);
     }
   });
