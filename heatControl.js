@@ -17,10 +17,10 @@ var commands = [];
 var flickHeaterSwitch = function(errorCallback) {
   open(settings.relay['2'], function(err, data) {
     if(!err) {
+      winston.debug("Heater on " + data);
+    } else {
       winston.debug("Heater off " + err);
       close(settings.relay['2']);
-    } else {
-      winston.debug("Heater on " + data);
     }
   });
 };
