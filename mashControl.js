@@ -79,9 +79,16 @@ app.get('/schedule', function(req, res) {
   res.status(200).send(scheduleRunner.getSchedule());
 });
 
-app.get('/heater', function(req, res) {
-  winston.info('Get Schedule');
-  res.status(200).send(heatControl.flickHeaterSwitch(function() {
+app.get('/heater/on', function(req, res) {
+  winston.info('Heater on');
+  res.status(200).send(heatControl.heaterOn(function() {
+    winston.error("ERROR!");
+  }));
+});
+
+app.get('/heater/off', function(req, res) {
+  winston.info('Heater off');
+  res.status(200).send(heatControl.heaterOff(function() {
     winston.error("ERROR!");
   }));
 });

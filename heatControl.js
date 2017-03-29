@@ -15,18 +15,27 @@ var heaterOpen = false;
 
 var commands = [];
 
-var flickHeaterSwitch = function(errorCallback) {
+var heaterOn = function(errorCallback) {
   var heaterPin = settings.relay['2'];
   if (!heaterOpen) {
     open(heaterPin, function(err, data) {
       if(!err) {
-        winston.debug("Heater on " + err);
+        winston.debug("Heater on");
         gpio.writeSync(heaterPin, 1);
         heaterOpen = true;
       }
     });
   } else {
-    winston.debug("Heater off " + err);
+    winston.debug("Heater on");
+    gpio.writeSync(heaterPin, 1);
+    heaterOpen = true;
+  }
+};
+
+var heaterOff = function(errorCallback) {
+  if (heaterOpen) {
+  var heaterPin = settings.relay['2'];
+    winston.debug("Heater off");
     gpio.writeSync(heaterPin, 0);
     close(settings.relay['2']);
     heaterOpen = false;
@@ -229,6 +238,7 @@ module.exports = {
   fastDecrease: fastBackward,
   turnOn: turnOn,
   turnOff: turnOff,
-  flickHeaterSwitch: flickHeaterSwitch,
+  heaterOn: heaterOn,
+  heaterOff: heaterOff,
   gpio: gpio
 };
