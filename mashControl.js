@@ -91,7 +91,7 @@ app.post('/relay', function(req, res) {
   var setting = req.body;
   winston.info('Setting relay ' + setting.relay + ' to ' + setting.state);
   heatControl.setRelay(setting);
-  res.status(200).send(scheduleStarted);
+  res.status(200).send(setting);
 });
 
 app.get('/heater/off', function(req, res) {
