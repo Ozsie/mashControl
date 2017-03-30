@@ -15,26 +15,21 @@ var relayOpen = [false, false, false, false];
 
 var commands = [];
 
-var getRelay = function(pin) {
-  for (var index in settings.relay) {
-    var relay = settings.relay[index];
-    if (relay.pin === pin) {
-      return relay;
-    }
-  }
-  throw new Error("Unknown relay pin");
+var getRelay = function(index) {
+  return settings.relay[index];
 };
 
 var setRelay = function(setting, errorCallback) {
   if (setting.state === "on") {
-    relayOn(setting.pin, errorCallback);
+    relayOn(setting.index, errorCallback);
   } else {
-    relayOff(setting.pin, errorCallback);
+    relayOff(setting.index, errorCallback);
   }
 };
 
-var relayOn = function(pin, errorCallback) {
-  var relay = getRelay(pin);
+var relayOn = function(index, errorCallback) {
+  var relay = getRelay(index);
+  var pin = relay.pin;
   if (!relayOpen[relay.index]) {
     open(heaterPin, function(err, data) {
       if(!err) {
@@ -49,8 +44,9 @@ var relayOn = function(pin, errorCallback) {
   }
 };
 
-var relayOff = function(pin, errorCallback) {
-  var relay = getRelay(pin);
+var relayOff = function(index, errorCallback) {
+  var relay = getRelay(index);
+  var pin = relay.pin;
   if (relayOpen[relay.index]) {
     winston.debug("Relay " + relay.name + " off");
     gpio.writeSync(pin, 0);
