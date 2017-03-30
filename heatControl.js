@@ -36,6 +36,7 @@ var relayOn = function(index, errorCallback) {
       if(!err) {
         winston.debug("Relay " + relay.name + " on");
         gpio.writeSync(pin, 1);
+        relayOpen[relay.index] = true;
       }
     });
   } else {
