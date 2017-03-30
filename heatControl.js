@@ -11,7 +11,7 @@ var isOpen = false;
 var stepping = false;
 
 var errCallback;
-var relayOpen = [false, false, false, false]
+var relayOpen = [false, false, false, false];
 
 var commands = [];
 

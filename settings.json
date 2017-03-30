@@ -5,7 +5,8 @@
   "heatCutOff": 85,
   "tolerance": 0.75,
   "offMarkBreak": 5,
-  "relay": [{
+  "relay": [
+    {
       "index": 1,
       "pin": 27,
       "name": "Heater power",
