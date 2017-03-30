@@ -11,34 +11,51 @@ var isOpen = false;
 var stepping = false;
 
 var errCallback;
-var heaterOpen = false;
+var relayOpen = [false, false, false, false]
 
 var commands = [];
 
-var heaterOn = function(errorCallback) {
-  var heaterPin = settings.relay['2'];
-  if (!heaterOpen) {
+var getRelay = function(pin) {
+  for (var index in settings.relay) {
+    var relay = settings.relay[index];
+    if (relay.pin === pin) {
+      return relay;
+    }
+  }
+  throw new Error("Unknown relay pin");
+};
+
+var setRelay = function(setting, errorCallback) {
+  if (setting.state === "on") {
+    relayOn(setting.pin, errorCallback);
+  } else {
+    relayOff(setting.pin, errorCallback);
+  }
+};
+
+var relayOn = function(pin, errorCallback) {
+  var relay = getRelay(pin);
+  if (!relayOpen[relay.index]) {
     open(heaterPin, function(err, data) {
       if(!err) {
-        winston.debug("Heater on");
-        gpio.writeSync(heaterPin, 1);
-        heaterOpen = true;
+        winston.debug("Relay " + relay.name + " on");
+        gpio.writeSync(pin, 1);
       }
     });
   } else {
     winston.debug("Heater on");
-    gpio.writeSync(heaterPin, 1);
-    heaterOpen = true;
+    gpio.writeSync(pin, 1);
+    relayOpen[relay.index] = true;
   }
 };
 
-var heaterOff = function(errorCallback) {
-  if (heaterOpen) {
-  var heaterPin = settings.relay['2'];
-    winston.debug("Heater off");
-    gpio.writeSync(heaterPin, 0);
-    close(settings.relay['2']);
-    heaterOpen = false;
+var relayOff = function(pin, errorCallback) {
+  var relay = getRelay(pin);
+  if (relayOpen[relay.index]) {
+    winston.debug("Relay " + relay.name + " off");
+    gpio.writeSync(pin, 0);
+    close(pin);
+    relayOpen[relay.index] = false;
   }
 };
 
@@ -238,7 +255,6 @@ module.exports = {
   fastDecrease: fastBackward,
   turnOn: turnOn,
   turnOff: turnOff,
-  heaterOn: heaterOn,
-  heaterOff: heaterOff,
+  setRelay: setRelay,
   gpio: gpio
 };

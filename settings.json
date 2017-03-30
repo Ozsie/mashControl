@@ -5,12 +5,27 @@
   "heatCutOff": 85,
   "tolerance": 0.75,
   "offMarkBreak": 5,
-  "relay": {
-    "1": "",
-    "2": "27",
-    "3": "",
-    "4": ""
-  },
+  "relay": [{
+      "index": 1,
+      "pin": 27,
+      "name": "Heater power",
+    },
+    {
+      "index": 2,
+      "pin": 19,
+      "name": "Heater on"
+    },
+    {
+      "index": 3,
+      "pin": 13,
+      "name": "Heater mode"
+    },
+    {
+      "index": 4,
+      "pin": 26,
+      "name": "Chiller valve"
+    }
+  ],
   "motor": {
     "enablePin": 18,
     "coilA1Pin": 4,
