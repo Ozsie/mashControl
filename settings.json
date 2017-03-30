@@ -7,22 +7,22 @@
   "offMarkBreak": 5,
   "relay": [
     {
-      "index": 1,
+      "index": 0,
       "pin": 27,
       "name": "Heater power"
     },
     {
-      "index": 2,
+      "index": 1,
       "pin": 19,
       "name": "Heater on"
     },
     {
-      "index": 3,
+      "index": 2,
       "pin": 13,
       "name": "Heater mode"
     },
     {
-      "index": 4,
+      "index": 3,
       "pin": 26,
       "name": "Chiller valve"
     }

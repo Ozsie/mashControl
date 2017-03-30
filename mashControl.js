@@ -126,7 +126,10 @@ function exitHandler() {
   //turnOff();
   winston.info("EXIT!");
   grpcServer.stopServer();
-  heatControl.heaterOff();
+  heatControl.setRelay({
+    index: 0,
+    state: "off"
+  });
   server.close();
   process.exit();
 }
