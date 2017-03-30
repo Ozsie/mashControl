@@ -20,6 +20,7 @@ var getRelay = function(index) {
 };
 
 var setRelay = function(setting, errorCallback) {
+  console.log(setting.state);
   if (setting.state === "on") {
     relayOn(setting.index, errorCallback);
   } else {
