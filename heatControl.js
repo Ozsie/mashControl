@@ -31,14 +31,14 @@ var relayOn = function(index, errorCallback) {
   var relay = getRelay(index);
   var pin = relay.pin;
   if (!relayOpen[relay.index]) {
-    open(heaterPin, function(err, data) {
+    open(pin, function(err, data) {
       if(!err) {
         winston.debug("Relay " + relay.name + " on");
         gpio.writeSync(pin, 1);
       }
     });
   } else {
-    winston.debug("Heater on");
+    winston.debug("Relay " + relay.name + " on");
     gpio.writeSync(pin, 1);
     relayOpen[relay.index] = true;
   }
