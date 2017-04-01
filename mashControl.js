@@ -90,13 +90,12 @@ app.post('/relay', function(req, res) {
   winston.info('Switch relay');
   var setting = req.body;
   winston.info('Setting relay ' + setting.index + ' to ' + setting.state);
-  heatControl.setRelay(setting);
-  res.status(200).send(setting);
+  var relay = heatControl.setRelay(setting);
+  res.status(200).send(relay);
 });
 
-app.get('/heater/off', function(req, res) {
-  winston.info('Heater off');
-  res.status(200).send(heatControl.heaterOff(function() {
+app.get('/relay/status', function(req, res) {
+  res.status(200).send(heatControl.getRelayStatus(function() {
     winston.error("ERROR!");
   }));
 });

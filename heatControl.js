@@ -19,12 +19,20 @@ var getRelay = function(index) {
   return settings.relay[index];
 };
 
+var getRelayStatus = function(index) {
+  var relays = settings.relay;
+  for (var index in relays) {
+    relays[index].open = relayOpen[index];
+  }
+
+  return relays;
+};
+
 var setRelay = function(setting, errorCallback) {
-  console.log(setting.state);
   if (setting.state === "on") {
-    relayOn(setting.index, errorCallback);
+    return relayOn(setting.index, errorCallback);
   } else {
-    relayOff(setting.index, errorCallback);
+    return relayOff(setting.index, errorCallback);
   }
 };
 
@@ -37,12 +45,16 @@ var relayOn = function(index, errorCallback) {
         winston.debug("Relay " + relay.name + " on");
         gpio.writeSync(pin, 1);
         relayOpen[relay.index] = true;
+        relay.open = true;
+        return relay;
       }
     });
   } else {
     winston.debug("Relay " + relay.name + " on");
     gpio.writeSync(pin, 1);
     relayOpen[relay.index] = true;
+    relay.open = true;
+    return relay;
   }
 };
 
@@ -54,7 +66,24 @@ var relayOff = function(index, errorCallback) {
     gpio.writeSync(pin, 0);
     close(pin);
     relayOpen[relay.index] = false;
+    relay.open = false;
+    return relay;
   }
+  return relay;
+};
+
+var heaterOnSwitch = function() {
+  setRelay({index: 0, "on"});
+  setTimeout(function() {
+    setRelay({index: 0, "off"});
+  }, 800);
+};
+
+var heaterModeSwitch = function() {
+  setRelay({index: 0, "on"});
+  setTimeout(function() {
+    setRelay({index: 0, "off"});
+  }, 800);
 };
 
 var turnOn = function(errorCallback) {
@@ -72,6 +101,11 @@ var turnOn = function(errorCallback) {
             output(settings.motor.enablePin, 1, function() {
               isOpen = true;
               winston.info("Motor communication is open. Waiting for commands.");
+              setRelay({index: 0, "on"});
+              heaterOnSwitch();
+              setTimeout(function() {
+                heaterModeSwitch();
+              }, 500);
             });
           });
         });
@@ -86,6 +120,7 @@ var turnOff = function(callback) {
   }
   winston.info("Turn off. Enable Pin: " + settings.motor.enablePin);
   commands = [];
+  heaterOnSwitch();
   output(settings.motor.enablePin, 0, function(err, data) {
     if (!err) {
       isOpen = false;
@@ -254,5 +289,6 @@ module.exports = {
   turnOn: turnOn,
   turnOff: turnOff,
   setRelay: setRelay,
+  getRelayStatus: getRelayStatus,
   gpio: gpio
 };

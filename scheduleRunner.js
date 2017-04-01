@@ -92,6 +92,13 @@ var runSchedule = function(callback) {
 
 var startSchedule = function(newSchedule) {
   if (newSchedule) {
+    if (status.status === 'running') {
+      stopSchedule(function(err, data) {
+        if (err) {
+          throw new Error(err);
+        }
+      });
+    }
     heatControl.turnOn(function() {
       status.motor = false;
     });
