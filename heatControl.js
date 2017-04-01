@@ -19,7 +19,7 @@ var getRelay = function(index) {
   return settings.relay[index];
 };
 
-var getRelayStatus = function(index) {
+var getRelayStatus = function() {
   var relays = settings.relay;
   for (var index in relays) {
     relays[index].open = relayOpen[index];
@@ -101,7 +101,7 @@ var turnOn = function(errorCallback) {
             output(settings.motor.enablePin, 1, function() {
               isOpen = true;
               winston.info("Motor communication is open. Waiting for commands.");
-              setRelay({index: 0, "on"});
+              setRelay({index: 0, state: "on"});
               heaterOnSwitch();
               setTimeout(function() {
                 heaterModeSwitch();

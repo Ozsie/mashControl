@@ -95,9 +95,7 @@ app.post('/relay', function(req, res) {
 });
 
 app.get('/relay/status', function(req, res) {
-  res.status(200).send(heatControl.getRelayStatus(function() {
-    winston.error("ERROR!");
-  }));
+  res.status(200).send(heatControl.getRelayStatus());
 });
 
 // Express route for any other unrecognised incoming requests
