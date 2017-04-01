@@ -75,7 +75,7 @@ var relayOff = function(index, errorCallback) {
 var heaterOnSwitch = function() {
   setRelay({index: 0, state: "on"});
   setTimeout(function() {
-    setRelay({index: 0, "off"});
+    setRelay({index: 0, state: "off"});
   }, 800);
 };
 
