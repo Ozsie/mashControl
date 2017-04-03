@@ -43,7 +43,7 @@ var adjustTemperatureForBoil = function(status, schedule) {
 var boil = function(status, schedule) {
   tempSensor.readAndParse(function(err, data) {
     if (!err) {
-      status.step = schedule.steps.length + 2;
+      status.step = schedule.steps.length + (schedule.spargePause ? 2 : 1);
       status.stepName = "Boil";
       status.initialTemp = data.temperature.celcius;
       status.startTime = Date.now();
@@ -83,5 +83,8 @@ var boil = function(status, schedule) {
 };
 
 module.exports = {
-  boil: boil
+  adjustTemperatureForBoil: adjustTemperatureForBoil,
+  boil: boil,
+  tempSensor: tempSensor,
+  heatControl: heatControl
 };

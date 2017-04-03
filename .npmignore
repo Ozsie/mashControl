@@ -1,2 +1,8 @@
-gpio
-tempSensor
+coverage
+docker-base
+Dockerfile
+.idea
+logs
+schematics
+.travis.yml
+.gitignore
