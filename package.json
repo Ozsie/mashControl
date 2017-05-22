@@ -44,7 +44,8 @@
     "grpc": "^1.0.0",
     "bootstrap": "3.3.7",
     "jquery": "3.2.0",
-    "push.js": "^0.0.12"
+    "push.js": "^0.0.12",
+    "uuid": "^3.0.1"
   },
   "devDependencies": {
     "mocha": "^3.2.0",
