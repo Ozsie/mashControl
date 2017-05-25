@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var heatControl = require('./heatControl');
 var tempSensor = require('mc-tempsensor');
 var scheduleRunner = require('./scheduleRunner');
+var db = require('./db');
 var grpcServer = require('./mashControlGRPC');
 var winston = require('winston');
 
@@ -79,6 +80,26 @@ app.get('/schedule', function(req, res) {
   res.status(200).send(scheduleRunner.getSchedule());
 });
 
+app.post('/schedule/store/create', function(req, res) {
+  winston.info('Create schedule');
+  var schedule = req.body;
+  db.createSchedule(schedule, function(err, data) {
+    if (!err) {
+      res.status(200).send(data);
+    }
+  });
+});
+
+app.get('/schedule/store/retrieve/:uuid', function(req, res) {
+  winston.info('Retrieve schedule');
+  var uuid = req.params.uuid;
+  db.retrieveSchedule(uuid, function(err, data) {
+    if (!err) {
+      res.status(200).send(data);
+    }
+  });
+});
+
 app.get('/heater/on', function(req, res) {
   winston.info('Heater on');
   res.status(200).send(heatControl.heaterOn(function() {
@@ -115,6 +136,13 @@ app.use(function(err, req, res, next) {
 });
 
 grpcServer.startServer();
+db.loadSchedules(function(err, data) {
+  if (err) {
+    winston.error(err);
+  } else {
+    winston.info("Schedules loaded");
+  }
+});
 
 var server = app.listen(3000);
 winston.info('App Server running at port 3000');
