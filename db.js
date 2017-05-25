@@ -46,6 +46,10 @@ var retrieveSchedule = function(uuid, callback) {
   }
 };
 
+var retrieveSchedules = function(callback) {
+  callback(undefined, schedules);
+};
+
 var updateSchedule = function(uuid, schedule, callback) {
   if (schedules[uuid]) {
     fs.writeFile(store + '/' + uuid + '.json', JSON.stringify(schedule), 'utf8', function(err, data) {
@@ -78,6 +82,7 @@ module.exports = {
   loadSchedules: loadSchedules,
   createSchedule: createSchedule,
   retrieveSchedule: retrieveSchedule,
+  retrieveSchedules: retrieveSchedules,
   updateSchedule: updateSchedule,
   deleteSchedule: deleteSchedule
 };
