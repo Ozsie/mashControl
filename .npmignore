@@ -7,3 +7,5 @@ schematics
 .travis.yml
 .gitignore
 .coveralls.yml
+schedules/*
+!schedules/default.json
