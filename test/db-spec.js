@@ -4,8 +4,20 @@ var fs = require('fs');
 var db = require('./../db');
 
 describe('db', function() {
+  before(function() {
+    db.clearSchedules(function() {
+      console.log('Schedules cleared');
+    });
+  });
 
   var uuid;
+
+  it('default schedule should not be retrieved before loading schedules', function(done) {
+    db.retrieveSchedule('default', function(err, data) {
+      expect(data).to.be.undefined;
+      done();
+    });
+  });
 
   it('schedule should be stored', function(done) {
     var schedule = JSON.parse(fs.readFileSync('test/mashControl-spec-schedule.json', 'utf8'));
@@ -23,13 +35,6 @@ describe('db', function() {
     db.retrieveSchedule(uuid, function(err, data) {
       expect(data).to.not.be.null;
       expect(data.uuid).to.equal(uuid);
-      done();
-    });
-  });
-
-  it('default schedule should not be retrieved before loading schedules', function(done) {
-    db.retrieveSchedule('default', function(err, data) {
-      expect(data).to.be.undefined;
       done();
     });
   });

@@ -26,6 +26,11 @@ var loadSchedules = function(callback) {
   });
 };
 
+var clearSchedules = function(callback) {
+  schedules = {};
+  callback();
+};
+
 var createSchedule = function(schedule, callback) {
   var uuid = uuidV4();
   schedule.uuid = uuid;
@@ -80,6 +85,7 @@ var deleteSchedule = function(uuid, callback) {
 
 module.exports = {
   loadSchedules: loadSchedules,
+  clearSchedules: clearSchedules,
   createSchedule: createSchedule,
   retrieveSchedule: retrieveSchedule,
   retrieveSchedules: retrieveSchedules,
