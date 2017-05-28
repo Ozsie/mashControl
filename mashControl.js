@@ -39,8 +39,15 @@ app.get('/temp/current', function(req, res) {
       tempData.minute = scheduleRunner.getRunningForMinutes();
       res.status(200).send(tempData);
     } else {
-      winston.error("Could not fetch temperature", error);
-      res.status(500).send(error);
+      switch (error.code) {
+        case 'ENOENT':
+          winston.error("Could not fetch temperature. Probe unavailable.");
+          break;
+        default:
+          winston.error("Could not fetch temperature.", error);
+      }
+
+      res.status(503).send(error);
     }
   });
 });

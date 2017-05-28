@@ -45,7 +45,6 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
       function(response) {
         deferred.resolve(response);
       }, function(error) {
-        console.error("Error getting current temperature");
         deferred.reject(error);
       });
     return deferred.promise;

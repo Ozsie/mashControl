@@ -62,28 +62,21 @@
         </div>
     </div>
 
-
-    <div class="panel panel-default">
-        <div class="panel-heading">Saved schedules</div>
-        <div class="panel-body">
-            <div class="well">
-                <ul class="nav" role="navigation">
-                    <li class="dropdown">
-                        <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">Schedules <b class="caret"></b></a>
-                        <ul class="dropdown-menu" role="menu">
-                            <li><a href="#" ng-repeat="schedule in savedSchedules" ng-click="selectSchedule(schedule);"> {{ schedule.name }}</a></li>
-                        </ul>
-                    </li>
-
-                </ul>
-            </div>
-        </div>
-    </div>
-
     <div class="panel panel-default">
         <div class="panel-heading">Mash schedule</div>
         <div class="panel-body">
             <div class="well">
+                <ul class="nav" role="navigation">
+                  <li class="dropdown">
+                      <button id="drop1" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Saved schedules<span class="caret"></span></button>
+
+                      <ul class="dropdown-menu" role="menu">
+                          <li ng-repeat="schedule in savedSchedules">
+                              <a href="#"><span ng-click="selectSchedule(schedule);" class="label label-primary">{{ schedule.name }}</span>&nbsp;<button class="btn btn-danger btn-xs" ng-click="deleteSchedule(schedule);"> Delete</button></a>
+                          </li>
+                      </ul>
+                  </li>
+                </ul>
                 <div class="input-group">
                     <span class="input-group-addon">Name</span>
                     <input class="form-control" type="text" ng-model="jsonSchedule.name" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Name" aria-label="Name">

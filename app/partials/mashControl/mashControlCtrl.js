@@ -46,9 +46,15 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     $scope.handleJsonSchedule();
   };
 
+  $scope.deleteSchedule = function(schedule) {
+    console.log('delete');
+  };
+
   $scope.fetchStartTemp = function() {
     mashControlRestService.getCurrentTemperature().then(function(data) {
       $scope.startTemp = data.temperature.celcius;
+    }, function(error) {
+      $scope.startTemp = 10;
     });
   };
 
@@ -218,6 +224,8 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         $scope.currentTemp = data;
         $scope.updates++;
         var updated = false;
+      }, function(error) {
+        console.error(error);
       });
       updateCurrentTemperature();
     }, 1000);
