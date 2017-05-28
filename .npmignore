@@ -6,3 +6,4 @@ logs
 schematics
 .travis.yml
 .gitignore
+.coveralls.yml
