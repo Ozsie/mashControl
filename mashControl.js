@@ -85,7 +85,7 @@ app.post('/schedule/store/create', function(req, res) {
   var schedule = req.body;
   db.createSchedule(schedule, function(err, data) {
     if (!err) {
-      res.status(200).send(data);
+      res.status(200).send({uuid: data});
     }
   });
 });
@@ -104,7 +104,7 @@ app.get('/schedule/store/retrieve/', function(req, res) {
   winston.info('Retrieve all schedules');
   db.retrieveSchedules(function(err, data) {
     if (!err) {
-      res.status(200).send(data);
+      res.status(200).send({schedules: data});
     }
   });
 });

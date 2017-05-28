@@ -21,7 +21,20 @@ mashControl.factory('mashControlRestFactory',function($resource) {
     },
     getTempLog : function(){
       return $resource('/schedule/tempLog');
-    }
+    },
+    getStoredSchedules : function(){
+      return $resource('/schedule/store/retrieve');
+    },
+    createSchedule: function() {
+      return $resource('/schedule/store/create',{}, {
+        create : { method: 'POST'}
+      });
+    },
+    updateSchedule: function() {
+      return $resource('/schedule/store/update/:uuid',{uuid: '@uuid'}, {
+        update : { method: 'PUT'}
+    });
+ }
   };
 });
 
@@ -54,6 +67,32 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
     var deferred = $q.defer();
 
     mashControlRestFactory.startSchedule().start(schedule,
+      function(response) {
+        deferred.resolve(response);
+      }, function(error) {
+        console.error("Error starting schedule");
+        deferred.reject(error);
+      });
+    return deferred.promise;
+  };
+
+  var createSchedule = function(schedule){
+    var deferred = $q.defer();
+
+    mashControlRestFactory.createSchedule().create(schedule,
+      function(response) {
+        deferred.resolve(response);
+      }, function(error) {
+        console.error("Error starting schedule");
+        deferred.reject(error);
+      });
+    return deferred.promise;
+  };
+
+  var updateSchedule = function(schedule){
+    var deferred = $q.defer();
+
+    mashControlRestFactory.updateSchedule().update(schedule,
       function(response) {
         deferred.resolve(response);
       }, function(error) {
@@ -99,12 +138,27 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
     return deferred.promise;
   };
 
+  var getStoredSchedules = function (){
+    var deferred = $q.defer();
+    mashControlRestFactory.getStoredSchedules().get({},
+      function(response) {
+        deferred.resolve(response);
+      }, function(error) {
+        console.error("Error getting stored schedules");
+        deferred.reject(error);
+      });
+    return deferred.promise;
+  };
+
   return {
     getCurrentTemperature: getCurrentTemperature,
     getSchedule: getSchedule,
     startSchedule: startSchedule,
     stopSchedule: stopSchedule,
     getStatus: getStatus,
-    getTempLog: getTempLog
+    getTempLog: getTempLog,
+    getStoredSchedules: getStoredSchedules,
+    createSchedule: createSchedule,
+    updateSchedule: updateSchedule
   };
 });

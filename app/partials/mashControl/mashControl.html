@@ -62,8 +62,34 @@
         </div>
     </div>
 
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Saved schedules</div>
+        <div class="panel-body">
+            <div class="well">
+                <ul class="nav" role="navigation">
+                    <li class="dropdown">
+                        <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">Schedules <b class="caret"></b></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#" ng-repeat="schedule in savedSchedules" ng-click="selectSchedule(schedule);"> {{ schedule.name }}</a></li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div class="panel panel-default">
         <div class="panel-heading">Mash schedule</div>
+        <div class="panel-body">
+            <div class="well">
+                <div class="input-group">
+                    <span class="input-group-addon">Name</span>
+                    <input class="form-control" type="text" ng-model="jsonSchedule.name" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Name" aria-label="Name">
+                </div>
+            </div>
+        </div>
         <div class="panel-body" ng-show="!running">
             <div class="well">
                 <div class="input-group">
@@ -167,7 +193,13 @@
             </div>
         </div>
     </div>
-    <!-- textarea ng-model="schedule" ng-disabled="inputDisabled"></textarea -->
+
+    <div class="btn-group" role="group" aria-label="...">
+        <button class="btn btn-success bt-md" ng-click="save()">
+            <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Save
+        </button>
+    </div>
+
     <div class="btn-group" role="group" aria-label="...">
         <button class="btn btn-primary bt-md" ng-click="start()">
             <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Start

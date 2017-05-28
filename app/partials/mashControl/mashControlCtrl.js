@@ -8,6 +8,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     }, function() {
       console.log("Push blocked");
     });
+    $scope.refreshStoredSchedules();
     mashControlRestService.getStatus().then(function(data) {
       $scope.status = data;
       if (data.status === 'running') {
@@ -28,6 +29,21 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         });
       }
     });
+  };
+
+  $scope.refreshStoredSchedules = function() {
+    mashControlRestService.getStoredSchedules().then(function(data) {
+      if (data) {
+        $scope.savedSchedules = data.schedules;
+        console.log('loaded schedules');
+        console.log(JSON.stringify($scope.savedSchedules));
+      }
+    });
+  };
+
+  $scope.selectSchedule = function(schedule) {
+    $scope.jsonSchedule = schedule;
+    $scope.handleJsonSchedule();
   };
 
   $scope.fetchStartTemp = function() {
@@ -533,6 +549,28 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
   $scope.secondsToMinutes = function(seconds) {
     var min = seconds/60;
     return Math.floor(min);
+  };
+
+  $scope.save = function() {
+    if (!$scope.jsonSchedule.uuid) {
+      mashControlRestService.createSchedule($scope.jsonSchedule).then(function(data) {
+        if (data) {
+          $scope.jsonSchedule.uuid = data.uuid;
+          $scope.refreshStoredSchedules();
+        } else {
+          console.error('Failed when saving schedule')
+        }
+      });
+    } else {
+      mashControlRestService.updateSchedule($scope.jsonSchedule).then(function(data) {
+        if (data) {
+          $scope.jsonSchedule.uuid = data.uuid;
+          $scope.refreshStoredSchedules();
+        } else {
+          console.error('Failed when saving schedule')
+        }
+      });
+    }
   };
 
   $scope.init();
