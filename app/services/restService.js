@@ -30,11 +30,19 @@ mashControl.factory('mashControlRestFactory',function($resource) {
         create : { method: 'POST'}
       });
     },
+    retrieveSchedules : function(){
+      return $resource('/schedule/store/retrieve/:uuid',{uuid: '@uuid'});
+    },
     updateSchedule: function() {
       return $resource('/schedule/store/update/:uuid',{uuid: '@uuid'}, {
         update : { method: 'PUT'}
-    });
- }
+      });
+    },
+    deleteSchedule: function() {
+      return $resource('/schedule/store/delete/:uuid',{uuid: '@uuid'}, {
+        del : { method: 'DELETE'}
+      });
+    }
   };
 });
 
@@ -75,6 +83,18 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
     return deferred.promise;
   };
 
+  var getStoredSchedules = function (){
+    var deferred = $q.defer();
+    mashControlRestFactory.getStoredSchedules().get({},
+      function(response) {
+        deferred.resolve(response);
+      }, function(error) {
+        console.error("Error getting stored schedules");
+        deferred.reject(error);
+      });
+    return deferred.promise;
+  };
+
   var createSchedule = function(schedule){
     var deferred = $q.defer();
 
@@ -88,6 +108,19 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
     return deferred.promise;
   };
 
+  var retrieveSchedule = function(schedule){
+    var deferred = $q.defer();
+
+    mashControlRestFactory.retrieveSchedule().get(schedule,
+      function(response) {
+        deferred.resolve(response);
+      }, function(error) {
+        console.error("Error retrieving schedule");
+        deferred.reject(error);
+      });
+    return deferred.promise;
+  };
+
   var updateSchedule = function(schedule){
     var deferred = $q.defer();
 
@@ -95,7 +128,20 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
       function(response) {
         deferred.resolve(response);
       }, function(error) {
-        console.error("Error starting schedule");
+        console.error("Error updating schedule");
+        deferred.reject(error);
+      });
+    return deferred.promise;
+  };
+
+  var deleteSchedule = function(schedule){
+    var deferred = $q.defer();
+
+    mashControlRestFactory.deleteSchedule().del(schedule,
+      function(response) {
+        deferred.resolve(response);
+      }, function(error) {
+        console.error("Error deleting schedule");
         deferred.reject(error);
       });
     return deferred.promise;
@@ -137,18 +183,6 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
     return deferred.promise;
   };
 
-  var getStoredSchedules = function (){
-    var deferred = $q.defer();
-    mashControlRestFactory.getStoredSchedules().get({},
-      function(response) {
-        deferred.resolve(response);
-      }, function(error) {
-        console.error("Error getting stored schedules");
-        deferred.reject(error);
-      });
-    return deferred.promise;
-  };
-
   return {
     getCurrentTemperature: getCurrentTemperature,
     getSchedule: getSchedule,
@@ -158,6 +192,8 @@ mashControl.factory('mashControlRestService', function($q, $http, mashControlRes
     getTempLog: getTempLog,
     getStoredSchedules: getStoredSchedules,
     createSchedule: createSchedule,
-    updateSchedule: updateSchedule
+    retrieveSchedule: retrieveSchedule,
+    updateSchedule: updateSchedule,
+    deleteSchedule: deleteSchedule
   };
 });

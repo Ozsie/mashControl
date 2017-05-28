@@ -72,7 +72,12 @@
 
                       <ul class="dropdown-menu" role="menu">
                           <li ng-repeat="schedule in savedSchedules">
-                              <a href="#"><span ng-click="selectSchedule(schedule);" class="label label-primary">{{ schedule.name }}</span>&nbsp;<button class="btn btn-danger btn-xs" ng-click="deleteSchedule(schedule);"> Delete</button></a>
+                              <a href="#">
+                                  <span ng-click="selectSchedule(schedule);" class="label label-primary">{{ schedule.name }}</span>
+                                  &nbsp;
+                                  <span class="label label-info" ng-if="schedule.uuid === 'default'">Default</span>
+                                  <button class="btn btn-danger btn-xs" ng-click="deleteSchedule(schedule);" ng-if="schedule.uuid !== 'default'"> Delete</button>
+                              </a>
                           </li>
                       </ul>
                   </li>
@@ -96,12 +101,12 @@
                     </button>
                     <span> Calculate rise time</span>
                 </div>
-                <div class="input-group">
+                <!--div class="input-group">
                     <button class="btn btn-primary btn-md" type="button" ng-click="autoNameSteps = !autoNameSteps">
                         <span class="glyphicon" ng-class="{'glyphicon-check': autoNameSteps, 'glyphicon-unchecked': !autoNameSteps}" aria-hidden="true"></span>
                     </button>
-                    <span> Autoname steps</span>
-                </div>
+                    <span> Autonaming</span>
+                </div-->
                 <div class="input-group">
                     <span class="input-group-addon">Start temperature</span>
                     <input class="form-control" type="number" ng-model="startTemp" ng-disabled="inputDisabled" ng-change="handleJsonSchedule()" placeholder="Start temperature" aria-label="Start temperature">
@@ -188,8 +193,11 @@
     </div>
 
     <div class="btn-group" role="group" aria-label="...">
-        <button class="btn btn-success bt-md" ng-click="save()">
-            <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Save
+        <button class="btn btn-success bt-md" ng-click="save()" ng-disabled="jsonSchedule.uuid === 'default'">
+            <span class="glyphicon glyphicon-save" aria-hidden="true"></span> Save
+        </button>
+        <button class="btn btn-success bt-md" ng-click="saveCopy()">
+            <span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span> Save copy
         </button>
     </div>
 

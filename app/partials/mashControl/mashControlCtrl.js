@@ -36,18 +36,22 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       if (data) {
         $scope.savedSchedules = data.schedules;
         console.log('loaded schedules');
-        console.log(JSON.stringify($scope.savedSchedules));
       }
     });
   };
 
   $scope.selectSchedule = function(schedule) {
+    schedule.loaded = true;
     $scope.jsonSchedule = schedule;
-    $scope.handleJsonSchedule();
+    $scope.handleJsonScheduleNoNameUpdate();
   };
 
   $scope.deleteSchedule = function(schedule) {
-    console.log('delete');
+    mashControlRestService.deleteSchedule(schedule).then(function(data) {
+      $scope.refreshStoredSchedules();
+    }, function(error) {
+      console.error('Could not delete schedule: ' + error);
+    });
   };
 
   $scope.fetchStartTemp = function() {
@@ -328,40 +332,17 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
     return Math.floor(rnd*16777215).toString(16);
   };
 
-  $scope.handleJsonSchedule = function() {
-    var data = {
-      temperature: []
-    };
-    var runTime = 1;
-    var lastTemp = 0;
-    var startTime = 0;
-    var m;
-    var i;
-    var point;
-    var joules;
-    var watts;
-    var secondsPerDegree;
-    var minutesPerDegree;
-    var expected;
+  $scope.calculateStep = function(step, index, values) {
 
-    $scope.totalRunTime = 0;
-    if (!$scope.startTemp) {
-      $scope.fetchStartTemp();
-    }
-    for (var index in $scope.jsonSchedule.steps) {
-      var step = $scope.jsonSchedule.steps[index];
-
-      $scope.addStepIndicator(data, {
+      $scope.addStepIndicator(values.data, {
         key: "step" + index,
         label: step.name,
         color: $scope.getColor(index + 1)
       });
 
-      runTime -= 1;
-      lastTemp = step.temperature;
-      if ($scope.autoNameSteps) {
-        step.name = $scope.getName(step);
-      }
+      values.runTime -= 1;
+      values.lastTemp = step.temperature;
+
       var startingTemp = $scope.startTemp;
       if (index > 0) {
         startingTemp = $scope.jsonSchedule.steps[index - 1].temperature;
@@ -379,42 +360,46 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       }
 
       if (!step.temperature) {
-        continue;
+        return data;
       }
       if (!step.riseTime && !step.time) {
-        continue;
+        return data;
       }
 
       for (i = 0; i < step.riseTime; i++) {
         expected = (((step.temperature - startingTemp) / step.riseTime) * i) + startingTemp;
         point = {
-          minute: runTime,
+          minute: values.runTime,
           expected: expected,
         };
         point["step" + index] = expected;
-        data.temperature.push(point);
-        runTime++;
+        values.data.temperature.push(point);
+        values.runTime++;
       }
 
       for (m = 0; m <= step.time; m++) {
         point = {
-          minute: runTime,
+          minute: values.runTime,
           expected: step.temperature
         };
         point["step" + index] = step.temperature;
-        data.temperature.push(point);
-        runTime += 1;
+        values.data.temperature.push(point);
+        values.runTime += 1;
       }
-      if (startTime !== 0) {
-        runTime++;
+      if (values.startTime !== 0) {
+        values.runTime++;
       }
       $scope.totalRunTime += step.riseTime + step.time;
-    }
+
+      return values;
+  }
+
+  $scope.calculateSpargePause = function(values) {
 
     if ($scope.jsonSchedule.spargePause) {
-      runTime--;
+      values.runTime--;
 
-      $scope.addStepIndicator(data, stepIndicator = {
+      $scope.addStepIndicator(values.data, stepIndicator = {
         key: "spargePause",
         label: "Sparge Pause",
         color: $scope.getColor(1000)
@@ -422,57 +407,61 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       $scope.totalRunTime += $scope.jsonSchedule.spargePause;
       for (m = 0; m <= $scope.jsonSchedule.spargePause; m++) {
         point = {
-          minute: runTime,
-          expected: lastTemp
+          minute: values.runTime,
+          expected: values.lastTemp
         };
-        point.spargePause = lastTemp;
-        data.temperature.push(point);
-        runTime += 1;
+        point.spargePause = values.lastTemp;
+        values.data.temperature.push(point);
+        values.runTime += 1;
       }
-      if (startTime !== 0) {
-        runTime++;
+      if (values.startTime !== 0) {
+        values.runTime++;
       }
     }
 
-    if ($scope.jsonSchedule.boilTime) {
-      runTime--;
+    return values;
+  }
 
-      $scope.addStepIndicator(data, stepIndicator = {
+  $scope.calculateBoilSteps = function(values) {
+    if ($scope.jsonSchedule.boilTime) {
+      values.runTime--;
+
+      $scope.addStepIndicator(values.data, stepIndicator = {
         key: "boilTime",
         label: "Boil",
         color: $scope.getColor(2000),
       });
       $scope.totalRunTime += $scope.jsonSchedule.boilTime;
 
-      joules = 4184 * $scope.jsonSchedule.volume;
-      watts = 1800;
-      secondsPerDegree = joules/watts;
-      minutesPerDegree = secondsPerDegree / 60;
-      $scope.jsonSchedule.boilRiseTime = Math.ceil((100 - lastTemp) * minutesPerDegree);
+      var joules = 4184 * $scope.jsonSchedule.volume;
+      var watts = 1800;
+      var secondsPerDegree = joules/watts;
+      var minutesPerDegree = secondsPerDegree / 60;
+      $scope.jsonSchedule.boilRiseTime = Math.ceil((100 - values.lastTemp) * minutesPerDegree);
 
       for (i = 0; i < $scope.jsonSchedule.boilRiseTime; i++) {
-        expected = (((100 - lastTemp) / $scope.jsonSchedule.boilRiseTime) * i) + lastTemp;
+        expected = (((100 - values.lastTemp) / $scope.jsonSchedule.boilRiseTime) * i) + values.lastTemp;
         point = {
-          minute: runTime,
+          minute: values.runTime,
           expected: expected,
         };
         point.boilTime = expected;
-        data.temperature.push(point);
-        runTime++;
+        values.data.temperature.push(point);
+        values.runTime++;
       }
 
       for (m = 0; m <= $scope.jsonSchedule.boilTime; m++) {
         point = {
-          minute: runTime,
+          minute: values.runTime,
           expected: 100
         };
         point.boilTime = 100;
-        data.temperature.push(point);
+        values.data.temperature.push(point);
 
         for (var boilIndex in $scope.jsonSchedule.boilSteps) {
           var boilStep = $scope.jsonSchedule.boilSteps[boilIndex];
           if ($scope.jsonSchedule.boilTime - boilStep.time === m) {
-            $scope.addStepIndicator(data, stepIndicator = {
+            $scope.addStepIndicator(values.data, stepIndicator = {
               key: "boilStep" + boilIndex,
               label: "Add hops: " + boilStep.hop,
               color: $scope.getColor(3002),
@@ -481,14 +470,93 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
             point["boilStep" + boilIndex] = boilStep.amount;
           }
         }
-        runTime += 1;
+        values.runTime += 1;
       }
-      if (startTime !== 0) {
-        runTime++;
+      if (values.startTime !== 0) {
+        values.runTime++;
       }
     }
 
-    $scope.data = data;
+    return values;
+  }
+
+  $scope.handleJsonSchedule = function(keepNames) {
+    var m;
+    var i;
+    var point;
+    var joules;
+    var watts;
+    var secondsPerDegree;
+    var minutesPerDegree;
+    var expected;
+
+    var values = {
+      data: {
+        temperature: []
+      },
+      runTime: 1,
+      lastTemp: 0,
+      startTime: 0
+    }
+
+    $scope.totalRunTime = 0;
+    if (!$scope.startTemp) {
+      $scope.fetchStartTemp();
+    }
+    for (var index in $scope.jsonSchedule.steps) {
+      var step = $scope.jsonSchedule.steps[index];
+      if ($scope.autoNameSteps) {
+        step.name = $scope.getName(step);
+      }
+      values = $scope.calculateStep(step, index, values);
+    }
+
+    values = $scope.calculateSpargePause(values);
+
+    values = $scope.calculateBoilSteps(values);
+
+    $scope.data = values.data;
+
+    if ($scope.autoNameSteps) {
+      $scope.nameGenerator($scope.jsonSchedule);
+    }
+    $scope.schedule = JSON.stringify($scope.jsonSchedule);
+  };
+
+  $scope.handleJsonScheduleNoNameUpdate = function(keepNames) {
+    var m;
+    var i;
+    var point;
+    var joules;
+    var watts;
+    var secondsPerDegree;
+    var minutesPerDegree;
+    var expected;
+
+    var values = {
+      data: {
+        temperature: []
+      },
+      runTime: 1,
+      lastTemp: 0,
+      startTime: 0
+    }
+
+    $scope.totalRunTime = 0;
+    if (!$scope.startTemp) {
+      $scope.fetchStartTemp();
+    }
+    for (var index in $scope.jsonSchedule.steps) {
+      var step = $scope.jsonSchedule.steps[index];
+      values = $scope.calculateStep(step, index, values);
+    }
+
+    values = $scope.calculateSpargePause(values);
+
+    values = $scope.calculateBoilSteps(values);
+
+    $scope.data = values.data;
+
     $scope.schedule = JSON.stringify($scope.jsonSchedule);
   };
 
@@ -579,6 +647,50 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
         }
       });
     }
+  };
+
+  $scope.saveCopy = function() {
+    $scope.jsonSchedule.uuid = undefined;
+    mashControlRestService.createSchedule($scope.jsonSchedule).then(function(data) {
+      if (data) {
+        $scope.jsonSchedule.uuid = data.uuid;
+        $scope.refreshStoredSchedules();
+      } else {
+        console.error('Failed when saving schedule')
+      }
+    });
+  };
+
+  $scope.nameGenerator = function(schedule) {
+    if (schedule.loaded) {
+      return;
+    }
+    var name = '';
+    var parts = [];
+    if (schedule.steps) {
+      var mashTime = 0;
+      for (var i in schedule.steps) {
+        mashTime += schedule.steps[i].riseTime + schedule.steps[i].time;
+      }
+      parts.push(schedule.steps.length + '-step');
+      if (mashTime !== 'NaN') {
+        parts.push(mashTime + ' min mash');
+      }
+    }
+    if (schedule.boilTime) {
+      parts.push(schedule.boilTime + ' min boil');
+    }
+    if (schedule.volume) {
+      parts.push(schedule.volume + ' l');
+    }
+
+    for (var j in parts) {
+      name += parts[j];
+      if (j < parts.length - 1) {
+        name += ', ';
+      }
+    }
+    schedule.name = name;
   };
 
   $scope.init();
