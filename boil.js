@@ -35,7 +35,6 @@ var adjustTemperatureForBoil = function(status, schedule) {
     } else {
       status.thermometer = false;
       winston.error(err);
-      callback(err);
     }
   });
 };

@@ -54,6 +54,7 @@
     "chai": "^4.0.0-canary.1",
     "chai-http": "^3.0.0",
     "istanbul": "^0.4.5",
-    "coveralls": "^2.13.1"
+    "coveralls": "^2.13.1",
+    "gpio-mock": "^1.1.0"
   }
 }

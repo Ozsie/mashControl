@@ -2,57 +2,29 @@ var chai = require('chai');
 var expect = chai.expect; // we are using the "expect" style of Chai
 var fs = require('fs');
 var boil = require('./../boil');
+var gpioMock = require('gpio-mock');
 
 describe('boil', function() {
-  beforeEach(function() {
-    boil.tempSensor.settings.input = "node_modules/mc-tempsensor/test/testTemp.txt";
-    boil.heatControl.gpio.settings.path = "./gpio-mock/";
 
-    var mockGpio = function(pin) {
-      fs.writeFileSync(boil.heatControl.gpio.settings.path + "export", pin);
-      fs.mkdirSync(boil.heatControl.gpio.settings.path + "gpio" + pin);
-      fs.writeFile(boil.heatControl.gpio.settings.path + "gpio" + pin + "/direction", "in");
-    }
-
-    fs.mkdirSync(boil.heatControl.gpio.settings.path);
-    mockGpio("18");
-    mockGpio("4");
-    mockGpio("17");
-    mockGpio("23");
-    mockGpio("24");
+  before(function(done) {
+    gpioMock.start(function(err) {
+      if (!err) {
+        console.log('GPIO mocked');
+        gpioMock.addDS18B20('28-800000263717', {
+          behavior: 'static',
+          temperature: 42
+        }, function(err) {
+          if (!err) {
+            console.log('DS18B20 mocked');
+          }
+          done();
+        });
+      }
+    })
   });
 
-  afterEach(function() {
-    boil.tempSensor.settings.input = "/sys/bus/w1/devices/28-800000263717/w1_slave";
-    boil.heatControl.gpio.settings.path = "/sys/class/gpio/";
-
-    var clearGpioMock = function(pin) {
-      if (fs.existsSync("./gpio-mock/gpio" + pin + "/")) {
-        if (fs.existsSync("./gpio-mock/gpio" + pin + "/direction")) {
-          fs.unlinkSync("./gpio-mock/gpio" + pin + "/direction");
-        }
-        if (fs.existsSync("./gpio-mock/gpio" + pin + "/value")) {
-          fs.unlinkSync("./gpio-mock/gpio" + pin + "/value");
-        }
-        fs.rmdirSync("./gpio-mock/gpio" + pin);
-      }
-    }
-
-    clearGpioMock("18");
-    clearGpioMock("4");
-    clearGpioMock("17");
-    clearGpioMock("23");
-    clearGpioMock("24");
-
-    if (fs.existsSync("./gpio-mock/")) {
-      if (fs.existsSync("./gpio-mock/export")) {
-        fs.unlinkSync("./gpio-mock/export");
-      }
-      if (fs.existsSync("./gpio-mock/unexport")) {
-        fs.unlinkSync("./gpio-mock/unexport");
-      }
-      fs.rmdirSync("./gpio-mock/");
-    }
+  after(function() {
+    gpioMock.stop();
   });
 
   it('status should be updated correctly', function(done) {
@@ -76,7 +48,7 @@ describe('boil', function() {
     setTimeout(function() {
       console.log(status);
       expect(status.initialTemp).to.equal(0);
-      expect(status.temperature).to.equal(35);
+      expect(status.temperature).to.equal(42);
       expect(status.minutes).to.equal(2);
       done();
     }, 60);
