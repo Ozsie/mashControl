@@ -12,4 +12,3 @@ branches:
     - "master"
 after_success:
   - 'npm run coveralls'
-  - 'npm run predocker'
