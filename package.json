@@ -10,10 +10,11 @@
     "test": "istanbul cover _mocha test --recursive",
     "prestart": "git pull && jshint",
     "start": "node mashControl.js",
+    "start-docker": "node docker.js",
+    "start-offline": "node mashControl.js",
     "predocker": "docker build -t ozsie/mash-control:$npm_package_version .",
-    "docker": "docker run -d --name mash-control ozsie/mash-control:$npm_package_version",
-    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "start-offline": "node mashControl.js"
+    "docker": "docker run --name mash-control -p 3000:3000 ozsie/mash-control:$npm_package_version",
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
   "repository": {
     "type": "git",
