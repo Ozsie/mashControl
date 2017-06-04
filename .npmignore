@@ -9,3 +9,5 @@ schematics
 .coveralls.yml
 schedules/*
 !schedules/default.json
+npm-debug.log
+sys

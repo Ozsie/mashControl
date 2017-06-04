@@ -1,5 +1,6 @@
 var chai = require('chai');
 var chaiHttp = require('chai-http');
+var gpioMock = require('gpio-mock');
 var expect = chai.expect;
 var should = chai.should();
 var mashControl = require('./../mashControl');
@@ -8,55 +9,30 @@ var fs = require('fs');
 chai.use(chaiHttp);
 
 describe('mashControl', function() {
-  beforeEach(function() {
-    mashControl.tempSensor.settings.input = "node_modules/mc-tempsensor/test/testTemp.txt";
-    mashControl.heatControl.gpio.settings.path = "./gpio-mock/";
 
-    var mockGpio = function(pin) {
-      fs.writeFileSync(mashControl.heatControl.gpio.settings.path + "export", pin);
-      fs.mkdirSync(mashControl.heatControl.gpio.settings.path + "gpio" + pin);
-      fs.writeFile(mashControl.heatControl.gpio.settings.path + "gpio" + pin + "/direction", "in");
-    }
-
-    fs.mkdirSync(mashControl.heatControl.gpio.settings.path);
-    mockGpio("18");
-    mockGpio("4");
-    mockGpio("17");
-    mockGpio("23");
-    mockGpio("24");
+  before(function(done) {
+    gpioMock.start(function(err) {
+      if (!err) {
+        console.log('GPIO mocked');
+        gpioMock.addDS18B20('28-800000263717', {
+          behavior: 'static',
+          temperature: 35
+        }, function(err) {
+          if (!err) {
+            console.log('DS18B20 mocked');
+          }
+          setTimeout(function() {
+            console.log('DONE');
+            done();
+          }, 1800)
+        });
+      }
+    });
   });
 
-  afterEach(function() {
-    mashControl.tempSensor.settings.input = "/sys/bus/w1/devices/28-800000263717/w1_slave";
-    mashControl.heatControl.gpio.settings.path = "/sys/class/gpio/";
-
-    var clearGpioMock = function(pin) {
-      if (fs.existsSync("./gpio-mock/gpio" + pin + "/")) {
-        if (fs.existsSync("./gpio-mock/gpio" + pin + "/direction")) {
-          fs.unlinkSync("./gpio-mock/gpio" + pin + "/direction");
-        }
-        if (fs.existsSync("./gpio-mock/gpio" + pin + "/value")) {
-          fs.unlinkSync("./gpio-mock/gpio" + pin + "/value");
-        }
-        fs.rmdirSync("./gpio-mock/gpio" + pin);
-      }
-    }
-
-    clearGpioMock("18");
-    clearGpioMock("4");
-    clearGpioMock("17");
-    clearGpioMock("23");
-    clearGpioMock("24");
-
-    if (fs.existsSync("./gpio-mock/")) {
-      if (fs.existsSync("./gpio-mock/export")) {
-        fs.unlinkSync("./gpio-mock/export");
-      }
-      if (fs.existsSync("./gpio-mock/unexport")) {
-        fs.unlinkSync("./gpio-mock/unexport");
-      }
-      fs.rmdirSync("./gpio-mock/");
-    }
+  after(function() {
+    gpioMock.stop();
+    mashControl.server.close();
   });
 
   it('GET /temp/current should return current temperature and have status 200', function(done) {
@@ -77,10 +53,14 @@ describe('mashControl', function() {
 
   it('POST /schedule/start should return "true" and have status 200', function(done) {
     var testSchedule = JSON.parse(fs.readFileSync('test/mashControl-spec-schedule.json', 'utf8'));
+    this.timeout(2500);
+    var start = Date.now();
     chai.request(mashControl.server)
         .post('/schedule/start')
         .send(testSchedule)
         .end(function(err, res){
+          var end = Date.now();
+          console.log('Time: ' + (end - start));
           expect(res.status).to.equal(200);
           expect(res.text).to.equal("true");
           done();
@@ -136,9 +116,5 @@ describe('mashControl', function() {
           }
           done();
         });
-  });
-
-  after(function() {
-    mashControl.server.close();
   });
 });

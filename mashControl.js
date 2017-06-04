@@ -54,9 +54,15 @@ app.get('/temp/current', function(req, res) {
 
 app.post('/schedule/start', function(req, res) {
   winston.info('Start schedule requested');
-  var scheduleStarted = scheduleRunner.startSchedule(req.body);
-  winston.info('Start ok = ' + scheduleStarted);
-  res.status(200).send(scheduleStarted);
+  scheduleRunner.startSchedule(req.body, function(err) {
+    if (!err) {
+      winston.info('Start ok = ' + true);
+      res.status(200).send(true);
+    } else {
+      winston.info('Start nok = ' + err);
+      res.status(200).send(false);
+    }
+  });
 });
 
 app.get('/schedule/stop', function(req, res) {
@@ -148,8 +154,12 @@ app.post('/relay', function(req, res) {
   winston.info('Switch relay');
   var setting = req.body;
   winston.info('Setting relay ' + setting.index + ' to ' + setting.state);
-  var relay = heatControl.setRelay(setting);
-  res.status(200).send(relay);
+  heatControl.setRelay(setting, function(err, relay) {
+    res.status(200).send(relay);
+    if (err) {
+      winston.error('Error while switching relay', err);
+    }
+  });
 });
 
 app.get('/relay/status', function(req, res) {
@@ -188,10 +198,26 @@ function exitHandler() {
   //turnOff();
   winston.info("EXIT!");
   grpcServer.stopServer();
-  heatControl.setRelay({index: 3, state: "off"});
-  heatControl.setRelay({index: 2, state: "off"});
-  heatControl.setRelay({index: 1, state: "off"});
-  heatControl.setRelay({index: 0, state: "off"});
+  heatControl.setRelay({index: 3, state: "off"}, function(err) {
+    if (err) {
+      winston.error('Error while turning off relay', err);
+    }
+  });
+  heatControl.setRelay({index: 2, state: "off"}, function(err) {
+    if (err) {
+      winston.error('Error while turning off relay', err);
+    }
+  });
+  heatControl.setRelay({index: 1, state: "off"}, function(err) {
+    if (err) {
+      winston.error('Error while turning off relay', err);
+    }
+  });
+  heatControl.setRelay({index: 0, state: "off"}, function(err) {
+    if (err) {
+      winston.error('Error while turning off relay', err);
+    }
+  });
   server.close();
   process.exit();
 }

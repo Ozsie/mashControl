@@ -1,60 +1,34 @@
 var chai = require('chai');
 var expect = chai.expect;
 var grpc = require('grpc');
+var gpioMock = require('gpio-mock');
 var mashControl = require('./../mashControl');
 var fs = require('fs');
 var mcProto = grpc.load('./mashControl.proto').mashControl;
 
 describe('mashControlGRPC', function() {
-  beforeEach(function() {
-    mashControl.tempSensor.settings.input = "node_modules/mc-tempsensor/test/testTemp.txt";
-    mashControl.heatControl.gpio.settings.path = "./gpio-mock/";
-
-    var mockGpio = function(pin) {
-      fs.writeFileSync(mashControl.heatControl.gpio.settings.path + "export", pin);
-      fs.mkdirSync(mashControl.heatControl.gpio.settings.path + "gpio" + pin);
-      fs.writeFile(mashControl.heatControl.gpio.settings.path + "gpio" + pin + "/direction", "in");
-    }
-
-    fs.mkdirSync(mashControl.heatControl.gpio.settings.path);
-    mockGpio("18");
-    mockGpio("4");
-    mockGpio("17");
-    mockGpio("23");
-    mockGpio("24");
+  before(function(done) {
+    gpioMock.start(function(err) {
+      if (!err) {
+        console.log('GPIO mocked');
+        gpioMock.addDS18B20('28-800000263717', {
+          behavior: 'static',
+          temperature: 35
+        }, function(err) {
+          if (!err) {
+            console.log('DS18B20 mocked');
+          }
+          setTimeout(function() {
+            console.log('DONE');
+            done();
+          }, 1800)
+        });
+      }
+    });
   });
 
-  afterEach(function() {
-    mashControl.tempSensor.settings.input = "/sys/bus/w1/devices/28-800000263717/w1_slave";
-    mashControl.heatControl.gpio.settings.path = "/sys/class/gpio/";
-
-    var clearGpioMock = function(pin) {
-      if (fs.existsSync("./gpio-mock/gpio" + pin + "/")) {
-        if (fs.existsSync("./gpio-mock/gpio" + pin + "/direction")) {
-          fs.unlinkSync("./gpio-mock/gpio" + pin + "/direction");
-        }
-        if (fs.existsSync("./gpio-mock/gpio" + pin + "/value")) {
-          fs.unlinkSync("./gpio-mock/gpio" + pin + "/value");
-        }
-        fs.rmdirSync("./gpio-mock/gpio" + pin);
-      }
-    }
-
-    clearGpioMock("18");
-    clearGpioMock("4");
-    clearGpioMock("17");
-    clearGpioMock("23");
-    clearGpioMock("24");
-
-    if (fs.existsSync("./gpio-mock/")) {
-      if (fs.existsSync("./gpio-mock/export")) {
-        fs.unlinkSync("./gpio-mock/export");
-      }
-      if (fs.existsSync("./gpio-mock/unexport")) {
-        fs.unlinkSync("./gpio-mock/unexport");
-      }
-      fs.rmdirSync("./gpio-mock/");
-    }
+  after(function() {
+    gpioMock.stop();
   });
 
   it('GetTemperature should return a parsed temperature', function(done) {

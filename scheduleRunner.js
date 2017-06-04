@@ -90,36 +90,40 @@ var runSchedule = function(callback) {
   doStep();
 };
 
-var startSchedule = function(newSchedule) {
+var startSchedule = function(newSchedule, callback) {
   if (newSchedule) {
     if (status.status === 'running') {
       stopSchedule(function(err, data) {
         if (err) {
-          throw new Error(err);
+          callback(err);
+        }
+      });
+    } else {
+      heatControl.turnOn(function(err) {
+        callback(err);
+        if (err) {
+          status.motor = false;
+        } else {
+          status.motor = true;
+          status.thermometer = true;
+          winston.info(JSON.stringify(schedule));
+          schedule = newSchedule;
+          schedule.startTime = Date.now();
+          status.status = schedule.status = 'running';
+          heatControl.fastDecrease();
+          heatControl.fastDecrease();
+          runSchedule(function() {
+            schedule.endTime = Date.now();
+            winston.info("Mash done after " + (schedule.endTime - schedule.startTime) + " ms");
+            status.status = schedule.status = 'done';
+            heatControl.fastDecrease();
+            heatControl.fastDecrease();
+          });
         }
       });
     }
-    heatControl.turnOn(function() {
-      status.motor = false;
-    });
-    status.motor = true;
-    status.thermometer = true;
-    winston.info(JSON.stringify(schedule));
-    schedule = newSchedule;
-    schedule.startTime = Date.now();
-    status.status = schedule.status = 'running';
-    heatControl.fastDecrease();
-    heatControl.fastDecrease();
-    runSchedule(function() {
-      schedule.endTime = Date.now();
-      winston.info("Mash done after " + (schedule.endTime - schedule.startTime) + " ms");
-      status.status = schedule.status = 'done';
-      heatControl.fastDecrease();
-      heatControl.fastDecrease();
-    });
-    return true;
   } else {
-    return false;
+    callback(new Error('No schedule specified'));
   }
 };
 
