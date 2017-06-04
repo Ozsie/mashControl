@@ -8,7 +8,7 @@ var heatControl = require('./heatControl');
 var tempSensor = require('mc-tempsensor');
 var scheduleRunner = require('./scheduleRunner');
 var db = require('./db');
-var grpcServer = require('./mashControlGRPC');
+//var grpcServer = require('./mashControlGRPC');
 var winston = require('winston');
 
 //"/sys/bus/w1/devices/28-800000263717/w1_slave"
@@ -182,7 +182,7 @@ app.use(function(err, req, res, next) {
   }
 });
 
-grpcServer.startServer();
+//grpcServer.startServer();
 db.loadSchedules(function(err, data) {
   if (err) {
     winston.error(err);
@@ -197,7 +197,7 @@ winston.info('App Server running at port 3000');
 function exitHandler() {
   //turnOff();
   winston.info("EXIT!");
-  grpcServer.stopServer();
+  //grpcServer.stopServer();
   heatControl.setRelay({index: 3, state: "off"}, function(err) {
     if (err) {
       winston.error('Error while turning off relay', err);
