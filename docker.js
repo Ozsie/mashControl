@@ -2,18 +2,12 @@ var gpioMock = require('gpio-mock');
 var fs = require('fs');
 
 function exitHandler() {
-  //turnOff();
   gpioMock.stop();
 }
 
 process.on('exit', exitHandler.bind());
-
-//catches ctrl+c event
 process.on('SIGINT', exitHandler.bind());
-
-process.on('uncaughtException',  (err) => {
-  console.error('Caught exception', err);
-});
+process.on('uncaughtException',  (err) => { console.error('Caught exception', err); });
 
 var ds18b20Simulator = function() {
   return '12000';
