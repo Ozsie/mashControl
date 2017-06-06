@@ -28,7 +28,7 @@ let updateTemp = function() {
     }
   } else if (currentDirection === 'backward') {
     if (currentTemp > 22) {
-      currentTemp -= 0.01/60;
+      currentTemp -= 0.05/60;
     } else if (currentTemp > 0 && currentTemp < 22) {
       currentTemp += 0.01/60;
     }
