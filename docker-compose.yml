@@ -1,0 +1,18 @@
+version: '3'
+services:
+  mash-control:
+    build: ./
+    container_name: mash-control
+    ports:
+      - "3000:3000"
+    volumes:
+      - ~/mashControlDocker/sys:/mashControl/sys
+      - ~/mashControlDocker/logs:/mashControl/logs
+    links:
+      - mock
+  mock:
+    build: mock
+    container_name: mc-mock
+    volumes:
+      - ~/mashControlDocker/sys:/mock/sys
+      - ~/mashControlDocker/logs:/mock/logs

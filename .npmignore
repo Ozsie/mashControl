@@ -11,3 +11,6 @@ schedules/*
 !schedules/default.json
 npm-debug.log
 sys
+**/mock
+docker-compose.yml
+currentMotorDirection
