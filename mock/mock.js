@@ -21,18 +21,20 @@ fs.watch('logs/currentMotorDirection', {encoding: 'utf8', persistent: 'true'}, (
 let updateTemp = function() {
   if (currentDirection === 'forward') {
     if (currentTemp < 100) {
-      console.log('increasing temp');
-      currentTemp += 2/60;
-      fs.writeFileSync('sys/bus/w1/devices/28-800000263717/w1_slave', tempFileContent + (currentTemp)*1000);
+      currentTemp += 4/60;
+      var tempOutput = parseInt(currentTemp * 1000)
+      console.log('increasing temp to ' + tempOutput);
+      fs.writeFileSync('sys/bus/w1/devices/28-800000263717/w1_slave', tempFileContent + tempOutput);
     }
   } else if (currentDirection === 'backward') {
-    console.log('decreasing temp');
     if (currentTemp > 22) {
       currentTemp -= 0.01/60;
     } else if (currentTemp > 0 && currentTemp < 22) {
       currentTemp += 0.01/60;
     }
-    fs.writeFileSync('sys/bus/w1/devices/28-800000263717/w1_slave', tempFileContent + (currentTemp)*1000);
+    var tempOutput = parseInt(currentTemp * 1000)
+    console.log('decreasing temp to ' + tempOutput);
+    fs.writeFileSync('sys/bus/w1/devices/28-800000263717/w1_slave', tempFileContent + tempOutput);
   }
   tempLoop();
 };
