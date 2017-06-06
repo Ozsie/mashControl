@@ -1,10 +1,9 @@
 **/node_modules
 .idea
-**/logs
+./logs
 coverage
 .coveralls.yml
 schedules/*
 !schedules/default.json
 npm-debug.log
 **/sys
-currentMotorDirection
