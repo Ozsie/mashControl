@@ -14,3 +14,5 @@ sys
 **/mock
 docker-compose.yml
 currentMotorDirection
+yarn-error.log
+yarn.lock

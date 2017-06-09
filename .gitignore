@@ -7,3 +7,4 @@ schedules/*
 !schedules/default.json
 npm-debug.log
 **/sys
+yarn-error.log
