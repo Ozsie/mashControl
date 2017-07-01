@@ -309,20 +309,10 @@ setTimeout(function() {
       if (command) {
         stepping = true;
         if (command === "forward") {
-          fs.writeFile('logs/currentMotorDirection', 'forward', function(err) {
-            if(err) {
-              winston.error(err);
-            }
-          });
           stepForward(24, function() {
             stepping = false;
           });
         } else {
-          fs.writeFile('logs/currentMotorDirection', 'backward', function(err) {
-            if(err) {
-              winston.error(err);
-            }
-          });
           stepBackward(24, function() {
             stepping = false;
           });
