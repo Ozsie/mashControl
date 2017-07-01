@@ -43,5 +43,6 @@ let tempLoop = function() {
   setTimeout(updateTemp, 1000);
 }
 
+console.log('Mash Control hardware mock started.');
 tempLoop();
 
