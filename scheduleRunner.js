@@ -14,7 +14,11 @@ var previousTemp;
 var status = {};
 
 var getTempLog = function() {
-  return schedule.tempLog;
+  if (schedule) {
+    return schedule.tempLog;
+  } else {
+    return [];
+  }
 };
 
 var logTemperature = function() {
