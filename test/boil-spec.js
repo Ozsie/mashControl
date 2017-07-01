@@ -46,7 +46,6 @@ describe('boil', function() {
     schedule.startTime = Date.now() - 120000;
     boil.adjustTemperatureForBoil(status, schedule);
     setTimeout(function() {
-      console.log(status);
       expect(status.initialTemp).to.equal(0);
       expect(status.temperature).to.equal(42);
       expect(status.minutes).to.equal(2);

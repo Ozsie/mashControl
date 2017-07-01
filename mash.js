@@ -8,16 +8,37 @@ winston.add(winston.transports.File, { name:"mash", filename: settings.logs.dire
 
 var previousTemp;
 
+var stopSchedule = function(schedule, status, callback) {
+  if (schedule) {
+    heatControl.turnOff(function(err, data) {
+      if (!err) {
+        callback(undefined, true);
+      } else {
+        callback(err, true);
+      }
+    });
+  } else {
+    callback("No schedule available");
+  }
+};
+
 var adjustTemperature = function(step, volume, status, schedule) {
   tempSensor.readAndParse(function(err, data) {
     if (!err) {
+      var currentTemp = data.temperature.celcius;
       if (currentTemp > 90 || currentTemp > settings.heatCutOff) {
         winston.warn("Temperature passed cut off. Stopping.");
-        stopSchedule();
+        stopSchedule(schedule, status, function(err, stopped) {
+          if (err) {
+            winston.error('Error while stopping: ' + err);
+          } else {
+            status.status = schedule.status = 'stopped';
+            winston.info('Mash stopped due to overheating.');
+          }
+        });
         return;
       }
 
-      var currentTemp = data.temperature.celcius;
       var initialDegreesToIncrease = step.temperature - step.initialTemp;
       var heatCutOff = util.calculateCutOffPoint(step.temperature, step.initialTemp, volume);
       if (previousTemp === undefined) {
@@ -103,5 +124,6 @@ var nextMashStep = function(status, schedule, index) {
 };
 
 module.exports = {
-  nextMashStep: nextMashStep
+  nextMashStep: nextMashStep,
+  adjustTemperature: adjustTemperature
 };
