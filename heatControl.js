@@ -14,6 +14,14 @@ var relayOpen = [false, false, false, false];
 
 var commands = [];
 
+var getCurrentDirection = function() {
+  if (commands.length > 0) {
+    return commands[0];
+  } else {
+    return undefined;
+  }
+};
+
 var getRelay = function(index) {
   return settings.relay[index];
 };
@@ -96,11 +104,11 @@ var turnOn = function(callback) {
     callback();
   }
   winston.info("Turn on. Enable Pin: " + settings.motor.enablePin);
-  open(18, function() {
-    open(4, function() {
-      open(17, function() {
-        open(23, function() {
-          open(24, function() {
+  open(settings.motor.enablePin, function() {
+    open(settings.motor.coilA1Pin, function() {
+      open(settings.motor.coilA2Pin, function() {
+        open(settings.motor.coilB1Pin, function() {
+          open(settings.motor.coilB2Pin, function() {
             output(settings.motor.enablePin, 1, function() {
               isOpen = true;
               winston.info("Motor communication is open. Waiting for commands.");
@@ -132,36 +140,8 @@ var turnOff = function(callback) {
   heaterOnSwitch(function(err) {
     output(settings.motor.enablePin, 0, function(err, data) {
       if (!err) {
-        close(4, function(err) {
-          if (!err) {
-            close(17, function(err) {
-              if (!err) {
-                close(18, function(err) {
-                  if (!err) {
-                    close(23, function(err) {
-                      if (!err) {
-                        close(24, function(err) {
-                          if (!err) {
-                            isOpen = false;
-                          }
-                          callback(err);
-                        });
-                      } else {
-                        callback(err);
-                      }
-                    });
-                  } else {
-                    callback(err);
-                  }
-                });
-              } else {
-                callback(err);
-              }
-            });
-          } else {
-            callback(err);
-          }
-        });
+        closeAll();
+        callback(undefined, data);
       } else {
         winston.error("Could not turn off heat control", err);
         callback(err, data);
@@ -218,6 +198,20 @@ var close = function(pin, callback) {
     }
     callback(err);
   });
+};
+
+var closeAll = function() {
+  var close = function(pin) {
+    gpio.closePin(pin, function(err) {
+      if (err) {
+        winston.error("Could not close pin:", + err);
+      }
+    });
+  };
+  for (var name in settings.motor) {
+    var pin = settings.motor[name];
+    close(pin);
+  }
 };
 
 var setStep = function(w1, w2, w3, w4) {
@@ -353,5 +347,6 @@ module.exports = {
   turnOff: turnOff,
   setRelay: setRelay,
   getRelayStatus: getRelayStatus,
+  getCurrentDirection: getCurrentDirection,
   gpio: gpio
 };

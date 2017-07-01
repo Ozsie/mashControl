@@ -166,6 +166,13 @@ app.get('/relay/status', function(req, res) {
   res.status(200).send(heatControl.getRelayStatus());
 });
 
+app.get('/heater/direction', function(req, res) {
+  var dir = {
+    direction: heatControl.getCurrentDirection()
+  };
+  res.status(200).send(dir);
+});
+
 // Express route for any other unrecognised incoming requests
 app.get('*', function(req, res) {
   winston.warn("Unrecognised API call", req);
