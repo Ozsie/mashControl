@@ -1,1 +1,1 @@
-{  "steps":[ {    "name" : "Proteinrast",    "riseTime" : 0,    "temperature" : 50,    "time" : 0.1,    "type" : "infusion"  }],  "boilTime": 60,  "boilRiseTime": 10,  "volume": 1}
+{  "steps":[ {    "name" : "Proteinrast",    "riseTime" : 0,    "temperature" : 50,    "time" : 0.1,    "type" : "infusion"  }],  "boilTime": 60,  "boilRiseTime": 10,  "volume": 1,  "spargePause": 0.02}

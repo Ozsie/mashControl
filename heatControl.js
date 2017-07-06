@@ -70,14 +70,19 @@ var relayOff = function(index, callback) {
   var pin = relay.pin;
   if (relayOpen[relay.index]) {
     winston.debug("Relay " + relay.name + " off");
-    gpio.writeSync(pin, 0);
-    close(pin, function(err) {
-      if (!err) {
-        relayOpen[relay.index] = false;
-        relay.open = false;
-      }
-      callback(err, relay);
-    });
+    try {
+      gpio.writeSync(pin, 0);
+      close(pin, function(err) {
+        if (!err) {
+          relayOpen[relay.index] = false;
+          relay.open = false;
+        }
+        callback(err, relay);
+      });
+    } catch (error) {
+      console.log(JSON.stringify(error));
+      callback(error);
+    }
   }
 };
 

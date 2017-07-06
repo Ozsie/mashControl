@@ -5,26 +5,22 @@ var mash = require('./../mash');
 var gpioMock = require('gpio-mock');
 var heatControl = require('./../heatControl');
 
-describe('boil', function() {
+describe('mash', function() {
 
   before(function(done) {
     this.timeout(5000);
     gpioMock.start(function(err) {
       if (!err) {
         console.log('GPIO mocked');
-        heatControl.turnOn(function(err) {
-          if (err) {
-            console.log(err);
+
+        gpioMock.addDS18B20('28-800000263717', {
+          behavior: 'static',
+          temperature: 42
+        }, function(err) {
+          if (!err) {
+            console.log('DS18B20 mocked');
           }
-          gpioMock.addDS18B20('28-800000263717', {
-            behavior: 'static',
-            temperature: 42
-          }, function(err) {
-            if (!err) {
-              console.log('DS18B20 mocked');
-            }
-            done();
-          });
+          done();
         });
       }
     })

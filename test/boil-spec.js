@@ -32,7 +32,7 @@ describe('boil', function() {
     var schedule = JSON.parse(fs.readFileSync('test/mashControl-spec-schedule.json', 'utf8'));
     boil.boil(status, schedule);
     setTimeout(function() {
-      expect(status.step).to.equal(2);
+      expect(status.step).to.equal(3);
       expect(status.stepName).to.equal('Boil');
       expect(status.startTime).to.not.equal(0);
       expect(status.timeRemaining).to.equal(4200000);

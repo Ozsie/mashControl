@@ -117,4 +117,17 @@ describe('mashControl', function() {
           done();
         });
   });
+
+  it('GET /schedule/tempLog should return the temp log and have status 200', function(done) {
+    var testSchedule = JSON.parse(fs.readFileSync('test/mashControl-spec-schedule.json', 'utf8'));
+    chai.request(mashControl.server)
+        .get('/schedule/tempLog')
+        .end(function(err, res){
+          expect(res.status).to.equal(200);
+          var body = JSON.parse(res.text);
+          expect(body.log).to.exist;
+          expect(body.log.length).to.equal(0);
+          done();
+        });
+  });
 });

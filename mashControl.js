@@ -207,22 +207,26 @@ function exitHandler() {
   //grpcServer.stopServer();
   heatControl.setRelay({index: 3, state: "off"}, function(err) {
     if (err) {
-      winston.error('Error while turning off relay', err);
+      winston.error('Error while turning off relay');
+      winston.error(err.code + ': ' + err.path);
     }
   });
   heatControl.setRelay({index: 2, state: "off"}, function(err) {
     if (err) {
-      winston.error('Error while turning off relay', err);
+      winston.error('Error while turning off relay');
+      winston.error(err.code + ': ' + err.path);
     }
   });
   heatControl.setRelay({index: 1, state: "off"}, function(err) {
     if (err) {
-      winston.error('Error while turning off relay', err);
+      winston.error('Error while turning off relay');
+      winston.error(err.code + ': ' + err.path);
     }
   });
   heatControl.setRelay({index: 0, state: "off"}, function(err) {
     if (err) {
-      winston.error('Error while turning off relay', err);
+      winston.error('Error while turning off relay');
+      winston.error(err.code + ': ' + err.path);
     }
   });
   server.close();
