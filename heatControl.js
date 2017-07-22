@@ -87,17 +87,17 @@ var relayOff = function(index, callback) {
 };
 
 var heaterOnSwitch = function(callback) {
-  setRelay({index: 0, state: "on"}, function() {
+  setRelay({index: 1, state: "on"}, function() {
     setTimeout(function() {
-      setRelay({index: 0, state: "off"}, callback);
+      setRelay({index: 1, state: "off"}, callback);
     }, 800);
   });
 };
 
 var heaterModeSwitch = function(callback) {
-  setRelay({index: 0, state: "on"}, function() {
+  setRelay({index: 2, state: "on"}, function() {
     setTimeout(function() {
-      setRelay({index: 0, state: "off"}, callback);
+      setRelay({index: 2, state: "off"}, callback);
     }, 800);
   });
 };
