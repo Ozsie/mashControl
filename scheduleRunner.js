@@ -113,6 +113,7 @@ var startSchedule = function(newSchedule, callback) {
           winston.info(JSON.stringify(schedule));
           schedule = newSchedule;
           schedule.startTime = Date.now();
+          schedule.tempLog = [];
           status.status = schedule.status = 'running';
           heatControl.fastDecrease();
           heatControl.fastDecrease();
