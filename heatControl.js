@@ -156,20 +156,32 @@ var turnOff = function(callback) {
 };
 
 var forward = function() {
+  if (commands[commands.length - 1] === "backward") {
+    commands = [];
+  }
   commands.push("forward");
 };
 
 var fastForward = function() {
+  if (commands[commands.length - 1] === "backward") {
+    commands = [];
+  }
   commands.push("forward");
   commands.push("forward");
   commands.push("forward");
 };
 
 var backward = function(steps) {
+  if (commands[commands.length - 1] === "forward") {
+    commands = [];
+  }
   commands.push("backward");
 };
 
 var fastBackward = function(steps) {
+  if (commands[commands.length - 1] === "forward") {
+    commands = [];
+  }
   commands.push("backward");
   commands.push("backward");
   commands.push("backward");

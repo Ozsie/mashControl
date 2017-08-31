@@ -1,7 +1,6 @@
 var http = require('http');
 var express = require('express');
 var fs = require('fs');
-var exec = require('child_process').exec;
 var bodyParser = require('body-parser');
 
 var heatControl = require('./heatControl');
