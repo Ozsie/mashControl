@@ -58,7 +58,7 @@ describe('mash', function() {
   });
 
   it('temperature adjustment should stop if temp 90 ', function(done) {
-    this.timeout(4000);
+    this.timeout(8000);
     gpioMock.setDS18B20('28-800000263717', {
       behavior: 'static',
       temperature: 91
