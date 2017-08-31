@@ -66,9 +66,9 @@ var boil = function(status, schedule) {
           heatControl.heaterOnSwitch(function(err, data) {
             if (!err) {
               heatControl.heaterModeSwitch(function(err, data) {
-              })
+              });
             }
-          })
+          });
         }
         setTimeout(function() {
           if (Date.now() - status.startTime < status.timeRemaining) {

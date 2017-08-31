@@ -87,7 +87,7 @@ var runSchedule = function(callback) {
         doStep();
       } else {
       console.log("DONE--------------");
-        heatControl.heaterOnSwitch(callback)
+        heatControl.heaterOnSwitch(callback);
       }
     }, nexInMs);
   };
