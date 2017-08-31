@@ -61,6 +61,15 @@ var boil = function(status, schedule) {
           winston.info("Running step stopped");
           return;
         }
+        if (Date.now() - status.onTime > 7200000) {
+          // Two hours, heater has auto power off after two hours, must cycle power and mode
+          heatControl.heaterOnSwitch(function(err, data) {
+            if (!err) {
+              heatControl.heaterModeSwitch(function(err, data) {
+              })
+            }
+          })
+        }
         setTimeout(function() {
           if (Date.now() - status.startTime < status.timeRemaining) {
             adjustTemperatureForBoil(status, schedule);

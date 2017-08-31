@@ -87,7 +87,7 @@ var runSchedule = function(callback) {
         doStep();
       } else {
       console.log("DONE--------------");
-        callback();
+        heatControl.heaterOnSwitch(callback)
       }
     }, nexInMs);
   };
@@ -115,14 +115,11 @@ var startSchedule = function(newSchedule, callback) {
           schedule.startTime = Date.now();
           schedule.tempLog = [];
           status.status = schedule.status = 'running';
-          heatControl.fastDecrease();
-          heatControl.fastDecrease();
+          status.onTime = Date.now();
           runSchedule(function() {
             schedule.endTime = Date.now();
             winston.info("Mash done after " + (schedule.endTime - schedule.startTime) + " ms");
             status.status = schedule.status = 'done';
-            heatControl.fastDecrease();
-            heatControl.fastDecrease();
           });
         }
       });
