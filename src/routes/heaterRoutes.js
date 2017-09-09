@@ -1,4 +1,4 @@
-var pump = require('../components/heatControl');
+var heatControl = require('../components/heatControl');
 
 module.exports = function (app, winston) {
   app.get('/heater/on', function(req, res) {

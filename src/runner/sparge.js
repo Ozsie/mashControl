@@ -1,55 +1,22 @@
 var heatControl = require('../components/heatControl');
-var util = require('../util');
 var tempSensor = require('mc-tempsensor');
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
-winston.add(winston.transports.File, { name:"boil", filename: settings.logs.directory + '/boil.log' });
+winston.add(winston.transports.File, { name:"sparge", filename: settings.logs.directory + '/sparge.log', 'timestamp':true });
 
-var previousTemp;
 
-var adjustTemperatureForBoil = function(status, schedule) {
+var spargePause = function(status, schedule) {
   tempSensor.readAndParse(function(err, data) {
     if (!err) {
-      var currentTemp = data.temperature.celcius;
-      var initialDegreesToIncrease = 100 - status.initialTemp;
-      if (previousTemp === undefined) {
-        previousTemp = currentTemp;
-      }
-      var diff = parseFloat(currentTemp - previousTemp);
-      var degreesToIncrease = Math.abs(currentTemp - 100);
-      status.temperature = currentTemp;
-      status.minutes = util.getRunningForMinutes(schedule);
-
-      winston.info("Increase from last: " + diff + "C. Degrees left: " + degreesToIncrease + "C of " +
-      initialDegreesToIncrease + "C. " +
-      "Target: " + 100 + "C");
-
-      if (currentTemp < 100) {
-        winston.info("Under, double increase");
-        heatControl.fastIncrease();
-      } else {
-        winston.info("On mark " + currentTemp + " >= 100 holding.");
-      }
-      previousTemp = currentTemp;
-    } else {
-      status.thermometer = false;
-      winston.error(err);
-    }
-  });
-};
-
-var boil = function(status, schedule) {
-  tempSensor.readAndParse(function(err, data) {
-    if (!err) {
-      status.step = schedule.steps.length + (schedule.spargePause ? 2 : 1);
-      status.stepName = "Boil";
+      status.step = schedule.steps.length + 1;
+      status.stepName = "Sparge Pause";
       status.initialTemp = data.temperature.celcius;
       status.startTime = Date.now();
-      status.timeRemaining = (schedule.boilTime + schedule.boilRiseTime) * 60 * 1000;
+      status.timeRemaining = schedule.spargePause * 60 * 1000;
       winston.info("######################################################################################");
       winston.info("#                                                                                    #");
-      winston.info("    Starting Boil at " + status.startTime);
+      winston.info("    Starting Sparge pause at " + status.startTime);
       winston.info("    Will run for " + status.timeRemaining + " ms");
       winston.info("    Temperature at start " + status.initialTemp + " C");
       winston.info("    Mash water volume " + schedule.volume + " l");
@@ -72,10 +39,9 @@ var boil = function(status, schedule) {
         }
         setTimeout(function() {
           if (Date.now() - status.startTime < status.timeRemaining) {
-            adjustTemperatureForBoil(status, schedule);
             run();
           } else {
-            winston.info("## Step Boil ran for " + (Date.now() - status.startTime) + " ms. ##");
+            winston.info("## Step Sparge Pause ran for " + (Date.now() - status.startTime) + " ms. ##");
           }
         }, 12000);
       };
@@ -91,8 +57,5 @@ var boil = function(status, schedule) {
 };
 
 module.exports = {
-  adjustTemperatureForBoil: adjustTemperatureForBoil,
-  boil: boil,
-  tempSensor: tempSensor,
-  heatControl: heatControl
+  spargePause: spargePause
 };

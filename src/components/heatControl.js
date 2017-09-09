@@ -5,7 +5,7 @@ var rc = require('./relay');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
 var winston = require('winston');
-winston.add(winston.transports.File, { name: "heatControl", filename: settings.logs.directory + '/heatControl.log' });
+winston.add(winston.transports.File, { name: "heatControl", filename: settings.logs.directory + '/heatControl.log', 'timestamp':true });
 
 var isOpen = false;
 var stepping = false;

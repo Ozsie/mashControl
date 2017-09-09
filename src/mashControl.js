@@ -12,7 +12,9 @@ var winston = require('winston');
 
 //"/sys/bus/w1/devices/28-800000263717/w1_slave"
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
-winston.add(winston.transports.File, { name:"mashControl", filename: settings.logs.directory + '/mashControl.log' });
+winston.add(winston.transports.File, { name:"mashControl", filename: settings.logs.directory + '/mashControl.log', 'timestamp':true});
+winston.remove(winston.transports.Console);
+winston.add(winston.transports.Console, {'timestamp':true});
 
 var logDir = settings.logs.directory;
 
@@ -22,7 +24,7 @@ if (!fs.existsSync(logDir)){
 
 var app = express();
 
-app.use(express.static('app'));
+app.use(express.static('src/app'));
 for (var index in settings.publishedModules) {
   var script = settings.publishedModules[index];
   winston.info("Publishing " + 'node_modules/' + script + " as /static/" + script);
@@ -39,7 +41,7 @@ require('./routes/relayRoutes')(app, winston);
 
 // Express route for any other unrecognised incoming requests
 app.get('*', function(req, res) {
-  winston.warn("Unrecognised API call", req);
+  //winston.warn("Unrecognised API call", req);
   res.status(404).send('Unrecognised API call');
 });
 
@@ -59,6 +61,12 @@ db.loadSchedules(function(err, data) {
     winston.error(err);
   } else {
     winston.info("Schedules loaded");
+    winston.info("Routes:");
+    app._router.stack.forEach(function(r) {
+      if (r.route && r.route.path) {
+        winston.info(r.route.path);
+      }
+    });
   }
 });
 

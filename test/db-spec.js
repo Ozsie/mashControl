@@ -1,7 +1,7 @@
 var chai = require('chai');
 var expect = chai.expect; // we are using the "expect" style of Chai
 var fs = require('fs');
-var db = require('./../db');
+var db = require('./../src/db');
 
 describe('db', function() {
   before(function() {

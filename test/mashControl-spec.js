@@ -3,7 +3,7 @@ var chaiHttp = require('chai-http');
 var gpioMock = require('gpio-mock');
 var expect = chai.expect;
 var should = chai.should();
-var mashControl = require('./../mashControl');
+var mashControl = require('./../src/mashControl');
 var fs = require('fs');
 
 chai.use(chaiHttp);

@@ -2,7 +2,7 @@ var fs = require('fs');
 var winston = require('winston');
 var uuidV4 = require('uuid/v4');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
-winston.add(winston.transports.File, { name:"db", filename: settings.logs.directory + '/db.log' });
+winston.add(winston.transports.File, { name:"db", filename: settings.logs.directory + '/db.log', 'timestamp':true});
 
 var store = settings.scheduleStore.directory;
 

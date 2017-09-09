@@ -4,7 +4,7 @@ var tempSensor = require('mc-tempsensor');
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
-winston.add(winston.transports.File, { name:"mash", filename: settings.logs.directory + '/mash.log' });
+winston.add(winston.transports.File, { name:"mash", filename: settings.logs.directory + '/mash.log', 'timestamp':true });
 
 var previousTemp;
 

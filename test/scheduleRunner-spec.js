@@ -1,7 +1,7 @@
 var chai = require('chai');
 var expect = chai.expect; // we are using the "expect" style of Chai
 var fs = require('fs');
-var scheduleRunner = require('./../runner/scheduleRunner');
+var scheduleRunner = require('./../src/runner/scheduleRunner');
 
 describe('scheduleRunner', function() {
 

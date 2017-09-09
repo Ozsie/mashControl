@@ -7,7 +7,11 @@ let tempFileContent = '00 11 22 33 44 55 aa bb cc dd : crc=66 YES\n77 88 99 ee f
 var currentTemp = 10;
 
 let updateTemp = function() {
-  http.get('http://mash-control:3000/heater/direction', (res) => {
+  var url = 'http://mash-control:3000/heater/direction';
+  if (process.argv[0] === 'local') {
+    url = 'http://localhost:3000/heater/direction';
+  }
+  http.get(url, (res) => {
     res.setEncoding('utf8');
     let rawData = '';
     res.on('data', (chunk) => { rawData += chunk; });

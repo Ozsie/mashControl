@@ -4,7 +4,7 @@ var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
 var winston = require('winston');
-winston.add(winston.transports.File, { name: "relay", filename: settings.logs.directory + '/relay.log' });
+winston.add(winston.transports.File, { name: "relay", filename: settings.logs.directory + '/relay.log', 'timestamp':true });
 
 var relayOpen = [false, false, false, false];
 

@@ -3,9 +3,9 @@ var chai = require('chai');
 var expect = chai.expect;
 var grpc = require('grpc');
 var gpioMock = require('gpio-mock');
-var mashControl = require('./../mashControl');
+var mashControl = require('./../src/mashControl');
 var fs = require('fs');
-var mcProto = grpc.load('./mashControl.proto').mashControl;
+var mcProto = grpc.load('../mashControl.proto').mashControl;
 
 describe('mashControlGRPC', function() {
   before(function(done) {

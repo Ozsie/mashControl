@@ -2,10 +2,10 @@
   "name": "mc-mock",
   "version": "1.0.1",
   "description": "mock hardware for mashControl",
-  "main": "mock.js",
+  "main": "src/mock.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node mock"
+    "start": "node src/mock"
   },
   "author": "Oscar Djupfeldt",
   "license": "ISC",

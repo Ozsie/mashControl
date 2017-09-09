@@ -4,8 +4,8 @@ MAINTAINER Oscar Djupfeldt
 USER root
 
 WORKDIR mock
-COPY mock.js mock.js
+COPY src src
 COPY package.json package.json
 COPY logs logs
 
-CMD node mock.js
+CMD node src/mock.js

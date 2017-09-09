@@ -1,7 +1,7 @@
 version: '3'
 services:
   mash-control:
-    build: ./
+    build: .
     container_name: mash-control
     ports:
       - "3000:3000"

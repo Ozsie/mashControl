@@ -6,13 +6,13 @@
   "scripts": {
     "publish": "git tag -a v$npm_package_version -m 'tag version v$npm_package_version'",
     "postpublish": "git push --tags",
-    "pretest": "jshint *.js app/**/*.js",
+    "pretest": "jshint src/**/*.js",
     "test": "istanbul cover _mocha test --recursive",
     "prestart": "git pull && jshint",
-    "start": "node mashControl.js",
-    "start-docker": "node docker.js",
-    "start-offline": "node mashControl.js",
-    "predocker": "docker build --no-cache -t ozsie/mash-control:$npm_package_version .",
+    "start": "node src/mashControl.js",
+    "start-docker": "node src/docker.js",
+    "start-offline": "node src/mashControl.js",
+    "predocker": "docker build --no-cache -t ozsie/mash-control:$npm_package_version ./docker",
     "docker": "docker run --name mash-control -p 3000:3000 ozsie/mash-control:$npm_package_version",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },

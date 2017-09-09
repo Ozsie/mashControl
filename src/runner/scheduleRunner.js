@@ -3,11 +3,12 @@ var util = require('../util');
 var boil = require('./boil');
 var sparge = require('./sparge');
 var mash = require('./mash');
+var pump = require('../components/pump');
 var tempSensor = require('mc-tempsensor');
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
-winston.add(winston.transports.File, { name:"scheduleRunner", filename: settings.logs.directory + '/scheduleRunner.log' });
+winston.add(winston.transports.File, { name:"scheduleRunner", filename: settings.logs.directory + '/scheduleRunner.log', 'timestamp':true });
 
 var schedule;
 var previousTemp;
@@ -80,11 +81,13 @@ var runSchedule = function(callback) {
         spargePauseRun = true;
         doStep();
       } else if (schedule.boilTime && (spargePauseRun || !schedule.spargePause) && !boilDone) {
-        winston.info("It's time for the next step");
-        boil.boil(status, schedule);
-        nexInMs = (schedule.boilTime + schedule.boilRiseTime) * 60 * 1000;
-        boilDone = true;
-        doStep();
+        pump.stop(function(err, status) {
+          winston.info("It's time for the next step");
+          boil.boil(status, schedule);
+          nexInMs = (schedule.boilTime + schedule.boilRiseTime) * 60 * 1000;
+          boilDone = true;
+          doStep();
+        });
       } else {
       console.log("DONE--------------");
         heatControl.heaterOnSwitch(callback);
@@ -108,18 +111,21 @@ var startSchedule = function(newSchedule, callback) {
         if (err) {
           status.motor = false;
         } else {
-          status.motor = true;
-          status.thermometer = true;
-          winston.info(JSON.stringify(schedule));
-          schedule = newSchedule;
-          schedule.startTime = Date.now();
-          schedule.tempLog = [];
-          status.status = schedule.status = 'running';
-          status.onTime = Date.now();
-          runSchedule(function() {
-            schedule.endTime = Date.now();
-            winston.info("Mash done after " + (schedule.endTime - schedule.startTime) + " ms");
-            status.status = schedule.status = 'done';
+          pump.start(function(err, status) {
+            status.motor = true;
+            status.thermometer = true;
+            status.pump = status;
+            winston.info(JSON.stringify(schedule));
+            schedule = newSchedule;
+            schedule.startTime = Date.now();
+            schedule.tempLog = [];
+            status.status = schedule.status = 'running';
+            status.onTime = Date.now();
+            runSchedule(function() {
+              schedule.endTime = Date.now();
+              winston.info("Mash done after " + (schedule.endTime - schedule.startTime) + " ms");
+              status.status = schedule.status = 'done';
+            });
           });
         }
       });
