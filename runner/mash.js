@@ -1,5 +1,5 @@
-var heatControl = require('./heatControl');
-var util = require('./util');
+var heatControl = require('../components/heatControl');
+var util = require('../util');
 var tempSensor = require('mc-tempsensor');
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));

@@ -1,7 +1,7 @@
 var chai = require('chai');
 var expect = chai.expect; // we are using the "expect" style of Chai
 var fs = require('fs');
-var boil = require('./../boil');
+var boil = require('./../runner/boil');
 var gpioMock = require('gpio-mock');
 
 describe('boil', function() {

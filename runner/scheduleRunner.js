@@ -1,5 +1,5 @@
-var heatControl = require('./heatControl');
-var util = require('./util');
+var heatControl = require('../components/heatControl');
+var util = require('../util');
 var boil = require('./boil');
 var sparge = require('./sparge');
 var mash = require('./mash');

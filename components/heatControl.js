@@ -1,16 +1,14 @@
 var gpio = require('mc-gpio');
 var fs = require('fs');
+var rc = require('./relay');
 
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
 var winston = require('winston');
 winston.add(winston.transports.File, { name: "heatControl", filename: settings.logs.directory + '/heatControl.log' });
 
-
 var isOpen = false;
 var stepping = false;
-
-var relayOpen = [false, false, false, false];
 
 var commands = [];
 
@@ -22,82 +20,18 @@ var getCurrentDirection = function() {
   }
 };
 
-var getRelay = function(index) {
-  return settings.relay[index];
-};
-
-var getRelayStatus = function() {
-  var relays = settings.relay;
-  for (var index in relays) {
-    relays[index].open = relayOpen[index];
-  }
-
-  return relays;
-};
-
-var setRelay = function(setting, callback) {
-  if (setting.state === "on") {
-    relayOn(setting.index, callback);
-  } else {
-    relayOff(setting.index, callback);
-  }
-};
-
-var relayOn = function(index, callback) {
-  var relay = getRelay(index);
-  var pin = relay.pin;
-  if (!relayOpen[relay.index]) {
-    open(pin, function(err, data) {
-      if(!err) {
-        winston.debug("Relay " + relay.name + " on");
-        gpio.writeSync(pin, 1);
-        relayOpen[relay.index] = true;
-        relay.open = true;
-      }
-      callback(err, relay);
-    });
-  } else {
-    winston.debug("Relay " + relay.name + " on");
-    gpio.writeSync(pin, 1);
-    relayOpen[relay.index] = true;
-    relay.open = true;
-    callback(undefined, relay);
-  }
-};
-
-var relayOff = function(index, callback) {
-  var relay = getRelay(index);
-  var pin = relay.pin;
-  if (relayOpen[relay.index]) {
-    winston.debug("Relay " + relay.name + " off");
-    try {
-      gpio.writeSync(pin, 0);
-      close(pin, function(err) {
-        if (!err) {
-          relayOpen[relay.index] = false;
-          relay.open = false;
-        }
-        callback(err, relay);
-      });
-    } catch (error) {
-      console.log(JSON.stringify(error));
-      callback(error);
-    }
-  }
-};
-
 var heaterOnSwitch = function(callback) {
-  setRelay({index: 1, state: "on"}, function() {
+  rc.setRelay({index: 1, state: "on"}, function() {
     setTimeout(function() {
-      setRelay({index: 1, state: "off"}, callback);
+      rc.setRelay({index: 1, state: "off"}, callback);
     }, 800);
   });
 };
 
 var heaterModeSwitch = function(callback) {
-  setRelay({index: 2, state: "on"}, function() {
+  rc.setRelay({index: 2, state: "on"}, function() {
     setTimeout(function() {
-      setRelay({index: 2, state: "off"}, callback);
+      rc.setRelay({index: 2, state: "off"}, callback);
     }, 800);
   });
 };
@@ -117,7 +51,7 @@ var turnOn = function(callback) {
             output(settings.motor.enablePin, 1, function() {
               isOpen = true;
               winston.info("Motor communication is open. Waiting for commands.");
-              setRelay({index: 0, state: "on"}, function(err, relay) {
+              rc.setRelay({index: 0, state: "on"}, function(err, relay) {
                 heaterOnSwitch(function(err) {
                   setTimeout(function() {
                     heaterModeSwitch(function() {
@@ -352,8 +286,6 @@ module.exports = {
   fastDecrease: fastBackward,
   turnOn: turnOn,
   turnOff: turnOff,
-  setRelay: setRelay,
-  getRelayStatus: getRelayStatus,
   getCurrentDirection: getCurrentDirection,
   gpio: gpio
 };

@@ -1,6 +1,6 @@
 var grpc = require('grpc');
 var tempSensor = require('mc-tempsensor');
-var scheduleRunner = require('./scheduleRunner');
+var scheduleRunner = require('./runner/scheduleRunner');
 
 var mcProto = grpc.load('./mashControl.proto').mashControl;
 

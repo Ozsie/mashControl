@@ -3,10 +3,10 @@ var express = require('express');
 var fs = require('fs');
 var bodyParser = require('body-parser');
 
-var heatControl = require('./heatControl');
-var tempSensor = require('mc-tempsensor');
-var scheduleRunner = require('./scheduleRunner');
+var scheduleRunner = require('./runner/scheduleRunner');
+var rc = require('./components/relay');
 var db = require('./db');
+
 //var grpcServer = require('./mashControlGRPC');
 var winston = require('winston');
 
@@ -30,147 +30,12 @@ for (var index in settings.publishedModules) {
 }
 app.use(bodyParser.json());
 
-app.get('/temp/current', function(req, res) {
-  //winston.info('Temp requested');
-  tempSensor.readTemp(function(error, data) {
-    if (!error) {
-      var tempData = tempSensor.parseTemp(data);
-      tempData.minute = scheduleRunner.getRunningForMinutes();
-      res.status(200).send(tempData);
-    } else {
-      switch (error.code) {
-        case 'ENOENT':
-          winston.error("Could not fetch temperature. Probe unavailable.");
-          break;
-        default:
-          winston.error("Could not fetch temperature.", error);
-      }
-
-      res.status(503).send(error);
-    }
-  });
-});
-
-app.post('/schedule/start', function(req, res) {
-  winston.info('Start schedule requested');
-  scheduleRunner.startSchedule(req.body, function(err) {
-    if (!err) {
-      winston.info('Start ok = ' + true);
-      res.status(200).send(true);
-    } else {
-      winston.info('Start nok = ' + err);
-      res.status(200).send(false);
-    }
-  });
-});
-
-app.get('/schedule/stop', function(req, res) {
-  winston.info('Stop schedule requested');
-  scheduleRunner.stopSchedule(function(err, data) {
-    if (!err) {
-      res.status(200).send(data);
-    } else {
-      winston.warn("Stopped with error", err);
-      res.status(200).send(data);
-    }
-  });
-
-});
-
-app.get('/schedule/status', function(req, res) {
-  var status = scheduleRunner.getStatus();
-  res.status(200).send(status);
-});
-
-app.get('/schedule/tempLog', function(req, res) {
-  var tempLog = scheduleRunner.getTempLog();
-  res.status(200).send({log: tempLog});
-});
-
-app.get('/schedule', function(req, res) {
-  winston.info('Get Schedule');
-  res.status(200).send(scheduleRunner.getSchedule());
-});
-
-app.post('/schedule/store/create', function(req, res) {
-  winston.info('Create schedule');
-  var schedule = req.body;
-  db.createSchedule(schedule, function(err, data) {
-    if (!err) {
-      res.status(200).send({uuid: data});
-    }
-  });
-});
-
-app.get('/schedule/store/retrieve/:uuid', function(req, res) {
-  var uuid = req.params.uuid;
-  winston.info('Retrieve schedule ' + uuid);
-  db.retrieveSchedule(uuid, function(err, data) {
-    if (!err) {
-      res.status(200).send(data);
-    }
-  });
-});
-
-app.get('/schedule/store/retrieve/', function(req, res) {
-  winston.info('Retrieve all schedules');
-  db.retrieveSchedules(function(err, data) {
-    if (!err) {
-      res.status(200).send({schedules: data});
-    }
-  });
-});
-
-app.put('/schedule/store/update/:uuid', function(req, res) {
-  var schedule = req.body;
-  var uuid = req.params.uuid;
-  winston.info('Update schedule ' + uuid);
-  db.updateSchedule(uuid, schedule, function(err, data) {
-    if (!err) {
-      res.status(200).send(data);
-    }
-  });
-});
-
-app.delete('/schedule/store/delete/:uuid', function(req, res) {
-  var uuid = req.params.uuid;
-  winston.info('Delete schedule ' + uuid);
-  db.deleteSchedule(uuid, function(err, data) {
-    if (!err) {
-      res.status(200).send(data);
-    }
-  });
-});
-
-app.get('/heater/on', function(req, res) {
-  winston.info('Heater on');
-  res.status(200).send(heatControl.heaterOn(function() {
-    winston.error("ERROR!");
-  }));
-});
-
-app.post('/relay', function(req, res) {
-  winston.info('Switch relay');
-  var setting = req.body;
-  winston.info('Setting relay ' + setting.index + ' to ' + setting.state);
-  heatControl.setRelay(setting, function(err, relay) {
-    res.status(200).send(relay);
-    if (err) {
-      winston.error('Error while switching relay', err);
-    }
-  });
-});
-
-app.get('/relay/status', function(req, res) {
-  res.status(200).send(heatControl.getRelayStatus());
-});
-
-app.get('/heater/direction', function(req, res) {
-  var dir = {
-    direction: heatControl.getCurrentDirection()
-  };
-  res.status(200).send(dir);
-});
+require('./routes/tempRoutes')(app, winston);
+require('./routes/scheduleRoutes')(app, winston);
+require('./routes/dbRoutes')(app, winston);
+require('./routes/pumpRoutes')(app, winston);
+require('./routes/heaterRoutes')(app, winston);
+require('./routes/relayRoutes')(app, winston);
 
 // Express route for any other unrecognised incoming requests
 app.get('*', function(req, res) {
@@ -204,25 +69,25 @@ function exitHandler() {
   //turnOff();
   winston.info("EXIT!");
   //grpcServer.stopServer();
-  heatControl.setRelay({index: 3, state: "off"}, function(err) {
+  rc.setRelay({index: 3, state: "off"}, function(err) {
     if (err) {
       winston.error('Error while turning off relay');
       winston.error(err.code + ': ' + err.path);
     }
   });
-  heatControl.setRelay({index: 2, state: "off"}, function(err) {
+  rc.setRelay({index: 2, state: "off"}, function(err) {
     if (err) {
       winston.error('Error while turning off relay');
       winston.error(err.code + ': ' + err.path);
     }
   });
-  heatControl.setRelay({index: 1, state: "off"}, function(err) {
+  rc.setRelay({index: 1, state: "off"}, function(err) {
     if (err) {
       winston.error('Error while turning off relay');
       winston.error(err.code + ': ' + err.path);
     }
   });
-  heatControl.setRelay({index: 0, state: "off"}, function(err) {
+  rc.setRelay({index: 0, state: "off"}, function(err) {
     if (err) {
       winston.error('Error while turning off relay');
       winston.error(err.code + ': ' + err.path);
@@ -243,8 +108,5 @@ process.on('uncaughtException',  (err) => {
 
 module.exports = {
   settings: settings,
-  server: server,
-  heatControl: heatControl,
-  tempSensor: tempSensor,
-  scheduleRunner: scheduleRunner
+  server: server
 };
