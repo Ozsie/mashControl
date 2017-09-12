@@ -43,12 +43,12 @@ var turnOn = function(callback) {
     callback();
   }
   winston.info("Turn on. Enable Pin: " + settings.motor.enablePin);
-  open(settings.motor.enablePin, function() {
-    open(settings.motor.coilA1Pin, function() {
-      open(settings.motor.coilA2Pin, function() {
-        open(settings.motor.coilB1Pin, function() {
-          open(settings.motor.coilB2Pin, function() {
-            output(settings.motor.enablePin, 1, function() {
+  gpio.openPinOut(settings.motor.enablePin, function() {
+    gpio.openPinOut(settings.motor.coilA1Pin, function() {
+      gpio.openPinOut(settings.motor.coilA2Pin, function() {
+        gpio.openPinOut(settings.motor.coilB1Pin, function() {
+          gpio.openPinOut(settings.motor.coilB2Pin, function() {
+            gpio.write(settings.motor.enablePin, 1, function() {
               isOpen = true;
               winston.info("Motor communication is open. Waiting for commands.");
               rc.setRelay({index: 0, state: "on"}, function(err, relay) {
@@ -70,6 +70,20 @@ var turnOn = function(callback) {
   });
 };
 
+var closeAll = function() {
+  var close = function(pin) {
+    gpio.closePin(pin, function(err) {
+      if (err) {
+        winston.error("Could not close pin:", + err);
+      }
+    });
+  };
+  for (var name in settings.motor) {
+    var pin = settings.motor[name];
+    close(pin);
+  }
+};
+
 var turnOff = function(callback) {
   if (!callback || typeof callback !== "function") {
     throw new Error("Callback function required");
@@ -77,7 +91,7 @@ var turnOff = function(callback) {
   winston.info("Turn off. Enable Pin: " + settings.motor.enablePin);
   commands = [];
   heaterOnSwitch(function(err) {
-    output(settings.motor.enablePin, 0, function(err, data) {
+    gpio.write(settings.motor.enablePin, 0, function(err, data) {
       if (!err) {
         closeAll();
         callback(undefined, data);
@@ -100,9 +114,9 @@ var fastForward = function() {
   if (commands[commands.length - 1] === "backward") {
     commands = [];
   }
-  commands.push("forward");
-  commands.push("forward");
-  commands.push("forward");
+  for (var i = 0; i < 3; i++) {
+    commands.push("forward");
+  }
 };
 
 var backward = function(steps) {
@@ -116,61 +130,17 @@ var fastBackward = function(steps) {
   if (commands[commands.length - 1] === "forward") {
     commands = [];
   }
-  commands.push("backward");
-  commands.push("backward");
-  commands.push("backward");
-  commands.push("backward");
-  commands.push("backward");
-  commands.push("backward");
-  commands.push("backward");
-  commands.push("backward");
-  commands.push("backward");
-  commands.push("backward");
-  commands.push("backward");
-  commands.push("backward");
-};
-
-var output = function(pin, value, callback) {
-  gpio.write(pin, value, callback);
-};
-
-var outputSync = function(pin, value) {
-  gpio.writeSync(pin, value);
-};
-
-var open = function(pin, callback) {
-  gpio.openPinOut(pin, callback);
-};
-
-var close = function(pin, callback) {
-  gpio.closePin(pin, function(err) {
-    if (err) {
-      winston.error("Could not close pin:", + err);
-    }
-    callback(err);
-  });
-};
-
-var closeAll = function() {
-  var close = function(pin) {
-    gpio.closePin(pin, function(err) {
-      if (err) {
-        winston.error("Could not close pin:", + err);
-      }
-    });
-  };
-  for (var name in settings.motor) {
-    var pin = settings.motor[name];
-    close(pin);
+  for (var i = 0; i < 12; i++) {
+    commands.push("forward");
   }
 };
 
 var setStep = function(w1, w2, w3, w4) {
   try {
-    outputSync(settings.motor.coilA1Pin, w1);
-    outputSync(settings.motor.coilA2Pin, w2);
-    outputSync(settings.motor.coilB1Pin, w3);
-    outputSync(settings.motor.coilB2Pin, w4);
+    gpio.writeSync(settings.motor.coilA1Pin, w1);
+    gpio.writeSync(settings.motor.coilA2Pin, w2);
+    gpio.writeSync(settings.motor.coilB1Pin, w3);
+    gpio.writeSync(settings.motor.coilB2Pin, w4);
   } catch (error) {
     winston.info('GPIO closed.');
     return 'break';
@@ -255,7 +225,7 @@ var stepBackward = function(steps, callback) {
 
 setTimeout(function() {
   setInterval(function () {
-    if (open && !stepping) {
+    if (isOpen && !stepping) {
       var command = commands.shift();
       if (command) {
         stepping = true;

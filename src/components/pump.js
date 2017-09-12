@@ -10,7 +10,7 @@ var doPump = false;
 var pump = function() {
   if (doPump) {
     rc.relayOn(0, function(err, relay) {
-      winston.info('Pump start')
+      winston.info('Pump start');
       setTimeout(function() {
         rc.relayOff(0, function(err, relay) {
           winston.info('Pump stop');
