@@ -111,15 +111,16 @@ var startSchedule = function(newSchedule, callback) {
         if (err) {
           status.motor = false;
         } else {
-          pump.start(function(err, status) {
+          pump.start(function(err, pumpStatus) {
             status.motor = true;
             status.thermometer = true;
-            status.pump = status;
+            status.pump = pumpStatus;
             winston.info(JSON.stringify(schedule));
             schedule = newSchedule;
             schedule.startTime = Date.now();
             schedule.tempLog = [];
             status.status = schedule.status = 'running';
+            winston.info('Status is now ' + status.status + ' ' + schedule.status);
             status.onTime = Date.now();
             runSchedule(function() {
               schedule.endTime = Date.now();

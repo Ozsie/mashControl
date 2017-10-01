@@ -242,7 +242,7 @@ setTimeout(function() {
     }
   },
   200);
-  }, 1000);
+}, 1000);
 
 //catches uncaught exceptions
 process.on('uncaughtException',  (err) => {

@@ -19,15 +19,20 @@ describe('mash', function() {
         }, function(err) {
           if (!err) {
             console.log('DS18B20 mocked');
+            heatControl.turnOn(function() {
+              done();
+            });
           }
-          done();
         });
       }
     })
   });
 
-  after(function() {
-    gpioMock.stop();
+  after(function(done) {
+    heatControl.turnOff(function() {
+      gpioMock.stop();
+      done();
+    });
   });
 
   it('status should be updated correctly', function(done) {
