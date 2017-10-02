@@ -130,4 +130,14 @@ describe('mashControl', function() {
           done();
         });
   });
+
+  it('GET /apa (unrecognized api call) should return status 404', function(done) {
+    var testSchedule = JSON.parse(fs.readFileSync('test/mashControl-spec-schedule.json', 'utf8'));
+    chai.request(mashControl.server)
+        .get('/apa')
+        .end(function(err, res){
+          expect(res.status).to.equal(404);
+          done();
+        });
+  });
 });
