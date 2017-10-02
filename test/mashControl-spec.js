@@ -35,22 +35,6 @@ describe('mashControl', function() {
     mashControl.server.close();
   });
 
-  it('GET /temp/current should return current temperature and have status 200', function(done) {
-    chai.request(mashControl.server)
-        .get('/temp/current')
-        .end(function(err, res){
-          expect(res.status).to.equal(200);
-          var body = JSON.parse(res.text);
-          expect(body.temperature.raw).to.equal(35000);
-          expect(body.temperature.celcius).to.equal(35);
-          expect(body.crc).to.equal('66');
-          expect(body.available).to.equal('YES');
-          expect(body.time).to.exist;
-          expect(body.time).to.be.above(0);
-          done();
-        });
-  });
-
   it('GET /apa (unrecognized api call) should return status 404', function(done) {
     var testSchedule = JSON.parse(fs.readFileSync('test/mashControl-spec-schedule.json', 'utf8'));
     chai.request(mashControl.server)
