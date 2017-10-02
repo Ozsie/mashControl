@@ -51,12 +51,12 @@ describe('mashControl', function() {
         });
   });
 
-  it('GET /apa (unrecognized api call) should return status 404', function(done) {
-    var testSchedule = JSON.parse(fs.readFileSync('test/mashControl-spec-schedule.json', 'utf8'));
+  it('GET /temp/current should return error 503 when hardware is unavailable', function(done) {
+    gpioMock.stop();
     chai.request(mashControl.server)
-        .get('/apa')
+        .get('/temp/current')
         .end(function(err, res){
-          expect(res.status).to.equal(404);
+          expect(res.status).to.equal(503);
           done();
         });
   });
