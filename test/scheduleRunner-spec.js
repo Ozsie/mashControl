@@ -5,17 +5,9 @@ var scheduleRunner = require('./../src/runner/scheduleRunner');
 
 describe('scheduleRunner', function() {
 
-  it('cut off point should be calculated', function() {
-    var cutOffPoint = scheduleRunner.calculateCutOffPoint(40, 15, 1);
-
-    console.log(cutOffPoint);
-
-    cutOffPoint = scheduleRunner.calculateCutOffPoint(60, 44, 1);
-
-    console.log(cutOffPoint);
-
-    cutOffPoint = scheduleRunner.calculateCutOffPoint(78, 68, 1);
-
-    console.log(cutOffPoint);
+  it('getTempLog should return an empty array if no schedule is loaded', function() {
+    scheduleRunner.clear();
+    var tempLog = scheduleRunner.getTempLog();
+    expect(tempLog.length).to.equal(0);
   });
 });

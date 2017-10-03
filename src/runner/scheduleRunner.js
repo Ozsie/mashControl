@@ -14,6 +14,13 @@ var schedule;
 var previousTemp;
 var status = {};
 
+var clear = function() {
+  schedule = undefined;
+  previousTemp = undefined;
+  status = {};
+  schedule = undefined;
+};
+
 var getTempLog = function() {
   if (schedule) {
     return schedule.tempLog;
@@ -171,7 +178,6 @@ module.exports = {
   stopSchedule: stopSchedule,
   getStatus: getStatus,
   getSchedule: getSchedule,
-  calculateCutOffPoint: util.calculateCutOffPoint,
-  getRunningForMinutes: util.getRunningForMinutes,
-  getTempLog: getTempLog
+  getTempLog: getTempLog,
+  clear: clear
 };
