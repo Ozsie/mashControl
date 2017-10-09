@@ -1,17 +1,18 @@
-var heatControl = require('../components/heatControl');
 var util = require('../util');
-var tempSensor = require('mc-tempsensor');
+var scheduleHandler = require('../scheduleHandler');
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
-winston.add(winston.transports.File, { name:"boil", filename: settings.logs.directory + '/boil.log', 'timestamp':true });
 
-var previousTemp;
+module.exports = function(hwi) {
+  var boil = {};
 
-var adjustTemperatureForBoil = function(status, schedule) {
-  tempSensor.readAndParse(function(err, data) {
-    if (!err) {
-      var currentTemp = data.temperature.celcius;
+  var previousTemp;
+  var timeout;
+
+  boil.adjustTemperatureForBoil = function(status, schedule) {
+    if (hwi.temperature) {
+      var currentTemp = hwi.temperature;
       var initialDegreesToIncrease = 100 - status.initialTemp;
       if (previousTemp === undefined) {
         previousTemp = currentTemp;
@@ -19,7 +20,7 @@ var adjustTemperatureForBoil = function(status, schedule) {
       var diff = parseFloat(currentTemp - previousTemp);
       var degreesToIncrease = Math.abs(currentTemp - 100);
       status.temperature = currentTemp;
-      status.minutes = util.getRunningForMinutes(schedule);
+      status.minutes = scheduleHandler.getRunningForMinutes();
 
       winston.info("Increase from last: " + diff + "C. Degrees left: " + degreesToIncrease + "C of " +
       initialDegreesToIncrease + "C. " +
@@ -27,24 +28,22 @@ var adjustTemperatureForBoil = function(status, schedule) {
 
       if (currentTemp < 100) {
         winston.info("Under, double increase");
-        heatControl.fastIncrease();
+        hwi.maxEffect();
       } else {
         winston.info("On mark " + currentTemp + " >= 100 holding.");
       }
       previousTemp = currentTemp;
     } else {
       status.thermometer = false;
-      winston.error(err);
+      winston.error('Could not get temperature');
     }
-  });
-};
+  };
 
-var boil = function(status, schedule) {
-  tempSensor.readAndParse(function(err, data) {
-    if (!err) {
+  boil.boil = function(status, schedule) {
+    if (hwi.temperature) {
       status.step = schedule.steps.length + (schedule.spargePause ? 2 : 1);
       status.stepName = "Boil";
-      status.initialTemp = data.temperature.celcius;
+      status.initialTemp = hwi.temperature;
       status.startTime = Date.now();
       status.timeRemaining = (schedule.boilTime + schedule.boilRiseTime) * 60 * 1000;
       winston.info("######################################################################################");
@@ -61,18 +60,13 @@ var boil = function(status, schedule) {
           winston.info("Running step stopped");
           return;
         }
+        // Two hours, heater has auto power off after two hours, must cycle power and mode
         if (Date.now() - status.onTime > 7200000) {
-          // Two hours, heater has auto power off after two hours, must cycle power and mode
-          heatControl.heaterOnSwitch(function(err, data) {
-            if (!err) {
-              heatControl.heaterModeSwitch(function(err, data) {
-              });
-            }
-          });
+          hwi.cycleHeaterPower();
         }
-        setTimeout(function() {
+        timeout = setTimeout(function() {
           if (Date.now() - status.startTime < status.timeRemaining) {
-            adjustTemperatureForBoil(status, schedule);
+            boil.adjustTemperatureForBoil(status, schedule);
             run();
           } else {
             winston.info("## Step Boil ran for " + (Date.now() - status.startTime) + " ms. ##");
@@ -84,15 +78,16 @@ var boil = function(status, schedule) {
       return status.timeRemaining;
     } else {
       status.thermometer = false;
-      winston.error("Could not read temperature", err);
-      throw new Error(err);
+      winston.error("Could not read temperature");
+      throw new Error("Could not read temperature");
     }
-  });
-};
+  };
 
-module.exports = {
-  adjustTemperatureForBoil: adjustTemperatureForBoil,
-  boil: boil,
-  tempSensor: tempSensor,
-  heatControl: heatControl
+  boil.stop = function() {
+    winston.info('Stop boil called');
+    clearTimeout(timeout);
+    previousTemp = undefined;
+  };
+
+  return boil;
 };

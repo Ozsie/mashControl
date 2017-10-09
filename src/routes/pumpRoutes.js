@@ -1,6 +1,6 @@
 var pump = require('../components/pump');
 
-module.exports = function (app, winston) {
+module.exports = function (app, hwi, winston) {
   app.get('/pump/status', function(req, res) {
     res.status(200).send(pump.isRunning());
   });

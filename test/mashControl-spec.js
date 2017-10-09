@@ -3,36 +3,27 @@ var chaiHttp = require('chai-http');
 var gpioMock = require('gpio-mock');
 var expect = chai.expect;
 var should = chai.should();
-var mashControl = require('./../src/mashControl');
 var fs = require('fs');
 
 chai.use(chaiHttp);
 
-describe('mashControl', function() {
+var mashControl;
 
-  before(function(done) {
-    gpioMock.start(function(err) {
-      if (!err) {
-        console.log('GPIO mocked');
-        gpioMock.addDS18B20('28-800000263717', {
-          behavior: 'static',
-          temperature: 35
-        }, function(err) {
-          if (!err) {
-            console.log('DS18B20 mocked');
-          }
-          setTimeout(function() {
-            console.log('DONE');
-            done();
-          }, 1800)
-        });
-      }
-    });
+describe('mashControl', function() {
+  before(function() {
+    hwi = {
+      temperature: 42,
+      cycleHeaterPower: function() {},
+      maxEffect: function() {},
+      turnOff: function(callback) { callback(); }
+    };
+    mashControl = require('./../src/mashControl')(hwi);
   });
 
-  after(function() {
-    gpioMock.stop();
-    mashControl.server.close();
+  after(function(done) {
+    mashControl.closeServer(function() {
+      done();
+    });
   });
 
   it('GET /apa (unrecognized api call) should return status 404', function(done) {

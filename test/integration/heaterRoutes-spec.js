@@ -3,12 +3,13 @@ var chaiHttp = require('chai-http');
 var gpioMock = require('gpio-mock');
 var expect = chai.expect;
 var should = chai.should();
-var mashControl = require('./../src/mashControl');
 var fs = require('fs');
 
 chai.use(chaiHttp);
 
-describe('mashControl', function() {
+var mashControl;
+
+describe('heaterRoutes', function() {
 
   before(function(done) {
     gpioMock.start(function(err) {
@@ -21,18 +22,20 @@ describe('mashControl', function() {
           if (!err) {
             console.log('DS18B20 mocked');
           }
-          setTimeout(function() {
-            console.log('DONE');
-            done();
-          }, 1800)
+          mashControl = require('./../src/mashControl');
+          done();
         });
+      } else {
+        done();
       }
     });
   });
 
-  after(function() {
-    gpioMock.stop();
-    mashControl.server.close();
+  after(function(done) {
+    mashControl.closeServer(function() {
+      gpioMock.stop();
+      done();
+    });
   });
 
   it('GET /heater/direction should return undefined when nothing is running', function(done) {

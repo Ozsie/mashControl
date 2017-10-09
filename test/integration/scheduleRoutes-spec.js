@@ -3,36 +3,39 @@ var chaiHttp = require('chai-http');
 var gpioMock = require('gpio-mock');
 var expect = chai.expect;
 var should = chai.should();
-var mashControl = require('./../src/mashControl');
+var mashControl;
 var fs = require('fs');
 
 chai.use(chaiHttp);
 
-describe('mashControl', function() {
-
+describe('scheduleRoutes', function() {
   before(function(done) {
     gpioMock.start(function(err) {
       if (!err) {
         console.log('GPIO mocked');
         gpioMock.addDS18B20('28-800000263717', {
           behavior: 'static',
-          temperature: 35
+          temperature: 42
         }, function(err) {
           if (!err) {
             console.log('DS18B20 mocked');
           }
-          setTimeout(function() {
-            console.log('DONE');
-            done();
-          }, 1800)
+          mashControl = require('./../src/mashControl');
+          done();
         });
+      } else {
+        done();
       }
-    });
+    })
   });
 
-  after(function() {
-    gpioMock.stop();
-    mashControl.server.close();
+  after(function(done) {
+    console.log('AFTER')
+    mashControl.closeServer(function() {
+      console.log('SERVER CLOSED');
+      gpioMock.stop();
+      done();
+    });
   });
 
   it('POST /schedule/start should return "true" and have status 200', function(done) {
@@ -65,6 +68,7 @@ describe('mashControl', function() {
     chai.request(mashControl.server)
         .get('/schedule/stop')
         .end(function(err, res){
+          console.log('--------------------------------- STOPPED');
           expect(res.status).to.equal(200);
           expect(res.text).to.equal("true");
           done();
@@ -89,7 +93,6 @@ describe('mashControl', function() {
           expect(res.status).to.equal(200);
           var body = JSON.parse(res.text);
           expect(body.startTime).to.exist;
-          expect(body.status).to.equal("stopped");
           for (var i = 0; i < body.steps.length; i++) {
             expect(body.steps[i].name).to.equal(testSchedule.steps[i].name);
             expect(body.steps[i].riseTime).to.equal(testSchedule.steps[i].riseTime);

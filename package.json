@@ -9,11 +9,9 @@
     "pretest": "jshint src/**/*.js",
     "test": "istanbul cover _mocha test --recursive",
     "prestart": "git pull && jshint",
-    "start": "node src/mashControl.js",
+    "start": "node src/index.js",
     "start-docker": "node src/docker.js",
-    "start-offline": "node src/mashControl.js",
-    "predocker": "docker build --no-cache -t ozsie/mash-control:$npm_package_version ./docker",
-    "docker": "docker run --name mash-control -p 3000:3000 ozsie/mash-control:$npm_package_version",
+    "docker": "docker-compose up --force-recreate --build",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
   "repository": {
@@ -51,11 +49,11 @@
     "winston": "^2.3.1"
   },
   "devDependencies": {
-    "chai": "^4.0.1",
+    "chai": "^4.1.2",
     "chai-http": "^3.0.0",
     "coveralls": "^2.13.1",
     "gpio-mock": "1.1.2",
     "istanbul": "^0.4.5",
-    "mocha": "^3.4.2"
+    "mocha": "^4.0.0"
   }
 }

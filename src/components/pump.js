@@ -7,15 +7,18 @@ winston.add(winston.transports.File, { name:"pump", filename: settings.logs.dire
 
 var doPump = false;
 
+var pumpOuter;
+var pumpInner;
+
 var pump = function() {
   if (doPump) {
     rc.relayOn(0, function(err, relay) {
       winston.info('Pump start');
-      setTimeout(function() {
+      pumpOuter = setTimeout(function() {
         rc.relayOff(0, function(err, relay) {
           winston.info('Pump stop');
           if (doPump) {
-            setTimeout(function() {
+            pumpInner = setTimeout(function() {
               pump();
             }, 60000);
           }
@@ -32,7 +35,10 @@ var startPump = function(callback) {
 };
 
 var stopPump = function(callback) {
+  winston.info('PUMP OFF');
   doPump = false;
+  clearTimeout(pumpOuter);
+  clearTimeout(pumpInner);
   callback(undefined, doPump);
 };
 

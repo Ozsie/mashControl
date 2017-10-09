@@ -8,7 +8,7 @@ var currentTemp = 10;
 
 let updateTemp = function() {
   var url = 'http://mash-control:3000/heater/direction';
-  if (process.argv[0] === 'local') {
+  if (process.argv[2] === 'local') {
     url = 'http://localhost:3000/heater/direction';
   }
   http.get(url, (res) => {
@@ -53,6 +53,6 @@ let tempLoop = function() {
   setTimeout(updateTemp, 1000);
 }
 
-console.log('Mash Control hardware mock started.');
+console.log('Mash Control hardware mock started. ' + process.argv[2]);
 tempLoop();
 

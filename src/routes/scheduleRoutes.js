@@ -1,9 +1,12 @@
-var scheduleRunner = require('../runner/scheduleRunner');
+var scheduleHandler = require('../scheduleHandler');
 
-module.exports = function (app, winston) {
+module.exports = function (app, hwi, winston) {
+  var scheduleRunner = require('../runner/scheduleRunner')(hwi);
+
   app.post('/schedule/start', function(req, res) {
     winston.info('Start schedule requested');
-    scheduleRunner.startSchedule(req.body, function(err) {
+    scheduleHandler.setSchedule(req.body);
+    scheduleRunner.startSchedule(function(err) {
       if (!err) {
         winston.info('Start ok = ' + true);
         res.status(200).send(true);
@@ -32,12 +35,12 @@ module.exports = function (app, winston) {
   });
 
   app.get('/schedule/tempLog', function(req, res) {
-    var tempLog = scheduleRunner.getTempLog();
+    var tempLog = scheduleHandler.getTempLog();
     res.status(200).send({log: tempLog});
   });
 
   app.get('/schedule', function(req, res) {
     winston.info('Get Schedule');
-    res.status(200).send(scheduleRunner.getSchedule());
+    res.status(200).send(scheduleHandler.getSchedule());
   });
 };

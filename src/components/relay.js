@@ -4,7 +4,7 @@ var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
 var winston = require('winston');
-winston.add(winston.transports.File, { name: "relay", filename: settings.logs.directory + '/relay.log', 'timestamp':true });
+winston.add(winston.transports.File, { name: 'relay', filename: settings.logs.directory + '/relay.log', 'timestamp':true });
 
 var relayOpen = [false, false, false, false];
 
@@ -22,7 +22,8 @@ var getRelayStatus = function() {
 };
 
 var setRelay = function(setting, callback) {
-  if (setting.state === "on") {
+  winston.info('flip' + JSON.stringify(setting));
+  if (setting.state === 'on') {
     relayOn(setting.index, callback);
   } else {
     relayOff(setting.index, callback);
@@ -35,7 +36,7 @@ var relayOn = function(index, callback) {
   if (!relayOpen[relay.index]) {
     open(pin, function(err, data) {
       if(!err) {
-        winston.debug("Relay " + relay.name + " on");
+        winston.info('Relay "' + relay.name + '" on');
         gpio.writeSync(pin, 1);
         relayOpen[relay.index] = true;
         relay.open = true;
@@ -43,7 +44,7 @@ var relayOn = function(index, callback) {
       callback(err, relay);
     });
   } else {
-    winston.debug("Relay " + relay.name + " on");
+    winston.info('Relay "' + relay.name + '" on');
     gpio.writeSync(pin, 1);
     relayOpen[relay.index] = true;
     relay.open = true;
@@ -55,7 +56,7 @@ var relayOff = function(index, callback) {
   var relay = getRelay(index);
   var pin = relay.pin;
   if (relayOpen[relay.index]) {
-    winston.debug("Relay " + relay.name + " off");
+    winston.debug('Relay ' + relay.name + ' off');
     try {
       gpio.writeSync(pin, 0);
       close(pin, function(err) {
@@ -79,7 +80,7 @@ var open = function(pin, callback) {
 var close = function(pin, callback) {
   gpio.closePin(pin, function(err) {
     if (err) {
-      winston.error("Could not close pin:", + err);
+      winston.error('Could not close pin:', + err);
     }
     callback(err);
   });

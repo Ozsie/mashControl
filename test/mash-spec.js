@@ -1,38 +1,24 @@
 var chai = require('chai');
 var expect = chai.expect; // we are using the "expect" style of Chai
 var fs = require('fs');
-var gpioMock = require('gpio-mock');
-var mash = require('./../src/runner/mash');
-var heatControl = require('./../src/components/heatControl');
+var scheduleHandler = require('../src/scheduleHandler');
+
+var mash;
+var hwi;
 
 describe('mash', function() {
-
-  before(function(done) {
-    this.timeout(5000);
-    gpioMock.start(function(err) {
-      if (!err) {
-        console.log('GPIO mocked');
-
-        gpioMock.addDS18B20('28-800000263717', {
-          behavior: 'static',
-          temperature: 42
-        }, function(err) {
-          if (!err) {
-            console.log('DS18B20 mocked');
-            heatControl.turnOn(function() {
-              done();
-            });
-          }
-        });
-      }
-    })
+  before(function() {
+    hwi = {
+      temperature: 42,
+      cycleHeaterPower: function() {},
+      maxEffect: function() {},
+      turnOff: function(callback) { callback(); }
+    };
+    mash = require('./../src/runner/mash')(hwi);
   });
 
-  after(function(done) {
-    heatControl.turnOff(function() {
-      gpioMock.stop();
-      done();
-    });
+  after(function() {
+    mash.stop();
   });
 
   it('status should be updated correctly', function(done) {
@@ -44,6 +30,7 @@ describe('mash', function() {
       expect(status.stepName).to.equal('Proteinrast');
       expect(status.startTime).to.not.equal(0);
       expect(status.timeRemaining).to.equal(6000);
+      mash.stop();
       done();
     }, 60);
   });
@@ -52,36 +39,30 @@ describe('mash', function() {
     var status = {step: 0, stepName: "", initialTemp: 0, startTime: Date.now(), timeRemaining: 0};
     var schedule = JSON.parse(fs.readFileSync('test/mashControl-spec-schedule.json', 'utf8'));
     schedule.startTime = Date.now() - 120000;
+    scheduleHandler.setSchedule(schedule);
     mash.adjustTemperature(schedule.steps[0], schedule.volume, status, schedule);
     setTimeout(function() {
       expect(status.initialTemp).to.equal(0);
       expect(status.temperature).to.equal(42);
       expect(status.minutes).to.equal(2);
+      mash.stop();
       done();
     }, 60);
 
   });
 
   it('temperature adjustment should stop if temp 90 ', function(done) {
-    this.timeout(8000);
-    gpioMock.setDS18B20('28-800000263717', {
-      behavior: 'static',
-      temperature: 91
-    }, function(err) {
-      if (!err) {
-        console.log('mash');
-        var status = {step: 0, stepName: "", initialTemp: 0, startTime: Date.now(), timeRemaining: 0};
-        var schedule = JSON.parse(fs.readFileSync('test/mashControl-spec-schedule.json', 'utf8'));
-        schedule.startTime = Date.now() - 120000;
-        mash.adjustTemperature(schedule.steps[0], schedule.volume, status, schedule);
-        setTimeout(function() {
-          expect(status.initialTemp).to.equal(0);
-          expect(status.temperature).to.not.exist;
-          expect(status.status).to.equal('stopped');
-          expect(schedule.status).to.equal('stopped');
-          done();
-        }, 3900);
-      }
-    });
+    hwi.temperature = 91;
+    var status = {step: 0, stepName: "", initialTemp: 0, startTime: Date.now(), timeRemaining: 0};
+    var schedule = JSON.parse(fs.readFileSync('test/mashControl-spec-schedule.json', 'utf8'));
+    schedule.startTime = Date.now() - 120000;
+    mash.adjustTemperature(schedule.steps[0], schedule.volume, status, schedule);
+    setTimeout(function() {
+      expect(status.initialTemp).to.equal(0);
+      expect(status.status).to.equal('stopped');
+      expect(status.temperature).to.not.exist;
+      mash.stop();
+      done();
+    }, 60);
   });
 });

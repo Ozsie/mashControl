@@ -3,36 +3,38 @@ var chaiHttp = require('chai-http');
 var gpioMock = require('gpio-mock');
 var expect = chai.expect;
 var should = chai.should();
-var mashControl = require('./../src/mashControl');
+var mashControl;
+var pump = require('../src/components/pump');
 var fs = require('fs');
 
 chai.use(chaiHttp);
 
-describe('mashControl', function() {
-
+describe('pumpRoutes', function() {
   before(function(done) {
     gpioMock.start(function(err) {
       if (!err) {
         console.log('GPIO mocked');
         gpioMock.addDS18B20('28-800000263717', {
           behavior: 'static',
-          temperature: 35
+          temperature: 42
         }, function(err) {
           if (!err) {
             console.log('DS18B20 mocked');
           }
-          setTimeout(function() {
-            console.log('DONE');
-            done();
-          }, 1800)
+          mashControl = require('./../src/mashControl');
+          done();
         });
+      } else {
+        done();
       }
-    });
+    })
   });
 
-  after(function() {
-    gpioMock.stop();
-    mashControl.server.close();
+  after(function(done) {
+    mashControl.closeServer(function() {
+      gpioMock.stop();
+      done();
+    });
   });
 
   it('GET /pump/status should return pump status "false" before pump is started and have http status 200', function(done) {

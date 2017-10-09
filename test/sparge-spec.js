@@ -1,37 +1,23 @@
 var chai = require('chai');
 var expect = chai.expect; // we are using the "expect" style of Chai
 var fs = require('fs');
-var gpioMock = require('gpio-mock');
-var sparge = require('./../src/runner/sparge');
-var heatControl = require('./../src/components/heatControl');
+
+var sparge;
+var hwi;
 
 describe('sparge', function() {
-
-  before(function(done) {
-    this.timeout(5000);
-    gpioMock.start(function(err) {
-      if (!err) {
-        console.log('GPIO mocked');
-        heatControl.turnOn(function(err) {
-          if (err) {
-            console.log(err);
-          }
-          gpioMock.addDS18B20('28-800000263717', {
-            behavior: 'static',
-            temperature: 42
-          }, function(err) {
-            if (!err) {
-              console.log('DS18B20 mocked');
-            }
-            done();
-          });
-        });
-      }
-    })
+  before(function() {
+    hwi = {
+      temperature: 78,
+      cycleHeaterPower: function() {},
+      maxEffect: function() {},
+      turnOff: function(callback) { callback(); }
+    };
+    sparge = require('./../src/runner/sparge')(hwi);
   });
 
   after(function() {
-    gpioMock.stop();
+    sparge.stop();
   });
 
   it('status should be updated correctly', function(done) {
@@ -43,6 +29,7 @@ describe('sparge', function() {
       expect(status.stepName).to.equal('Sparge Pause');
       expect(status.startTime).to.not.equal(0);
       expect(status.timeRemaining).to.equal(1200);
+      sparge.stop();
       done();
     }, 60);
   });

@@ -1,30 +1,22 @@
 var chai = require('chai');
 var expect = chai.expect; // we are using the "expect" style of Chai
 var fs = require('fs');
-var gpioMock = require('gpio-mock');
-var boil = require('./../src/runner/boil');
+var scheduleHandler = require('../src/scheduleHandler');
+
+var boil;
 
 describe('boil', function() {
-
-  before(function(done) {
-    gpioMock.start(function(err) {
-      if (!err) {
-        console.log('GPIO mocked');
-        gpioMock.addDS18B20('28-800000263717', {
-          behavior: 'static',
-          temperature: 42
-        }, function(err) {
-          if (!err) {
-            console.log('DS18B20 mocked');
-          }
-          done();
-        });
-      }
-    })
+  before(function() {
+    var hwi = {
+      temperature: 100,
+      cycleHeaterPower: function() {},
+      maxEffect: function() {}
+    };
+    boil = require('./../src/runner/boil')(hwi);
   });
 
   after(function() {
-    gpioMock.stop();
+    boil.stop();
   });
 
   it('status should be updated correctly', function(done) {
@@ -36,6 +28,7 @@ describe('boil', function() {
       expect(status.stepName).to.equal('Boil');
       expect(status.startTime).to.not.equal(0);
       expect(status.timeRemaining).to.equal(4200000);
+      boil.stop();
       done();
     }, 60);
   });
@@ -44,11 +37,13 @@ describe('boil', function() {
     var status = {step: 0, stepName: "", initialTemp: 0, startTime: Date.now(), timeRemaining: 0};
     var schedule = JSON.parse(fs.readFileSync('test/mashControl-spec-schedule.json', 'utf8'));
     schedule.startTime = Date.now() - 120000;
-    boil.adjustTemperatureForBoil(status, schedule);
+    scheduleHandler.setSchedule(schedule);
+    boil.adjustTemperatureForBoil(status, scheduleHandler.getSchedule());
     setTimeout(function() {
       expect(status.initialTemp).to.equal(0);
-      expect(status.temperature).to.equal(42);
+      expect(status.temperature).to.equal(100);
       expect(status.minutes).to.equal(2);
+      boil.stop();
       done();
     }, 60);
 

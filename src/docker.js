@@ -17,7 +17,8 @@ gpioMock.start(function(err) {
     }, function(err) {
       if (!err) {
         console.log('DS18B20 mocked');
-        var mashControl = require('./mashControl');
+        var hardwareInterface = require('./hardwareInterface');
+        require('./mashControl.js')(hardwareInterface());
       } else {
         process.exit();
       }

@@ -3,18 +3,38 @@ var chaiHttp = require('chai-http');
 var gpioMock = require('gpio-mock');
 var expect = chai.expect;
 var should = chai.should();
-var mashControl = require('./../src/mashControl');
 var fs = require('fs');
 
 chai.use(chaiHttp);
 
-describe('mashControl', function() {
+var mashControl;
 
-  before(function() {
+describe('dbRoutes', function() {
+  before(function(done) {
+    gpioMock.start(function(err) {
+      if (!err) {
+        console.log('GPIO mocked');
+        gpioMock.addDS18B20('28-800000263717', {
+          behavior: 'static',
+          temperature: 42
+        }, function(err) {
+          if (!err) {
+            console.log('DS18B20 mocked');
+          }
+          mashControl = require('./../src/mashControl');
+          done();
+        });
+      } else {
+        done();
+      }
+    })
   });
 
-  after(function() {
-    mashControl.server.close();
+  after(function(done) {
+    mashControl.closeServer(function() {
+      gpioMock.stop();
+      done();
+    });
   });
 
   var uuid = '';

@@ -1,12 +1,14 @@
 var chai = require('chai');
 var expect = chai.expect; // we are using the "expect" style of Chai
 var fs = require('fs');
+var gpioMock = require('gpio-mock');
 var db = require('./../src/db');
 
 describe('db', function() {
-  before(function() {
+  before(function(done) {
     db.clearSchedules(function() {
       console.log('Schedules cleared');
+      done();
     });
   });
 
@@ -47,6 +49,8 @@ describe('db', function() {
           expect(data).to.deep.equal(defaultSchedule);
           done();
         });
+      } else {
+        done();
       }
     })
   });

@@ -1,38 +1,33 @@
-var heatControl = require('../components/heatControl');
 var util = require('../util');
-var tempSensor = require('mc-tempsensor');
+var scheduleHandler = require('../scheduleHandler');
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
-winston.add(winston.transports.File, { name:"mash", filename: settings.logs.directory + '/mash.log', 'timestamp':true });
 
-var previousTemp;
+module.exports = function(hwi) {
+  var mash = {};
+  var previousTemp;
+  var timeout;
 
-var stopSchedule = function(schedule, status, callback) {
-  if (schedule) {
-    heatControl.turnOff(function(err, data) {
-      if (!err) {
-        callback(undefined, true);
-      } else {
-        callback(err, true);
-      }
-    });
-  } else {
-    callback("No schedule available");
-  }
-};
+  var stopSchedule = function(schedule, status, callback) {
+    winston.info('Turn off due to overheating');
+    if (schedule) {
+      hwi.turnOff(callback);
+    } else {
+      callback("No schedule available");
+    }
+  };
 
-var adjustTemperature = function(step, volume, status, schedule) {
-  tempSensor.readAndParse(function(err, data) {
-    if (!err) {
-      var currentTemp = data.temperature.celcius;
+  mash.adjustTemperature = function(step, volume, status, schedule) {
+    if (hwi.temperature) {
+      var currentTemp = hwi.temperature;
       if (currentTemp > 90 || currentTemp > settings.heatCutOff) {
         winston.warn("Temperature passed cut off. Stopping.");
         stopSchedule(schedule, status, function(err, stopped) {
           if (err) {
             winston.error('Error while stopping: ' + err);
           } else {
-            status.status = schedule.status = 'stopped';
+            status.status = 'stopped';
             winston.info('Mash stopped due to overheating.');
           }
         });
@@ -48,7 +43,7 @@ var adjustTemperature = function(step, volume, status, schedule) {
       var degreesToIncrease = Math.abs(currentTemp - step.temperature);
       status.timeRemaining = (step.stepTime - (Date.now() - step.startTime));
       status.temperature = currentTemp;
-      status.minutes = util.getRunningForMinutes(schedule);
+      status.minutes = scheduleHandler.getRunningForMinutes();
 
       winston.info("Increase from last: " + diff + "C. Degrees left: " + degreesToIncrease + "C of " +
       initialDegreesToIncrease + "C. Cut off at: " + heatCutOff + "C. " +
@@ -57,14 +52,14 @@ var adjustTemperature = function(step, volume, status, schedule) {
 
       if (currentTemp < heatCutOff) {
         winston.info("Under, increasing");
-        heatControl.fastIncrease();
+        hwi.maxEffect();
       } else if (currentTemp >= heatCutOff) {
         if (diff < 0 && currentTemp < step.temperature) {
           winston.info("Sank below target, increasing");
-          heatControl.fastIncrease();
+          hwi.maxEffect();
         } else {
           winston.info("Reached heat cut off point, fast decrease");
-          heatControl.fastDecrease();
+          hwi.minEffect();
         }
       } else {
         winston.info("On mark " + currentTemp + " = " + step.temperature + " holding.");
@@ -72,21 +67,19 @@ var adjustTemperature = function(step, volume, status, schedule) {
       previousTemp = currentTemp;
     } else {
       status.thermometer = false;
-      winston.error(err);
-      callback(err);
+      winston.error("Could not read temperature");
+      throw new Error("Could not read temperature");
     }
-  });
-};
+  };
 
-var nextMashStep = function(status, schedule, index) {
-  tempSensor.readAndParse(function(err, data) {
-    if (!err) {
+  mash.nextMashStep = function(status, schedule, index) {
+    if (hwi.temperature) {
       var step = schedule.steps[index];
       status.step = index + 1;
       status.stepName = step.name;
-      status.initialTemp = step.initialTemp = data.temperature.celcius;
+      status.initialTemp = step.initialTemp = hwi.temperature;
       status.startTime = step.startTime = Date.now();
-      status.timeRemaining = step.stepTime = util.calculateStepTime(step);
+      status.timeRemaining = step.stepTime = scheduleHandler.calculateStepTime(step);
       status.heatCutOff = step.heatCutOff = util.calculateCutOffPoint(step.temperature, step.initialTemp, schedule.volume);
       winston.info("######################################################################################");
       winston.info("#                                                                                    #");
@@ -105,16 +98,11 @@ var nextMashStep = function(status, schedule, index) {
         }
         if (Date.now() - status.onTime > 7200000) {
           // Two hours, heater has auto power off after two hours, must cycle power and mode
-          heatControl.heaterOnSwitch(function(err, data) {
-            if (!err) {
-              heatControl.heaterModeSwitch(function(err, data) {
-              });
-            }
-          });
+          hwi.cycleHeaterPower();
         }
-        setTimeout(function() {
+        timeout = setTimeout(function() {
           if (Date.now() - step.startTime < step.stepTime) {
-            adjustTemperature(step, schedule.volume, status, schedule);
+            mash.adjustTemperature(step, schedule.volume, status, schedule);
             run();
           } else {
             winston.info("## Step " + step.name + " ran for " + (Date.now() - step.startTime) + " ms. ##");
@@ -126,13 +114,16 @@ var nextMashStep = function(status, schedule, index) {
       return step.stepTime;
     } else {
       status.thermometer = false;
-      winston.error("Could not read temperature", err);
-      throw new Error(err);
+      winston.error("Could not read temperature");
+      throw new Error("Could not read temperature");
     }
-  });
-};
+  };
 
-module.exports = {
-  nextMashStep: nextMashStep,
-  adjustTemperature: adjustTemperature
+  mash.stop = function() {
+    winston.info('Stop mash called');
+    clearTimeout(timeout);
+    previousTemp = undefined;
+  };
+
+  return mash;
 };

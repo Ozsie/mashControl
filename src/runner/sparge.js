@@ -1,17 +1,16 @@
-var heatControl = require('../components/heatControl');
-var tempSensor = require('mc-tempsensor');
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
-winston.add(winston.transports.File, { name:"sparge", filename: settings.logs.directory + '/sparge.log', 'timestamp':true });
 
+module.exports = function(hwi) {
+  var sparge = {};
+  var timeout;
 
-var spargePause = function(status, schedule) {
-  tempSensor.readAndParse(function(err, data) {
-    if (!err) {
+  sparge.spargePause = function(status, schedule) {
+    if (hwi.temperature) {
       status.step = schedule.steps.length + 1;
       status.stepName = "Sparge Pause";
-      status.initialTemp = data.temperature.celcius;
+      status.initialTemp = hwi.temperature;
       status.startTime = Date.now();
       status.timeRemaining = schedule.spargePause * 60 * 1000;
       winston.info("######################################################################################");
@@ -30,14 +29,9 @@ var spargePause = function(status, schedule) {
         }
         if (Date.now() - status.onTime > 7200000) {
           // Two hours, heater has auto power off after two hours, must cycle power and mode
-          heatControl.heaterOnSwitch(function(err, data) {
-            if (!err) {
-              heatControl.heaterModeSwitch(function(err, data) {
-              });
-            }
-          });
+          hwi.cycleHeaterPower();
         }
-        setTimeout(function() {
+        timeout = setTimeout(function() {
           if (Date.now() - status.startTime < status.timeRemaining) {
             run();
           } else {
@@ -50,12 +44,15 @@ var spargePause = function(status, schedule) {
       return status.timeRemaining;
     } else {
       status.thermometer = false;
-      winston.error("Could not read temperature", err);
-      throw new Error(err);
+      winston.error("Could not read temperature");
+      throw new Error("Could not read temperature");
     }
-  });
-};
+  };
 
-module.exports = {
-  spargePause: spargePause
+  sparge.stop = function() {
+    winston.info('Stop sparge pause called');
+    clearTimeout(timeout);
+  };
+
+  return sparge;
 };
