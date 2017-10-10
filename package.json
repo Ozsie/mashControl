@@ -10,6 +10,7 @@
     "test": "istanbul cover -x **/src/routes/** _mocha test/** --recursive",
     "prestart": "git pull && jshint",
     "start": "node src/index.js",
+    "prestart-docker": "jshint",
     "start-docker": "node src/docker.js",
     "docker": "docker-compose up --force-recreate --build",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
