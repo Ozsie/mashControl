@@ -24,7 +24,7 @@ let updateTemp = function() {
           if (currentTemp < 100) {
             currentTemp += 4/60;
             var tempOutput = parseInt(currentTemp * 1000)
-            console.log('increasing temp to ' + tempOutput);
+            //console.log('increasing temp to ' + tempOutput);
             fs.writeFileSync('sys/bus/w1/devices/28-800000263717/w1_slave', tempFileContent + tempOutput);
           }
         } else if (currentDirection === 'backward') {
@@ -34,7 +34,7 @@ let updateTemp = function() {
             currentTemp += 0.01/60;
           }
           var tempOutput = parseInt(currentTemp * 1000)
-          console.log('decreasing temp to ' + tempOutput);
+          //console.log('decreasing temp to ' + tempOutput);
           fs.writeFileSync('sys/bus/w1/devices/28-800000263717/w1_slave', tempFileContent + tempOutput);
         }
         tempLoop();
