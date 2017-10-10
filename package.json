@@ -7,7 +7,7 @@
     "publish": "git tag -a v$npm_package_version -m 'tag version v$npm_package_version'",
     "postpublish": "git push --tags",
     "pretest": "jshint src/**/*.js",
-    "test": "istanbul cover _mocha test --recursive",
+    "test": "istanbul cover _mocha test/** --recursive",
     "prestart": "git pull && jshint",
     "start": "node src/index.js",
     "start-docker": "node src/docker.js",
