@@ -6,26 +6,26 @@ module.exports = function (app, hwi, winston) {
   app.post('/schedule/start', function(req, res) {
     winston.info('Start schedule requested');
     scheduleHandler.setSchedule(req.body);
-    scheduleRunner.startSchedule(function(err) {
-      if (!err) {
-        winston.info('Start ok = ' + true);
-        res.status(200).send(true);
-      } else {
-        winston.info('Start nok = ' + err);
-        res.status(200).send(false);
-      }
-    });
+    var err = scheduleRunner.startSchedule();
+    if (!err) {
+      winston.info('Start ok = ' + true);
+      res.status(200).send(true);
+    } else {
+      winston.info('Start nok = ' + err);
+      res.status(200).send(false);
+    }
   });
 
   app.get('/schedule/stop', function(req, res) {
     winston.info('Stop schedule requested');
-    var err = scheduleRunner.stopSchedule();
-    if (!err) {
-      res.status(200).send(data);
-    } else {
-      winston.warn("Stopped with error", err);
-      res.status(200).send(data);
-    }
+    scheduleRunner.stopSchedule(function(err, data) {
+      if (!err) {
+        res.status(200).send(data);
+      } else {
+        winston.warn("Stopped with error", err);
+        res.status(200).send(data);
+      }
+    });
   });
 
   app.get('/schedule/status', function(req, res) {
