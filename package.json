@@ -43,7 +43,7 @@
     "jquery": "3.2.0",
     "jshint": "^2.9.4",
     "mc-gpio": "^1.0.3",
-    "mc-tempsensor": "^1.0.4",
+    "mc-tempsensor": "^2.0.0",
     "n3-charts": "^2.0.28",
     "push.js": "^0.0.12",
     "uuid": "^3.0.1",

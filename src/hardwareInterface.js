@@ -8,15 +8,20 @@ module.exports = function() {
   var hi = {};
   var updateTempTimeout;
 
+  tempSensor.init('28-800000263717', undefined, function() {
+    console.log('Temp sensor initialized');
+  });
+
   var updateTemp = function(callback) {
     tempSensor.readAndParse(function(err, data) {
       if (!err) {
-        hi.temperature = data.temperature.celcius;
+        hi.temperature = data[0].temperature.celcius;
         updateTempLoop();
         if (callback) {
           callback();
         }
       } else {
+        console.log(' ------------ ' + err);
         callback(err);
       }
     });
@@ -99,7 +104,7 @@ module.exports = function() {
     } else {
       tempSensor.readAndParse(function(err, data) {
         if (!err) {
-          callback(undefined, data.temperature.celcius);
+          callback(undefined, data[0].temperature.celcius);
         } else {
           callback(err);
         }
