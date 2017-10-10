@@ -1,7 +1,7 @@
 var tempSensor = require('mc-tempsensor');
-var pump = require('./components/pump');
 var gpio = require('mc-gpio');
-var rc = require('./relay');
+var rc = require('./relay')(gpio);
+var pump = require('./components/pump')(rc);
 var heatControl = require('./components/heatControl')(gpio, rc);
 
 module.exports = function() {
@@ -87,6 +87,10 @@ module.exports = function() {
         callback(err, true);
       });
     });
+  };
+
+  hi.stopPump = function(callback) {
+    pump.stop(callback);
   };
 
   return hi;

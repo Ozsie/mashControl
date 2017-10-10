@@ -1,5 +1,4 @@
 var util = require('../util');
-var pump = require('../components/pump');
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
@@ -91,7 +90,7 @@ module.exports = function(hwi) {
             spargePauseRun = true;
             doStep();
           } else if (schedule.boilTime && (spargePauseRun || !schedule.spargePause) && !boilDone) {
-            pump.stop(function(err, pumpStatus) {
+            hwi.stopPump(function(err, pumpStatus) {
               if (err) {
                 winston.error('Could not stop pump before boil');
                 callback(err);

@@ -1,94 +1,94 @@
-var gpio = require('mc-gpio');
 var fs = require('fs');
-
-var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
-
 var winston = require('winston');
-winston.add(winston.transports.File, { name: 'relay', filename: settings.logs.directory + '/relay.log', 'timestamp':true });
 
-var relayOpen = [false, false, false, false];
+module.exports = function(gpio) {
+  var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 
-var getRelay = function(index) {
-  return settings.relay[index];
-};
+  var relay = {};
 
-var getRelayStatus = function() {
-  var relays = settings.relay;
-  for (var index in relays) {
-    relays[index].open = relayOpen[index];
-  }
+  var relayOpen = [false, false, false, false];
 
-  return relays;
-};
+  var getRelay = function(index) {
+    return settings.relay[index];
+  };
 
-var setRelay = function(setting, callback) {
-  winston.info('flip' + JSON.stringify(setting));
-  if (setting.state === 'on') {
-    relayOn(setting.index, callback);
-  } else {
-    relayOff(setting.index, callback);
-  }
-};
+  relay.getRelayStatus = function() {
+    var relays = settings.relay;
+    for (var index in relays) {
+      relays[index].open = relayOpen[index];
+    }
 
-var relayOn = function(index, callback) {
-  var relay = getRelay(index);
-  var pin = relay.pin;
-  if (!relayOpen[relay.index]) {
-    open(pin, function(err, data) {
-      if(!err) {
-        winston.info('Relay "' + relay.name + '" on');
-        gpio.writeSync(pin, 1);
-        relayOpen[relay.index] = true;
-        relay.open = true;
-      }
-      callback(err, relay);
-    });
-  } else {
-    winston.info('Relay "' + relay.name + '" on');
-    gpio.writeSync(pin, 1);
-    relayOpen[relay.index] = true;
-    relay.open = true;
-    callback(undefined, relay);
-  }
-};
+    return relays;
+  };
 
-var relayOff = function(index, callback) {
-  var relay = getRelay(index);
-  var pin = relay.pin;
-  if (relayOpen[relay.index]) {
-    winston.debug('Relay ' + relay.name + ' off');
-    try {
-      gpio.writeSync(pin, 0);
-      close(pin, function(err) {
-        if (!err) {
-          relayOpen[relay.index] = false;
-          relay.open = false;
+  relay.setRelay = function(setting, callback) {
+    winston.info('flip ' + JSON.stringify(setting));
+    if (setting.state === 'on') {
+      relay.relayOn(setting.index, callback);
+    } else {
+      relay.relayOff(setting.index, callback);
+    }
+  };
+
+  relay.relayOn = function(index, callback) {
+    winston.info('Fetching relay ' + index);
+    var relay = getRelay(index);
+    var pin = relay.pin;
+    if (!relayOpen[relay.index]) {
+      open(pin, function(err, data) {
+        if(!err) {
+          winston.info('Relay "' + relay.name + '" on');
+          gpio.writeSync(pin, 1);
+          relayOpen[relay.index] = true;
+          relay.open = true;
         }
         callback(err, relay);
       });
-    } catch (error) {
-      console.log(JSON.stringify(error));
-      callback(error);
+    } else {
+      winston.info('Relay "' + relay.name + '" already on');
+      gpio.writeSync(pin, 1);
+      relayOpen[relay.index] = true;
+      relay.open = true;
+      callback(undefined, relay);
     }
-  }
-};
+  };
 
-var open = function(pin, callback) {
-  gpio.openPinOut(pin, callback);
-};
-
-var close = function(pin, callback) {
-  gpio.closePin(pin, function(err) {
-    if (err) {
-      winston.error('Could not close pin:', + err);
+  relay.relayOff = function(index, callback) {
+    winston.info('Fetching relay ' + index);
+    var relay = getRelay(index);
+    var pin = relay.pin;
+    if (relayOpen[relay.index]) {
+      try {
+        gpio.writeSync(pin, 0);
+        close(pin, function(err) {
+          if (!err) {
+            relayOpen[relay.index] = false;
+            relay.open = false;
+            winston.debug('Relay ' + relay.name + ' off');
+          }
+          callback(err, relay);
+        });
+      } catch (error) {
+        winston.error('Could not close relay', error);
+        callback(error);
+      }
+    } else {
+      callback(undefined, relay);
     }
-    callback(err);
-  });
-};
+  };
 
-module.exports = {
-  setRelay: setRelay,
-  relayOn: relayOn,
-  relayOff: relayOff,
-  getRelayStatus: getRelayStatus
+  var open = function(pin, callback) {
+    gpio.openPinOut(pin, callback);
+  };
+
+  var close = function(pin, callback) {
+    gpio.closePin(pin, function(err) {
+      if (err) {
+        winston.error('Could not close pin:', + err);
+      }
+      callback(err);
+    });
+  };
+
+  return relay;
 };

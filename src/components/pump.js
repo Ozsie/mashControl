@@ -1,49 +1,58 @@
 var util = require('../util');
-var rc = require('./relay');
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
-winston.add(winston.transports.File, { name:"pump", filename: settings.logs.directory + '/pump.log', 'timestamp':true });
 
-var doPump = false;
+module.exports = function(rc) {
+  var pumpObj = {};
 
-var pumpOuter;
-var pumpInner;
+  var doPump = false;
+  var pumping = false;
 
-var pump = function() {
-  if (doPump) {
-    rc.relayOn(0, function(err, relay) {
-      winston.info('Pump start');
-      pumpOuter = setTimeout(function() {
-        rc.relayOff(0, function(err, relay) {
-          winston.info('Pump stop');
-          if (doPump) {
-            pumpInner = setTimeout(function() {
-              pump();
-            }, 60000);
-          }
-        });
-      }, 120000);
+  var pumpOuter;
+  var pumpInner;
+
+  pumpObj.pause = function(callback) {
+    rc.relayOff(0, function(err, relay) {
+      pumping = false;
+      winston.info('Pump stop');
+      if (doPump) {
+        pumpInner = setTimeout(pump, 60000);
+      }
+      if (callback) {
+        callback(undefined, pumpInner);
+      }
     });
-  }
-};
+  };
 
-var startPump = function(callback) {
-  doPump = true;
-  pump();
-  callback(undefined, doPump);
-};
+  var pump = function(callback) {
+    if (doPump) {
+      rc.relayOn(0, function(err, relay) {
+        winston.info('Pump start');
+        pumping = true;
+        pumpOuter = setTimeout(pumpObj.pause, 120000);
+        if (callback) {
+          callback(undefined, pumpOuter);
+        }
+      });
+    }
+  };
 
-var stopPump = function(callback) {
-  winston.info('PUMP OFF');
-  doPump = false;
-  clearTimeout(pumpOuter);
-  clearTimeout(pumpInner);
-  callback(undefined, doPump);
-};
+  pumpObj.start = function(callback) {
+    doPump = true;
+    pump(callback);
+  };
 
-module.exports = {
-  isRunning: function() { return doPump; },
-  start: startPump,
-  stop: stopPump
+  pumpObj.stop = function(callback) {
+    winston.info('PUMP OFF');
+    doPump = false;
+    clearTimeout(pumpOuter);
+    clearTimeout(pumpInner);
+    callback(undefined, doPump);
+  };
+
+  pumpObj.isOn = function() { return doPump; };
+  pumpObj.isRunning = function() { return pumping; };
+
+  return pumpObj;
 };

@@ -1,6 +1,4 @@
-var rc = require('../components/relay');
-
-module.exports = function (app, winston) {
+module.exports = function (app, rc, winston) {
   app.post('/relay', function(req, res) {
     winston.info('Switch relay');
     var setting = req.body;

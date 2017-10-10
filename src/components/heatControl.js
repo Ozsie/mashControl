@@ -94,6 +94,7 @@ module.exports = function(gpio, rc) {
   };
 
   heatControl.turnOff = function(callback) {
+    var start = Date.now();
     turningOff = true;
     winston.info("Turn off. Enable Pin: " + settings.motor.enablePin);
     direction = undefined;
@@ -106,10 +107,12 @@ module.exports = function(gpio, rc) {
         winston.info('Enable pin off');
         if (!err) {
           closeAll();
-          callback(undefined, data);
+          var end = Date.now();
+          winston.info('Time to turn off: ' + (end - start) + ' ms');
+          callback(undefined, (end - start));
         } else {
           winston.error("Could not turn off heat control", err);
-          callback(err, data);
+          callback(err);
         }
       });
     });

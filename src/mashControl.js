@@ -3,7 +3,8 @@ var express = require('express');
 var fs = require('fs');
 var bodyParser = require('body-parser');
 
-var rc = require('./components/relay');
+var gpio = require('mc-gpio');
+var rc = require('./components/relay')(gpio);
 var db = require('./db');
 
 module.exports = function(hwi) {
@@ -37,9 +38,8 @@ module.exports = function(hwi) {
   require('./routes/tempRoutes')(app, hwi, winston);
   require('./routes/scheduleRoutes')(app, hwi, winston);
   require('./routes/dbRoutes')(app, winston);
-  require('./routes/pumpRoutes')(app, hwi, winston);
   require('./routes/heaterRoutes')(app, hwi, winston);
-  require('./routes/relayRoutes')(app, hwi, winston);
+  require('./routes/relayRoutes')(app, rc, winston);
 
   // Express route for any other unrecognised incoming requests
   app.get('*', function(req, res) {
