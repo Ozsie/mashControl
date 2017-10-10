@@ -1,47 +1,47 @@
 module.exports = function() {
-  var status = { status: {} };
+  var statusObj = { status: {} };
 
-  status.reset = function() {
-     status.status = {};
+  statusObj.reset = function() {
+     statusObj.status = {};
   };
 
-  status.setStatusRunning = function() {
-    status.status.status = 'running';
+  statusObj.setStatusRunning = function() {
+    statusObj.status.status = 'running';
   };
 
-  status.setStatusUnavailable = function() {
-    status.reset();
-    status.status.status = 'unavailable';
+  statusObj.setStatusUnavailable = function() {
+    statusObj.reset();
+    statusObj.status.status = 'unavailable';
   };
 
-  status.setStatusDone = function() {
-    status.status.status = 'done';
+  statusObj.setStatusDone = function() {
+    statusObj.status.status = 'done';
   };
 
-  status.setStatusStopped = function() {
-    status.reset();
-    status.status.status = 'stopped'
+  statusObj.setStatusStopped = function() {
+    statusObj.reset();
+    statusObj.status.status = 'stopped'
   };
 
-  status.isNotRunning = function() {
-    return status.status.status === 'stopped' || status.status.status === 'done' || status.status.status === 'unavailable';
+  statusObj.isNotRunning = function() {
+    return statusObj.status.status === 'stopped' || statusObj.status.status === 'done' || statusObj.status.status === 'unavailable';
   };
 
-  status.isRunning = function() {
-    return status.status.status === 'running';
+  statusObj.isRunning = function() {
+    return statusObj.status.status === 'running';
   };
 
-  status.updateOnTime = function() {
-    status.status.onTime = Date.now();
+  statusObj.updateOnTime = function() {
+    statusObj.status.onTime = Date.now();
   };
 
-  status.setAllOk = function(hwStatus) {
-    status.status.motor = hwStatus.motor;
-    status.status.thermometer = true;
-    status.status.pump = hwStatus.pump;
-    status.setStatusRunning();
-    status.updateOnTime();
+  statusObj.setAllOk = function(hwStatus) {
+    statusObj.status.motor = hwStatus.motor;
+    statusObj.status.thermometer = true;
+    statusObj.status.pump = hwStatus.pump;
+    statusObj.setStatusRunning();
+    statusObj.updateOnTime();
   };
 
-  return status;
+  return statusObj;
 };
