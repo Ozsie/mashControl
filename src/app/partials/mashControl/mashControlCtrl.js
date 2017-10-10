@@ -22,8 +22,8 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
           $scope.updateOptions();
           $scope.lastTempUpdate = undefined;
           mashControlRestService.getCurrentTemperature().then(function(data) {
-            $scope.currentTempTime = data.time;
-            $scope.currentTemp = data;
+            $scope.currentTempTime = Date.now();
+            $scope.currentTemp = data.temperature;
             getTempLog();
           });
         });
@@ -56,7 +56,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
 
   $scope.fetchStartTemp = function() {
     mashControlRestService.getCurrentTemperature().then(function(data) {
-      $scope.startTemp = data.temperature.celcius;
+      $scope.startTemp = data.temperature;
     }, function(error) {
       $scope.startTemp = 10;
     });
@@ -224,8 +224,8 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
       }
       $scope.runTime = Math.round((Date.now() - $scope.startedTime) / 1000);
       mashControlRestService.getCurrentTemperature().then(function(data) {
-        $scope.currentTempTime = data.time;
-        $scope.currentTemp = data;
+        $scope.currentTempTime = Date.now();
+        $scope.currentTemp = data.temperature;
         $scope.updates++;
         var updated = false;
       }, function(error) {
@@ -249,7 +249,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
           var value = log[index];
           if (!point.actual) {
             point.actual = value.temperature;
-            $scope.lastTempUpdate = $scope.currentTemp.time;
+            $scope.lastTempUpdate = $scope.currentTempTime;
           }
           if ($scope.jsonSchedule.boilSteps && (log.length - $scope.tempLog.length === 1)) {
             for (var boilIndex = 0; boilIndex < $scope.jsonSchedule.boilSteps.length; boilIndex++) {
