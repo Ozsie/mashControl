@@ -1,6 +1,6 @@
 var tempSensor = require('mc-tempsensor');
 var gpio = require('mc-gpio');
-var rc = require('./relay')(gpio);
+var rc = require('./components/relay')(gpio);
 var pump = require('./components/pump')(rc);
 var heatControl = require('./components/heatControl')(gpio, rc);
 
@@ -64,14 +64,14 @@ module.exports = function() {
           if (!mErr) {
             hwStatus.motor = true;
             pump.start(function(pErr, pumpStatus) {
-              hwStatus.pump = pumpStatus;
+              hwStatus.pump = pump.isOn();
               callback(pErr, hwStatus)
             });
           } else {
             callback(mErr, hwStatus);
           }
         });
-          }
+      }
     });
   };
 
@@ -91,6 +91,20 @@ module.exports = function() {
 
   hi.stopPump = function(callback) {
     pump.stop(callback);
+  };
+
+  hi.getCurrentTemperature = function(callback) {
+    if (hi.temperature) {
+      callback(undefined, hi.temperature)
+    } else {
+      tempSensor.readAndParse(function(err, data) {
+        if (!err) {
+          callback(undefined, data.temperature.celcius);
+        } else {
+          callback(err);
+        }
+      });
+    }
   };
 
   return hi;
