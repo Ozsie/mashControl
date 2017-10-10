@@ -1,7 +1,6 @@
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
-winston.add(winston.transports.File, { name:"scheduleHandler", filename: settings.logs.directory + '/scheduleHandler.log', 'timestamp':true });
 
 var schedule;
 
@@ -11,11 +10,20 @@ var setSchedule = function(newSchedule) {
     schedule.startTime = Date.now();
   }
   schedule.tempLog = [];
-  winston.info(JSON.stringify(schedule));
 };
 
 var setEndTime = function() {
-  schedule.endTime = Date.now();
+  if (schedule) {
+    schedule.endTime = Date.now();
+  }
+};
+
+var getRunTime = function() {
+  if (schedule) {
+    return schedule.endTime - schedule.startTime;
+  } else {
+    return -1;
+  }
 };
 
 var getRunningForMinutes = function() {
@@ -76,5 +84,7 @@ module.exports = {
   setSchedule: setSchedule,
   getSchedule: getSchedule,
   addTempToLog: addTempToLog,
-  clear: clear
+  clear: clear,
+  setEndTime: setEndTime,
+  getRunTime: getRunTime
 };

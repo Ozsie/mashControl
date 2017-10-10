@@ -4,6 +4,10 @@ var fs = require('fs');
 var scheduleHandler = require('./../src/scheduleHandler');
 
 describe('scheduleHandler', function() {
+  after(function() {
+    scheduleHandler.clear();
+  });
+
   it('getTempLog should return an empty array if no schedule is loaded', function() {
     scheduleHandler.clear();
     var tempLog = scheduleHandler.getTempLog();

@@ -1,0 +1,1 @@
+{  "steps":[ {    "name" : "Proteinrast",    "riseTime" : 0,    "temperature" : 50,    "time" : 0.005,    "type" : "infusion"  }],  "boilTime": 0.0025,  "boilRiseTime": 0.0025,  "volume": 1,  "spargePause": 0.005,  "name": "scheduleRunner Test schedule"}

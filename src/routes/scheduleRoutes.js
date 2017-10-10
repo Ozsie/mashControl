@@ -19,14 +19,13 @@ module.exports = function (app, hwi, winston) {
 
   app.get('/schedule/stop', function(req, res) {
     winston.info('Stop schedule requested');
-    scheduleRunner.stopSchedule(function(err, data) {
-      if (!err) {
-        res.status(200).send(data);
-      } else {
-        winston.warn("Stopped with error", err);
-        res.status(200).send(data);
-      }
-    });
+    var err = scheduleRunner.stopSchedule();
+    if (!err) {
+      res.status(200).send(data);
+    } else {
+      winston.warn("Stopped with error", err);
+      res.status(200).send(data);
+    }
   });
 
   app.get('/schedule/status', function(req, res) {
