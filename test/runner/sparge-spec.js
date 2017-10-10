@@ -2,10 +2,10 @@ var chai = require('chai');
 var expect = chai.expect; // we are using the "expect" style of Chai
 var fs = require('fs');
 
-var sparge;
-var hwi;
-
 describe('sparge', function() {
+  var sparge;
+  var hwi;
+
   before(function() {
     hwi = {
       temperature: 78,
@@ -13,7 +13,7 @@ describe('sparge', function() {
       maxEffect: function() {},
       turnOff: function(callback) { callback(); }
     };
-    sparge = require('./../src/runner/sparge')(hwi);
+    sparge = require('./../../src/runner/sparge')(hwi);
   });
 
   after(function() {

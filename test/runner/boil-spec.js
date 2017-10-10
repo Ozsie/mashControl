@@ -1,18 +1,19 @@
 var chai = require('chai');
 var expect = chai.expect; // we are using the "expect" style of Chai
 var fs = require('fs');
-var scheduleHandler = require('../src/scheduleHandler');
 
-var boil;
 
 describe('boil', function() {
+  var scheduleHandler = require('../../src/scheduleHandler');
+  var boil;
+
   before(function() {
     var hwi = {
       temperature: 100,
       cycleHeaterPower: function() {},
       maxEffect: function() {}
     };
-    boil = require('./../src/runner/boil')(hwi);
+    boil = require('./../../src/runner/boil')(hwi);
   });
 
   after(function() {

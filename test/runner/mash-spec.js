@@ -1,12 +1,13 @@
 var chai = require('chai');
 var expect = chai.expect; // we are using the "expect" style of Chai
 var fs = require('fs');
-var scheduleHandler = require('../src/scheduleHandler');
-
-var mash;
-var hwi;
 
 describe('mash', function() {
+  var scheduleHandler = require('../../src/scheduleHandler');
+
+  var mash;
+  var hwi;
+
   before(function() {
     hwi = {
       temperature: 42,
@@ -14,7 +15,7 @@ describe('mash', function() {
       maxEffect: function() {},
       turnOff: function(callback) { callback(); }
     };
-    mash = require('./../src/runner/mash')(hwi);
+    mash = require('./../../src/runner/mash')(hwi);
   });
 
   after(function() {
