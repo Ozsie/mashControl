@@ -67,8 +67,16 @@ var addTempToLog = function(temperature, minute) {
   }
   var entry = {
     minute: minute,
-    temperature: temperature
+    temperature: temperature,
+    actualTime: Date.now()
   };
+  if (schedule.tempLog.length > 0) {
+    entry.timeSinceFirst = entry.actualTime - schedule.tempLog[0].actualTime;
+    entry.timeSincePrevious = entry.actualTime - schedule.tempLog[schedule.tempLog.length - 1].actualTime;
+  } else {
+    entry.timeSinceFirst = 0;
+    entry.timeSincePrevious = 0;
+  }
   schedule.tempLog.push(entry);
 };
 
