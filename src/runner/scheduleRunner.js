@@ -37,11 +37,21 @@ module.exports = function(hwi, test) {
         winston.info('Running schedule stopped');
         return;
       }
+
       logTempTimeout = setTimeout(function() {
-        scheduleHandler.addTempToLog(hwi.temperature, m);
-        m++;
+        var tempLog = scheduleHandler.getTempLog();
+        if (tempLog.length > 0) {
+          var diff = Date.now() - tempLog[tempLog.length - 1].actualTime
+          if (diff >= 60000) {
+            scheduleHandler.addTempToLog(hwi.temperature, m);
+            m++;
+          }
+        } else {
+          scheduleHandler.addTempToLog(hwi.temperature, m);
+          m++;
+        }
         readTemp();
-      }, 60000);
+      }, 100);
     };
     readTemp();
   };
@@ -125,7 +135,9 @@ module.exports = function(hwi, test) {
       winston.info('Mash done after ' + scheduleHandler.getRunTime() + ' ms');
       status.setStatusDone();
     }
-    callback(error);
+    if (callback) {
+      callback(error);
+    }
   };
 
   scheduleRunner.startSchedule = function(callback) {
