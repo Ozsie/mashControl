@@ -63,8 +63,8 @@
     </div>
 
     <div class="panel panel-default">
-        <div class="panel-heading">Mash schedule</div>
-        <div class="panel-body">
+        <div class="panel-heading">Mash schedule <span ng-show="running">{{jsonSchedule.name}}</span></div>
+        <div class="panel-body" ng-show="!running">
             <div class="well">
                 <ul class="nav" role="navigation">
                   <li class="dropdown">

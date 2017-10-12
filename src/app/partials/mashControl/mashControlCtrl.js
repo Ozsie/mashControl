@@ -368,6 +368,7 @@ mashControl.controller('MashControlCtrl', function($scope, mashControlRestServic
 
       for (i = 0; i < step.riseTime; i++) {
         expected = (((step.temperature - startingTemp) / step.riseTime) * i) + startingTemp;
+        expected = Math.round(100 * expected + Number.EPSILON) / 100;
         point = {
           minute: values.runTime,
           expected: expected,
