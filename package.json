@@ -10,8 +10,8 @@
     "test": "istanbul cover -x **/src/routes/** _mocha test/** --recursive",
     "prestart": "git pull && jshint",
     "start": "node src/index.js",
-    "prestart-docker": "jshint",
     "start-docker": "node src/docker.js",
+    "predocker": "jshint",
     "docker": "docker-compose up --force-recreate --build",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
@@ -43,7 +43,7 @@
     "jquery": "3.2.0",
     "jshint": "^2.9.4",
     "mc-gpio": "^1.0.3",
-    "mc-tempsensor": "^2.0.0",
+    "mc-tempsensor": "2.0.2",
     "n3-charts": "^2.0.28",
     "push.js": "^0.0.12",
     "uuid": "^3.0.1",
