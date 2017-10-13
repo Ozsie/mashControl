@@ -41,7 +41,7 @@ module.exports = function(hwi, test) {
       logTempTimeout = setTimeout(function() {
         var tempLog = scheduleHandler.getTempLog();
         if (tempLog.length > 0) {
-          var diff = Date.now() - tempLog[tempLog.length - 1].actualTime
+          var diff = Date.now() - tempLog[tempLog.length - 1].actualTime;
           if (diff >= 60000) {
             scheduleHandler.addTempToLog(hwi.temperature, m);
             m++;
