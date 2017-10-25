@@ -1,4 +1,4 @@
-module.exports = function(hwi, winston, ws, sendJson) {
+module.exports = function(hwi, winston, ws) {
   var tempWs = {};
 
   tempWs.getCurrentTemperature = function(response) {

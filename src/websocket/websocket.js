@@ -1,6 +1,6 @@
 module.exports = function (app, hwi, winston) {
 
-  var socket = app.ws('/ws', function(ws, req) {
+  app.ws('/ws', function(ws) {
     var sendJson = function(msg) {
       ws.send(JSON.stringify(msg));
     };

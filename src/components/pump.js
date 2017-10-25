@@ -1,6 +1,3 @@
-var util = require('../util');
-var fs = require('fs');
-var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
 
 module.exports = function(rc) {
@@ -13,26 +10,34 @@ module.exports = function(rc) {
   var pumpInner;
 
   pumpObj.pause = function(callback) {
-    rc.relayOff(0, function(err, relay) {
-      pumping = false;
-      winston.info('Pump stop');
-      if (doPump) {
-        pumpInner = setTimeout(pump, 60000);
-      }
-      if (callback) {
-        callback(undefined, pumpInner);
+    rc.relayOff(0, function(err) {
+      if (!err) {
+        pumping = false;
+        winston.info('Pump stop');
+        if (doPump) {
+          pumpInner = setTimeout(pump, 60000);
+        }
+        if (callback) {
+          callback(undefined, pumpInner);
+        }
+      } else {
+        callback(err);
       }
     });
   };
 
   var pump = function(callback) {
     if (doPump) {
-      rc.relayOn(0, function(err, relay) {
-        winston.info('Pump start');
-        pumping = true;
-        pumpOuter = setTimeout(pumpObj.pause, 120000);
-        if (callback) {
-          callback(undefined, pumpOuter);
+      rc.relayOn(0, function(err) {
+        if (!err) {
+          winston.info('Pump start');
+          pumping = true;
+          pumpOuter = setTimeout(pumpObj.pause, 120000);
+          if (callback) {
+            callback(undefined, pumpOuter);
+          }
+        } else if (callback) {
+          callback(err);
         }
       });
     }

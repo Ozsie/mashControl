@@ -1,7 +1,4 @@
-var util = require('../util');
 var scheduleHandler = require('../scheduleHandler');
-var fs = require('fs');
-var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
 
 module.exports = function(hwi) {
@@ -10,7 +7,7 @@ module.exports = function(hwi) {
   var previousTemp;
   var timeout;
 
-  boil.adjustTemperatureForBoil = function(status, schedule) {
+  boil.adjustTemperatureForBoil = function(status) {
     if (hwi.temperature) {
       var currentTemp = hwi.temperature;
       var initialDegreesToIncrease = 100 - status.initialTemp;
@@ -66,7 +63,7 @@ module.exports = function(hwi) {
         }
         timeout = setTimeout(function() {
           if (Date.now() - status.startTime < status.timeRemaining) {
-            boil.adjustTemperatureForBoil(status, schedule);
+            boil.adjustTemperatureForBoil(status);
             run();
           } else {
             winston.info("## Step Boil ran for " + (Date.now() - status.startTime) + " ms. ##");

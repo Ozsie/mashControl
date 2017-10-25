@@ -60,8 +60,8 @@ module.exports = function(gpio, rc) {
               gpio.write(settings.motor.enablePin, 1, function() {
                 isOpen = true;
                 winston.info("Motor communication is open. Waiting for commands.");
-                rc.setRelay({index: 0, state: "on"}, function(err, relay) {
-                  heatControl.heaterOnSwitch(function(err) {
+                rc.setRelay({index: 0, state: "on"}, function() {
+                  heatControl.heaterOnSwitch(function() {
                     modeSwitchTimeout = setTimeout(function() {
                       heatControl.heaterModeSwitch(function(err) {
                         var end = Date.now();
@@ -101,9 +101,9 @@ module.exports = function(gpio, rc) {
     stepping = false;
     clearTimeout(stepTimeout);
     clearTimeout(modeSwitchTimeout);
-    heatControl.heaterOnSwitch(function(err) {
+    heatControl.heaterOnSwitch(function() {
       winston.info('Relay switched');
-      gpio.write(settings.motor.enablePin, 0, function(err, data) {
+      gpio.write(settings.motor.enablePin, 0, function(err) {
         winston.info('Enable pin off');
         if (!err) {
           closeAll();

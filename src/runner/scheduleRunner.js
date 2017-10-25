@@ -1,4 +1,3 @@
-var util = require('../util');
 var fs = require('fs');
 var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
@@ -88,7 +87,7 @@ module.exports = function(hwi, test) {
     } else if (schedule.boilTime && (spargePauseRun || !schedule.spargePause) && !boilDone) {
       doBoil(schedule, callback);
     } else {
-      console.log('-------------- DONE --------------');
+      winston.info('-------------- DONE --------------');
       stopAllTimeouts();
       hwi.heaterOnSwitch(callback);
     }
@@ -112,7 +111,7 @@ module.exports = function(hwi, test) {
   };
 
   var doBoil = function(schedule, callback) {
-    hwi.stopPump(function(err, pumpStatus) {
+    hwi.stopPump(function(err) {
       if (err) {
         winston.error('Could not stop pump before boil');
         callback(err);

@@ -1,5 +1,3 @@
-var fs = require('fs');
-var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
 var winston = require('winston');
 
 module.exports = function(hwi) {

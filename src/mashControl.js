@@ -1,4 +1,3 @@
-var http = require('http');
 var express = require('express');
 var expressWs = require('express-ws');
 var fs = require('fs');
@@ -16,7 +15,7 @@ module.exports = function(hwi) {
 
   //"/sys/bus/w1/devices/28-800000263717/w1_slave"
   mashControl.settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
-  winston.add(winston.transports.File, { name:"mashControl", filename: mashControl.settings.logs.directory + '/mashControl.log', 'timestamp':true});
+  winston.add(winston.transports.File, { name:'mashControl', filename: mashControl.settings.logs.directory + '/mashControl.log', 'timestamp':true});
   winston.remove(winston.transports.Console);
   winston.add(winston.transports.Console, {'timestamp':true});
 
@@ -27,26 +26,26 @@ module.exports = function(hwi) {
   }
 
   var app = express();
-  var ws = expressWs(app);
+  expressWs(app);
 
   app.use(express.static('src/app'));
   for (var index in mashControl.settings.publishedModules) {
     var script = mashControl.settings.publishedModules[index];
-    winston.info("Publishing " + 'node_modules/' + script + " as /static/" + script);
+    winston.info('Publishing ' + 'node_modules/' + script + ' as /static/' + script);
     app.use('/static/' + script, express.static('node_modules/' + script));
   }
   app.use(bodyParser.json());
 
   require('./websocket/websocket')(app, hwi, winston);
-  require('./routes/tempRoutes')(app, hwi, winston);
+  require('./routes/tempRoutes')(app, hwi);
   require('./routes/scheduleRoutes')(app, hwi, winston);
   require('./routes/dbRoutes')(app, winston);
-  require('./routes/heaterRoutes')(app, hwi, winston);
+  require('./routes/heaterRoutes')(app, hwi);
   require('./routes/relayRoutes')(app, rc, winston);
 
   // Express route for any other unrecognised incoming requests
   app.get('*', function(req, res) {
-    //winston.warn("Unrecognised API call", req);
+    //winston.warn('Unrecognised API call', req);
     res.status(404).send('Unrecognised API call');
   });
 
@@ -65,8 +64,12 @@ module.exports = function(hwi) {
     if (err) {
       winston.error(err);
     } else {
-      winston.info("Schedules loaded");
-      winston.info("Routes:");
+      var loaded = 0;
+      if (data) {
+        loaded = data.length;
+      }
+      winston.info('Loaded ' + loaded + ' schedules');
+      winston.info('Routes:');
       app._router.stack.forEach(function(r) {
         if (r.route && r.route.path) {
           winston.info(r.route.path);
@@ -92,27 +95,27 @@ module.exports = function(hwi) {
 
   function exitHandler() {
     //turnOff();
-    winston.info("EXIT!");
+    winston.info('EXIT!');
     //grpcServer.stopServer();
-    rc.setRelay({index: 3, state: "off"}, function(err) {
+    rc.setRelay({index: 3, state: 'off'}, function(err) {
       if (err) {
         winston.error('Error while turning off relay');
         winston.error(err.code + ': ' + err.path);
       }
     });
-    rc.setRelay({index: 2, state: "off"}, function(err) {
+    rc.setRelay({index: 2, state: 'off'}, function(err) {
       if (err) {
         winston.error('Error while turning off relay');
         winston.error(err.code + ': ' + err.path);
       }
     });
-    rc.setRelay({index: 1, state: "off"}, function(err) {
+    rc.setRelay({index: 1, state: 'off'}, function(err) {
       if (err) {
         winston.error('Error while turning off relay');
         winston.error(err.code + ': ' + err.path);
       }
     });
-    rc.setRelay({index: 0, state: "off"}, function(err) {
+    rc.setRelay({index: 0, state: 'off'}, function(err) {
       if (err) {
         winston.error('Error while turning off relay');
         winston.error(err.code + ': ' + err.path);

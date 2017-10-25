@@ -48,12 +48,12 @@ module.exports = function(hwi, winston, ws, sendJson) {
   scheduleWs.stop = function(response) {
     winston.info('Stop schedule requested');
     scheduleRunner.stopSchedule(function(err, data) {
-      clearTimeouts(sendUpdatesTimeout);
+      clearTimeout(sendUpdatesTimeout);
       if (!err) {
         response.data = {stopped: data};
       } else {
+        response.error = err;
         winston.warn("Stopped with error", err);
-        res.status(200).send(data);
       }
       sendJson(response);
     });

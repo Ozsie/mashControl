@@ -55,10 +55,9 @@ module.exports = function() {
   };
 
   hi.cycleHeaterPower = function() {
-    heatControl.heaterOnSwitch(function(err, data) {
+    heatControl.heaterOnSwitch(function(err) {
       if (!err) {
-        heatControl.heaterModeSwitch(function(err, data) {
-        });
+        heatControl.heaterModeSwitch(function() {});
       }
     });
   };
@@ -77,7 +76,7 @@ module.exports = function() {
         heatControl.turnOn(function(mErr) {
           if (!mErr) {
             hwStatus.motor = true;
-            pump.start(function(pErr, pumpStatus) {
+            pump.start(function(pErr) {
               hwStatus.pump = pump.isOn();
               callback(pErr, hwStatus)
             });
@@ -93,7 +92,7 @@ module.exports = function() {
     clearTimeout(updateTempTimeout);
     hi.initialized = false;
     winston.info('TURN OFF HW');
-    heatControl.turnOff(function(err, data) {
+    heatControl.turnOff(function() {
       winston.info('Heat control off');
 
       pump.stop(function(err) {

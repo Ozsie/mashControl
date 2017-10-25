@@ -35,7 +35,7 @@ module.exports = function(gpio) {
     var relay = getRelay(index);
     var pin = relay.pin;
     if (!relayOpen[relay.index]) {
-      open(pin, function(err, data) {
+      open(pin, function(err) {
         if(!err) {
           winston.info('Relay "' + relay.name + '" on');
           gpio.writeSync(pin, 1);

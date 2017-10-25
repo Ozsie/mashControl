@@ -1,4 +1,4 @@
-module.exports = function (app, hwi, winston) {
+module.exports = function (app, hwi) {
   app.get('/temp/current', function(req, res) {
     //winston.info('Temp requested');
     hwi.getCurrentTemperature(function(err, temp) {

@@ -1,5 +1,5 @@
 var gpioMock = require('gpio-mock');
-var fs = require('fs');
+var winston = require('winston');
 
 function exitHandler() {
   gpioMock.stop();
@@ -7,7 +7,7 @@ function exitHandler() {
 
 process.on('exit', exitHandler.bind());
 process.on('SIGINT', exitHandler.bind());
-process.on('uncaughtException',  (err) => { console.error('Caught exception', err); });
+process.on('uncaughtException',  (err) => { winston.error('Caught exception', err); });
 
 gpioMock.start(function(err) {
   if (!err) {
@@ -16,7 +16,7 @@ gpioMock.start(function(err) {
       temperature: 10
     }, function(err) {
       if (!err) {
-        console.log('DS18B20 mocked');
+        winston.info('DS18B20 mocked');
         var hardwareInterface = require('./hardwareInterface');
         require('./mashControl.js')(hardwareInterface());
       } else {

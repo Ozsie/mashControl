@@ -1,4 +1,4 @@
-module.exports = function (app, hwi, winston) {
+module.exports = function (app, hwi) {
   app.get('/heater/direction', function(req, res) {
     var dir = {
       direction: hwi.getCurrentDirection()

@@ -23,7 +23,7 @@ module.exports = function(hwi) {
       var currentTemp = hwi.temperature;
       if (currentTemp > 90 || currentTemp > settings.heatCutOff) {
         winston.warn("Temperature passed cut off. Stopping.");
-        stopSchedule(schedule, status, function(err, stopped) {
+        stopSchedule(schedule, status, function(err) {
           if (err) {
             winston.error('Error while stopping: ' + err);
           } else {

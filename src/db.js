@@ -34,7 +34,7 @@ var clearSchedules = function(callback) {
 var createSchedule = function(schedule, callback) {
   var uuid = uuidV4();
   schedule.uuid = uuid;
-  fs.writeFile(store + '/' + uuid + '.json', JSON.stringify(schedule), 'utf8', function(err, data) {
+  fs.writeFile(store + '/' + uuid + '.json', JSON.stringify(schedule), 'utf8', function(err) {
     if (!err) {
       schedules[uuid] = schedule;
     }
@@ -57,7 +57,7 @@ var retrieveSchedules = function(callback) {
 
 var updateSchedule = function(uuid, schedule, callback) {
   if (schedules[uuid]) {
-    fs.writeFile(store + '/' + uuid + '.json', JSON.stringify(schedule), 'utf8', function(err, data) {
+    fs.writeFile(store + '/' + uuid + '.json', JSON.stringify(schedule), 'utf8', function(err) {
       if (!err) {
         schedules[uuid] = schedule;
       }
@@ -71,7 +71,7 @@ var updateSchedule = function(uuid, schedule, callback) {
 
 var deleteSchedule = function(uuid, callback) {
   if (schedules[uuid]) {
-    fs.unlink(store + '/' + uuid + '.json', function(err, data) {
+    fs.unlink(store + '/' + uuid + '.json', function(err) {
       if (!err) {
         schedules[uuid] = undefined;
       }

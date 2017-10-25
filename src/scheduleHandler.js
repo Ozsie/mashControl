@@ -1,7 +1,3 @@
-var fs = require('fs');
-var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
-var winston = require('winston');
-
 var schedule;
 
 var setSchedule = function(newSchedule) {
