@@ -56,10 +56,12 @@ describe('scheduleRunner', function() {
   });
 
   it('stopSchedule with loaded schedule', function(done) {
-    scheduleRunner.stopSchedule(function(err, data) {
-      expect(err).to.not.exist;
-      expect(scheduleRunner.getStatus().status).to.equal('stopped');
-      done();
+    scheduleRunner.startSchedule(function(err, data) {
+      scheduleRunner.stopSchedule(function(err, data) {
+        expect(err).to.not.exist;
+        expect(scheduleRunner.getStatus().status).to.equal('stopped');
+        done();
+      });
     });
   });
 });
