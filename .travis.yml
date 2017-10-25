@@ -5,11 +5,11 @@ node_js:
   - "node"
   - "7"
 install:
-  - "npm install"
+  - "yarn install"
 test:
-  - "npm test"
+  - "yarn test"
 branches:
   only:
     - "master"
 after_success:
-  - 'npm run coveralls'
+  - 'yarn run coveralls'

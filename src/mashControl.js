@@ -1,5 +1,6 @@
 var http = require('http');
 var express = require('express');
+var expressWs = require('express-ws');
 var fs = require('fs');
 var bodyParser = require('body-parser');
 
@@ -26,6 +27,7 @@ module.exports = function(hwi) {
   }
 
   var app = express();
+  var ws = expressWs(app);
 
   app.use(express.static('src/app'));
   for (var index in mashControl.settings.publishedModules) {
@@ -35,6 +37,7 @@ module.exports = function(hwi) {
   }
   app.use(bodyParser.json());
 
+  require('./websocket/websocket')(app, hwi, winston);
   require('./routes/tempRoutes')(app, hwi, winston);
   require('./routes/scheduleRoutes')(app, hwi, winston);
   require('./routes/dbRoutes')(app, winston);
