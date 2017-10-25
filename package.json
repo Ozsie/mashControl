@@ -4,14 +4,15 @@
   "description": "mash controller",
   "main": "mashControl.js",
   "scripts": {
+    "lint": "eslint ./src/** --ignore-path .eslintignore",
     "publish": "git tag -a v$npm_package_version -m 'tag version v$npm_package_version'",
     "postpublish": "git push --tags",
-    "pretest": "jshint src/**/*.js",
+    "pretest": "yarn run lint",
     "test": "istanbul cover -x **/src/routes/** _mocha test/** --recursive",
-    "prestart": "jshint",
+    "prestart": "yarn run lint",
     "start": "node src/index.js",
     "start-docker": "node src/docker.js",
-    "predocker": "jshint",
+    "predocker": "yarn run lint",
     "docker": "docker-compose up --force-recreate --build",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
@@ -42,7 +43,6 @@
     "express-ws": "3.0.0",
     "grpc": "^1.3.7",
     "jquery": "3.2.0",
-    "jshint": "^2.9.4",
     "mc-gpio": "^1.0.3",
     "mc-tempsensor": "2.0.2",
     "n3-charts": "^2.0.28",
@@ -56,6 +56,7 @@
     "coveralls": "^2.13.1",
     "gpio-mock": "1.1.2",
     "istanbul": "^0.4.5",
-    "mocha": "^4.0.0"
+    "mocha": "^4.0.0",
+    "eslint": "^4.9.0"
   }
 }
