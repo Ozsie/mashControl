@@ -8,7 +8,7 @@
   "relay": [
     {
       "index": 0,
-      "pin": 27,
+      "pin": 6,
       "name": "Circulation pump"
     },
     {
@@ -28,11 +28,11 @@
     }
   ],
   "motor": {
-    "enablePin": 18,
-    "coilA1Pin": 4,
-    "coilA2Pin": 17,
-    "coilB1Pin": 23,
-    "coilB2Pin": 24
+    "enablePin": 22,
+    "coilA1Pin": 11,
+    "coilA2Pin": 10,
+    "coilB1Pin": 17,
+    "coilB2Pin": 27
   },
   "gpio": {
     "path": "/sys/class/gpio/"
