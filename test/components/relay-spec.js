@@ -24,7 +24,7 @@ describe('relay', function() {
       expect(status[i].open).to.equal(false);
     }
 
-    expect(status[0].pin).to.equal(27);
+    expect(status[0].pin).to.equal(6);
     expect(status[0].name).to.equal('Circulation pump');
     expect(status[1].pin).to.equal(19);
     expect(status[1].name).to.equal('Heater on');
