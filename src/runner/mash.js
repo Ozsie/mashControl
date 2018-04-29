@@ -99,6 +99,7 @@ module.exports = function(hwi) {
         if (Date.now() - status.onTime > 7200000) {
           // Two hours, heater has auto power off after two hours, must cycle power and mode
           hwi.cycleHeaterPower();
+          status.onTime = Date.now()
         }
         timeout = setTimeout(function() {
           if (Date.now() - step.startTime < step.stepTime) {
